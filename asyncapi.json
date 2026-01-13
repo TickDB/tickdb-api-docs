@@ -1,0 +1,344 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "TickDB WebSocket API",
+    "version": "1.0.0",
+    "description": "Real-time market data WebSocket API for TickDB",
+    "contact": {
+      "email": "support@tickdb.ai"
+    }
+  },
+  "servers": {
+    "production": {
+      "host": "api.tickdb.ai",
+      "protocol": "wss",
+      "description": "Production WebSocket server",
+      "pathname": "/v1/realtime"
+    }
+  },
+  "channels": {
+    "auth": {
+      "address": "auth",
+      "messages": {
+        "authRequest": {
+          "name": "Authentication",
+          "title": "Authenticate Connection",
+          "summary": "Authenticate the WebSocket connection with API key",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "const": "auth",
+                "description": "Authentication action"
+              },
+              "api_key": {
+                "type": "string",
+                "description": "Your TickDB API key",
+                "example": "your_api_key_here"
+              }
+            },
+            "required": ["action", "api_key"]
+          }
+        }
+      }
+    },
+    "ticker": {
+      "address": "ticker",
+      "messages": {
+        "subscribe": {
+          "name": "TickerSubscription",
+          "title": "Subscribe to Ticker",
+          "summary": "Subscribe to real-time ticker updates for a symbol",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "const": "subscribe",
+                "description": "Subscription action"
+              },
+              "channel": {
+                "type": "string",
+                "const": "ticker",
+                "description": "Channel type"
+              },
+              "symbol": {
+                "type": "string",
+                "description": "Trading symbol",
+                "examples": ["BTCUSDT", "AAPL.US", "700.HK", "EURUSD", "SPX", "XAUUSD"]
+              }
+            },
+            "required": ["action", "channel", "symbol"]
+          }
+        },
+        "data": {
+          "name": "TickerData",
+          "title": "Ticker Data",
+          "summary": "Real-time ticker data",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "ticker"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "example": "AAPL.US"
+                  },
+                  "last_price": {
+                    "type": "string",
+                    "example": "150.25"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1703123456789
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "depth": {
+      "address": "depth",
+      "messages": {
+        "subscribe": {
+          "name": "DepthSubscription",
+          "title": "Subscribe to Order Book Depth",
+          "summary": "Subscribe to real-time order book depth updates",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "const": "subscribe"
+              },
+              "channel": {
+                "type": "string",
+                "const": "depth"
+              },
+              "symbol": {
+                "type": "string",
+                "description": "Trading symbol",
+                "examples": ["BTCUSDT", "AAPL.US", "700.HK"]
+              }
+            },
+            "required": ["action", "channel", "symbol"]
+          }
+        },
+        "data": {
+          "name": "DepthData",
+          "title": "Order Book Depth Data",
+          "summary": "Real-time order book depth data",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "depth"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "example": "BTCUSDT"
+                  },
+                  "bids": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "example": [["43250.50", "0.125"], ["43250.00", "0.250"]]
+                  },
+                  "asks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "example": [["43251.00", "0.180"], ["43251.50", "0.320"]]
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1703123456789
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "trade": {
+      "address": "trade",
+      "messages": {
+        "subscribe": {
+          "name": "TradeSubscription",
+          "title": "Subscribe to Recent Trades",
+          "summary": "Subscribe to real-time trade execution updates",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "const": "subscribe"
+              },
+              "channel": {
+                "type": "string",
+                "const": "trade"
+              },
+              "symbol": {
+                "type": "string",
+                "description": "Trading symbol",
+                "examples": ["BTCUSDT", "AAPL.US", "700.HK"]
+              }
+            },
+            "required": ["action", "channel", "symbol"]
+          }
+        },
+        "data": {
+          "name": "TradeData",
+          "title": "Trade Execution Data",
+          "summary": "Real-time trade execution data",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "trade"
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "example": "AAPL.US"
+                  },
+                  "price": {
+                    "type": "string",
+                    "example": "150.25"
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "example": "100"
+                  },
+                  "side": {
+                    "type": "string",
+                    "enum": ["buy", "sell"],
+                    "example": "buy"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1703123456789
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "operations": {
+    "authenticate": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/auth"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/auth/messages/authRequest"
+        }
+      ]
+    },
+    "subscribeToTicker": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker/messages/subscribe"
+        }
+      ]
+    },
+    "receiveTickerData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker/messages/data"
+        }
+      ]
+    },
+    "subscribeToDepth": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/depth"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/depth/messages/subscribe"
+        }
+      ]
+    },
+    "receiveDepthData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/depth"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/depth/messages/data"
+        }
+      ]
+    },
+    "subscribeToTrade": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/trade"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/trade/messages/subscribe"
+        }
+      ]
+    },
+    "receiveTradeData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/trade"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/trade/messages/data"
+        }
+      ]
+    }
+  }
+}

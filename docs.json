@@ -1,0 +1,101 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "TickDB Docs",
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373"
+  },
+  "favicon": "/docs/assets/images/logo.png",
+  "api": {
+    "baseUrl": "https://api.tickdb.ai",
+    "auth": {
+      "method": "key",
+      "name": "X-API-Key"
+    }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": [
+              "docs/index"
+            ]
+          },
+          {
+            "group": "Getting Started",
+            "pages": [
+              "docs/getting-started",
+              "docs/authentication"
+            ]
+          },
+          {
+            "group": "REST API",
+            "pages": [
+              "docs/rest/api_symbols",
+              "docs/rest/api_ticker",
+              "docs/rest/api_kline",
+              "docs/rest/api_depth",
+              "docs/rest/api_trades"
+            ]
+          },
+          {
+            "group": "WebSocket Docs",
+            "pages": [
+              "docs/websocket/websocket_overview",
+              "docs/websocket/websocket_quickstart", 
+              "docs/websocket/websocket_subscribe",
+              "docs/websocket/websocket_message_schema"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "docs/data-specification",
+              "docs/errors"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "WebSocket API",
+        "asyncapi": "asyncapi.json"
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Dashboard",
+          "href": "https://tickdb.ai",
+          "icon": "chart-line"
+        },
+        {
+          "anchor": "Support",
+          "href": "mailto:support@tickdb.ai",
+          "icon": "envelope"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/docs/assets/images/logo.png",
+    "dark": "/docs/assets/images/logo.png"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:support@tickdb.ai"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://tickdb.ai"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "tickdb-docs",
+  "version": "1.0.0",
+  "description": "TickDB API Documentation",
+  "scripts": {
+    "dev": "mintlify dev --port 3000 --host 0.0.0.0",
+    "check": "mintlify broken-links"
+  },
+  "keywords": ["tickdb", "api", "documentation", "market-data"],
+  "author": "TickDB Team",
+  "license": "MIT",
+  "devDependencies": {
+    "mintlify": "^4.2.269"
+  }
+}
