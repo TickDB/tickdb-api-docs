@@ -1,0 +1,227 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "TickDB Docs",
+  "defaultLanguage": "zh-Hant",
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/zh-Hant/index"
+    }
+  ],
+  "colors": {
+    "primary": "#0D9373",
+    "light": "#07C983",
+    "dark": "#0D9373"
+  },
+  "favicon": "/logo.png",
+  "api": {
+    "mdx": {
+      "server": "https://api.tickdb.ai",
+      "auth": {
+        "method": "key",
+        "name": "X-API-Key"
+      }
+    }
+  },
+  "navigation": {
+    "languages": [
+      {
+        "language": "zh-Hant",
+        "tabs": [
+          {
+            "tab": "文檔",
+            "groups": [
+              {
+                "group": "介紹",
+                "pages": [
+                  "zh-Hant/index"
+                ]
+              },
+              {
+                "group": "入門指南",
+                "pages": [
+                  "zh-Hant/quick-start",
+                  "zh-Hant/authentication"
+                ]
+              },
+              {
+                "group": "REST API",
+                "pages": [
+                  "zh-Hant/rest/api_symbols",
+                  "zh-Hant/rest/api_ticker",
+                  "zh-Hant/rest/api_kline",
+                  "zh-Hant/rest/api_depth",
+                  "zh-Hant/rest/api_trades"
+                ]
+              },
+              {
+                "group": "WebSocket 文檔",
+                "pages": [
+                  "zh-Hant/websocket/websocket_overview",
+                  "zh-Hant/websocket/websocket_quickstart",
+                  "zh-Hant/websocket/websocket_subscribe",
+                  "zh-Hant/websocket/websocket_message_schema"
+                ],
+                "asyncapi": {
+                  "source": "/asyncapi.json",
+                  "directory": "zh-Hant/websocket/websocket_playground"
+                }
+              },
+              {
+                "group": "參考",
+                "pages": [
+                  "zh-Hant/data-specification",
+                  "zh-Hant/errors"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "zh-Hans",
+        "tabs": [
+          {
+            "tab": "文档",
+            "groups": [
+              {
+                "group": "介绍",
+                "pages": [
+                  "zh-Hans/index"
+                ]
+              },
+              {
+                "group": "入门指南",
+                "pages": [
+                  "zh-Hans/quick-start",
+                  "zh-Hans/authentication"
+                ]
+              },
+              {
+                "group": "REST API",
+                "pages": [
+                  "zh-Hans/rest/api_symbols",
+                  "zh-Hans/rest/api_ticker",
+                  "zh-Hans/rest/api_kline",
+                  "zh-Hans/rest/api_depth",
+                  "zh-Hans/rest/api_trades"
+                ]
+              },
+              {
+                "group": "WebSocket 文档",
+                "pages": [
+                  "zh-Hans/websocket/websocket_overview",
+                  "zh-Hans/websocket/websocket_quickstart",
+                  "zh-Hans/websocket/websocket_subscribe",
+                  "zh-Hans/websocket/websocket_message_schema"
+                ],
+                "asyncapi": {
+                  "source": "/asyncapi.json",
+                  "directory": "zh-Hans/websocket/websocket_playground"
+                }
+              },
+              {
+                "group": "参考",
+                "pages": [
+                  "zh-Hans/data-specification",
+                  "zh-Hans/errors"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "language": "en",
+        "tabs": [
+          {
+            "tab": "Documentation",
+            "groups": [
+              {
+                "group": "Introduction",
+                "pages": [
+                  "en/index"
+                ]
+              },
+              {
+                "group": "Getting Started",
+                "pages": [
+                  "en/quick-start",
+                  "en/authentication"
+                ]
+              },
+              {
+                "group": "REST API",
+                "pages": [
+                  "en/rest/api_symbols",
+                  "en/rest/api_ticker",
+                  "en/rest/api_kline",
+                  "en/rest/api_depth",
+                  "en/rest/api_trades"
+                ]
+              },
+              {
+                "group": "WebSocket Docs",
+                "pages": [
+                  "en/websocket/websocket_overview",
+                  "en/websocket/websocket_quickstart",
+                  "en/websocket/websocket_subscribe",
+                  "en/websocket/websocket_message_schema"
+                ],
+                "asyncapi": {
+                  "source": "/asyncapi.json",
+                  "directory": "en/websocket/websocket_playground"
+                }
+              },
+              {
+                "group": "Reference",
+                "pages": [
+                  "en/data-specification",
+                  "en/errors"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Dashboard",
+          "href": "https://tickdb.ai",
+          "icon": "chart-line"
+        },
+        {
+          "anchor": "Telegram",
+          "icon": "send",
+          "href": "https://t.me/TickDB_Support"
+        },
+        {
+          "anchor": "Support",
+          "href": "mailto:support@tickdb.ai",
+          "icon": "envelope"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo.png",
+    "dark": "/logo.png",
+    "href": "https://tickdb.ai"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Support",
+        "href": "mailto:support@tickdb.ai"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Dashboard",
+      "href": "https://tickdb.ai"
+    }
+  }
+}

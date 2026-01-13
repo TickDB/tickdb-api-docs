@@ -1,0 +1,591 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "TickDB WebSocket API",
+    "version": "1.0.0",
+    "description": "Unified real-time market data WebSocket API for Forex, indices, US stocks, HK stocks, A-shares, and Crypto.",
+    "contact": {
+      "email": "support@tickdb.ai"
+    }
+  },
+  "servers": {
+    "production": {
+      "host": "api.tickdb.ai",
+      "protocol": "wss",
+      "description": "Production WebSocket server",
+      "pathname": "/v1/realtime",
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/apiKey"
+        }
+      ]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "httpApiKey",
+        "name": "api_key",
+        "in": "query"
+      }
+    }
+  },
+  "channels": {
+    "ticker": {
+      "address": "/v1/realtime",
+      "messages": {
+        "subscribeRequest": {
+          "name": "TickerSubscriptionRequest",
+          "title": "Subscribe/Unsubscribe to Ticker",
+          "summary": "Subscribe or unsubscribe to real-time ticker updates for one or multiple symbols",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "description": "Command type (subscribe or unsubscribe)"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "ticker",
+                      "depth",
+                      "trade"
+                    ],
+                    "default": "ticker",
+                    "description": "Channel name"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT"
+                    ],
+                    "description": "List of trading symbols to subscribe/unsubscribe"
+                  }
+                },
+                "required": [
+                  "channel",
+                  "symbols"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tickerData": {
+          "name": "TickerData",
+          "title": "Ticker Data",
+          "summary": "Real-time ticker data pushed from server",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "ticker",
+                "description": "Message type"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "example": "AAPL.US",
+                    "description": "Trading symbol"
+                  },
+                  "last_price": {
+                    "type": "string",
+                    "example": "150.25",
+                    "description": "Latest trade price"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1703123456789,
+                    "description": "Unix timestamp in milliseconds"
+                  }
+                },
+                "required": [
+                  "symbol",
+                  "last_price",
+                  "timestamp"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        }
+      }
+    },
+    "depth": {
+      "address": "/v1/realtime",
+      "messages": {
+        "subscribeRequest": {
+          "name": "DepthSubscriptionRequest",
+          "title": "Subscribe/Unsubscribe to Order Book Depth",
+          "summary": "Subscribe or unsubscribe to real-time order book depth updates",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "description": "Command type (subscribe or unsubscribe)"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "ticker",
+                      "depth",
+                      "trade"
+                    ],
+                    "default": "depth",
+                    "description": "Channel name"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT"
+                    ],
+                    "description": "List of trading symbols to subscribe/unsubscribe"
+                  }
+                },
+                "required": [
+                  "channel",
+                  "symbols"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "depthData": {
+          "name": "DepthData",
+          "title": "Order Book Depth Data",
+          "summary": "Real-time order book depth data pushed from server",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "depth",
+                "description": "Message type"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "example": "BTCUSDT",
+                    "description": "Trading symbol"
+                  },
+                  "bids": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "example": [
+                      [
+                        "43250.50",
+                        "0.125"
+                      ],
+                      [
+                        "43250.00",
+                        "0.250"
+                      ]
+                    ],
+                    "description": "Bid orders [price, quantity]"
+                  },
+                  "asks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "example": [
+                      [
+                        "43251.00",
+                        "0.180"
+                      ],
+                      [
+                        "43251.50",
+                        "0.320"
+                      ]
+                    ],
+                    "description": "Ask orders [price, quantity]"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1703123456789,
+                    "description": "Unix timestamp in milliseconds"
+                  }
+                },
+                "required": [
+                  "symbol",
+                  "bids",
+                  "asks",
+                  "timestamp"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        }
+      }
+    },
+    "trade": {
+      "address": "/v1/realtime",
+      "messages": {
+        "subscribeRequest": {
+          "name": "TradeSubscriptionRequest",
+          "title": "Subscribe/Unsubscribe to Recent Trades",
+          "summary": "Subscribe or unsubscribe to real-time trade execution updates",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "description": "Command type (subscribe or unsubscribe)"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "ticker",
+                      "depth",
+                      "trade"
+                    ],
+                    "default": "trade",
+                    "description": "Channel name"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT"
+                    ],
+                    "description": "List of trading symbols to subscribe/unsubscribe"
+                  }
+                },
+                "required": [
+                  "channel",
+                  "symbols"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tradeData": {
+          "name": "TradeData",
+          "title": "Trade Execution Data",
+          "summary": "Real-time trade execution data pushed from server",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "trade",
+                "description": "Message type"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "example": "AAPL.US",
+                    "description": "Trading symbol"
+                  },
+                  "price": {
+                    "type": "string",
+                    "example": "150.25",
+                    "description": "Trade execution price"
+                  },
+                  "quantity": {
+                    "type": "string",
+                    "example": "100",
+                    "description": "Trade quantity"
+                  },
+                  "side": {
+                    "type": "string",
+                    "enum": [
+                      "buy",
+                      "sell"
+                    ],
+                    "example": "buy",
+                    "description": "Trade side"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1703123456789,
+                    "description": "Unix timestamp in milliseconds"
+                  }
+                },
+                "required": [
+                  "symbol",
+                  "price",
+                  "quantity",
+                  "side",
+                  "timestamp"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        }
+      }
+    },
+    "ping": {
+      "address": "/v1/realtime",
+      "messages": {
+        "pingRequest": {
+          "name": "PingRequest",
+          "title": "Ping Request",
+          "summary": "Send ping to check connection",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "ping",
+                "default": "ping",
+                "description": "Ping command (fixed value)"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "examples": [
+            {
+              "payload": {
+                "cmd": "ping"
+              }
+            }
+          ]
+        },
+        "pongResponse": {
+          "name": "PongResponse",
+          "title": "Pong Response",
+          "summary": "Server response to ping",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "pong",
+                "description": "Pong response"
+              },
+              "code": {
+                "type": "integer",
+                "example": 0,
+                "description": "Response code"
+              },
+              "message": {
+                "type": "string",
+                "example": "pong",
+                "description": "Response message"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1768976158541,
+                    "description": "Server timestamp in milliseconds"
+                  }
+                },
+                "required": [
+                  "timestamp"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "code",
+              "message",
+              "data"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "operations": {
+    "subscribeToTicker": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker/messages/tickerData"
+        }
+      ]
+    },
+    "receiveTickerData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker/messages/subscribeRequest"
+        }
+      ]
+    },
+    "subscribeToDepth": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/depth"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/depth/messages/depthData"
+        }
+      ]
+    },
+    "receiveDepthData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/depth"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/depth/messages/subscribeRequest"
+        }
+      ]
+    },
+    "subscribeToTrade": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/trade"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/trade/messages/tradeData"
+        }
+      ]
+    },
+    "receiveTradeData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/trade"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/trade/messages/subscribeRequest"
+        }
+      ]
+    },
+    "sendPing": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ping"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ping/messages/pongResponse"
+        }
+      ]
+    },
+    "receivePong": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ping"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ping/messages/pingRequest"
+        }
+      ]
+    }
+  }
+}
