@@ -2,7 +2,6 @@
 title: Data Specification
 description: Symbol naming, timestamps, and K-line interval rules.
 ---
-# Data Specification
 
 ## Symbol Naming Rules
 

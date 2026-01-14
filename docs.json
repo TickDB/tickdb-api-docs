@@ -9,10 +9,12 @@
   },
   "favicon": "/docs/assets/images/logo.png",
   "api": {
-    "baseUrl": "https://api.tickdb.ai",
-    "auth": {
-      "method": "key",
-      "name": "X-API-Key"
+    "mdx": {
+      "server": "https://api.tickdb.ai",
+      "auth": {
+        "method": "key",
+        "name": "X-API-Key"
+      }
     }
   },
   "navigation": {
@@ -29,7 +31,7 @@
           {
             "group": "Getting Started",
             "pages": [
-              "docs/getting-started",
+              "docs/quick-start",
               "docs/authentication"
             ]
           },
@@ -47,10 +49,14 @@
             "group": "WebSocket Docs",
             "pages": [
               "docs/websocket/websocket_overview",
-              "docs/websocket/websocket_quickstart", 
+              "docs/websocket/websocket_quickstart",
               "docs/websocket/websocket_subscribe",
               "docs/websocket/websocket_message_schema"
-            ]
+            ],
+            "asyncapi": {
+              "source": "/asyncapi.json",
+              "directory": "docs/websocket/websocket_playground"
+            }
           },
           {
             "group": "Reference",
@@ -60,10 +66,6 @@
             ]
           }
         ]
-      },
-      {
-        "tab": "WebSocket API",
-        "asyncapi": "asyncapi.json"
       }
     ],
     "global": {
@@ -82,8 +84,9 @@
     }
   },
   "logo": {
-    "light": "/docs/assets/images/logo.png",
-    "dark": "/docs/assets/images/logo.png"
+    "light": "/logo.png",
+    "dark": "/logo.png",
+    "href": "https://tickdb.ai"
   },
   "navbar": {
     "links": [

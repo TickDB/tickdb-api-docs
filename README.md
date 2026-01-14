@@ -4,7 +4,7 @@ Official API documentation for TickDB - Real-time market data API.
 
 ## 🚀 Quick Start
 
-This documentation is built with [Mintlify](https://mintlify.com) and automatically deployed from GitHub.
+This documentation is built with [Mintlify](https://mintlify.com) and automatically deployed via GitHub integration.
 
 ### Local Development
 
@@ -23,55 +23,121 @@ Visit `http://localhost:3000` to preview the documentation locally.
 Documentation is automatically deployed to Mintlify when changes are pushed to the `main` branch.
 
 - **Live Site**: https://docs.tickdb.ai
-- **Mintlify Dashboard**: Connected via GitHub integration
+- **Mintlify Dashboard**: Connected via GitHub App
 
 ## 📁 Project Structure
 
 ```
-├── docs.json          # Mintlify configuration
-├── asyncapi.json      # WebSocket API specification  
-├── package.json       # Dependencies and scripts
-└── docs/              # Documentation content
-    ├── index.md       # Homepage
-    ├── getting-started.md
-    ├── authentication.md
-    ├── rest/          # REST API documentation
-    ├── websocket/     # WebSocket API documentation
-    └── assets/        # Images and static files
+├── docs.json              # Mintlify configuration
+├── asyncapi.json          # WebSocket API specification (AsyncAPI 3.0)
+├── package.json           # Dependencies and scripts
+├── vercel.json            # Vercel deployment configuration
+├── logo.png               # TickDB logo
+├── .gitignore             # Git ignore rules
+└── docs/                  # Documentation content
+    ├── index.md           # Homepage
+    ├── quick-start.md     # Quick start guide
+    ├── authentication.md  # Authentication guide
+    ├── data-specification.md  # Data formats
+    ├── errors.md          # Error codes reference
+    ├── openapi.yaml       # REST API OpenAPI spec
+    ├── rest/              # REST API documentation
+    │   ├── api_symbols.md
+    │   ├── api_ticker.md
+    │   ├── api_kline.md
+    │   ├── api_depth.md
+    │   └── api_trades.md
+    └── websocket/         # WebSocket API documentation
+        ├── websocket_overview.md
+        ├── websocket_quickstart.md
+        ├── websocket_subscribe.md
+        └── websocket_message_schema.md
+
 ```
 
-## 🔧 Configuration
+## 🔧 Configuration Files
 
-- **Main config**: `docs.json` (Mintlify configuration)
-- **API spec**: `docs/openapi.yaml` (REST API specification)
-- **WebSocket spec**: `asyncapi.json` (WebSocket API specification)
+### docs.json
+Main Mintlify configuration file containing:
+- Theme and branding settings
+- Navigation structure
+- API integration settings
+- AsyncAPI integration for WebSocket playground
+
+### asyncapi.json
+WebSocket API specification (AsyncAPI 3.0) defining:
+- WebSocket connection endpoints
+- Channel definitions (ticker, depth, trade)
+- Message schemas and examples
+- Authentication requirements
+
+**Note**: Mintlify automatically generates an interactive WebSocket playground from this file under "WebSocket Docs → WebSocket Playground".
+
+### docs/openapi.yaml
+REST API specification (OpenAPI 3.0) defining:
+- All REST endpoints
+- Request/response schemas
+- Authentication methods
+- Try-It interactive examples
 
 ## 📚 Documentation Features
 
-- ✅ Interactive API testing (Try-It functionality)
-- ✅ WebSocket playground
-- ✅ Multi-market examples (Crypto, Stocks, Forex, etc.)
-- ✅ OpenAPI integration
-- ✅ Search functionality
-- ✅ Mobile responsive
+- ✅ **Interactive REST API Testing**: Try-It functionality with API key input
+- ✅ **WebSocket Playground**: Auto-generated from AsyncAPI spec
+- ✅ **Multi-Market Examples**: Crypto, US Stocks, HK Stocks, Forex, Metals, Indices
+- ✅ **OpenAPI Integration**: Automatic API reference generation
+- ✅ **AsyncAPI Integration**: Interactive WebSocket testing
+- ✅ **Search Functionality**: Built-in documentation search
+- ✅ **Mobile Responsive**: Optimized for all devices
+- ✅ **Dark Mode Support**: Automatic theme switching
 
-## 🛠 Development
+## 🛠 Development Workflow
 
-### Adding New Pages
+### Adding New Documentation Pages
 
-1. Create a new `.md` file in the appropriate directory
-2. Add frontmatter with title and description
-3. Update `docs.json` navigation if needed
-4. Push to GitHub - auto-deploys to Mintlify
+1. Create a new `.md` file in the appropriate directory:
+   - REST API docs → `docs/rest/`
+   - WebSocket docs → `docs/websocket/`
+   - General docs → `docs/`
+
+2. Add frontmatter to the file:
+   ```markdown
+   ---
+   title: "Page Title"
+   description: "Page description for SEO"
+   ---
+   ```
+
+3. Update `docs.json` navigation to include the new page
+
+4. Test locally with `npm run dev`
+
+5. Push to GitHub - auto-deploys to Mintlify
 
 ### Updating API Specifications
 
-- **REST APIs**: Edit `docs/openapi.yaml`
-- **WebSocket APIs**: Edit `asyncapi.json`
+**REST APIs**:
+- Edit `docs/openapi.yaml`
+- Mintlify automatically updates the Try-It interface
+- Changes reflect immediately after deployment
 
-Changes are automatically reflected in the interactive documentation.
+**WebSocket APIs**:
+- Edit `asyncapi.json`
+- Mintlify regenerates the WebSocket playground
+- Interactive testing UI updates automatically
 
-## 📞 Support
+### Navigation Structure
+
+The documentation is organized in a single "Documentation" tab with the following groups:
+
+- **Introduction**: Overview and welcome
+- **Getting Started**: Quick start and authentication
+- **REST API**: All REST endpoints with Try-It functionality
+- **WebSocket Docs**: WebSocket guides + auto-generated playground
+- **Reference**: Data specifications and error codes
+
+## 📧 Support
 
 - **Email**: support@tickdb.ai
 - **Dashboard**: https://tickdb.ai
+- **Mintlify Docs**: https://mintlify.com/docs

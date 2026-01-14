@@ -2,7 +2,6 @@
 title: TickDB Documentation
 description: Unified Real-time Market Data API for Forex, Indice,US Stocks, HK Stocks, A-Shares, and Crypto.
 ---
-# TickDB API Documentation
 
 Welcome to the **TickDB Online Documentation**.
 

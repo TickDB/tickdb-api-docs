@@ -2,7 +2,6 @@
 title: WebSocket Quick Start
 description: Connect and subscribe to realtime market data.
 ---
-# WebSocket Quick Start
 
 This guide gets you a running realtime stream quickly.
 

@@ -4,8 +4,6 @@ description: Get real-time ticker snapshots for one or more symbols.
 openapi: GET /v1/market/ticker
 ---
 
-# Real-Time Market Ticker
-
 **GET** `/v1/market/ticker`
 
 ## Overview

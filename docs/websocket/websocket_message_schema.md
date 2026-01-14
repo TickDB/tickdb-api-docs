@@ -2,7 +2,6 @@
 title: Message Schema
 description: Server push payload schemas for ticker, depth, and trade.
 ---
-# Message Schema
 
 This page documents the payload formats pushed by TickDB WebSocket.
 

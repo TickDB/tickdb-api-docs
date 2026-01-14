@@ -4,8 +4,6 @@ description: Get real-time order book bids and asks.
 openapi: GET /v1/market/depth
 ---
 
-# Order Book Depth
-
 **GET** `/v1/market/depth`
 
 ## Overview

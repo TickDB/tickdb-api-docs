@@ -2,7 +2,6 @@
 title: WebSocket Overview
 description: Connection endpoint, authentication, and basics.
 ---
-# WebSocket Streaming (Realtime)
 
 TickDB provides real-time market data streaming over WebSocket.
 

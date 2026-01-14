@@ -13,65 +13,105 @@
       "host": "api.tickdb.ai",
       "protocol": "wss",
       "description": "Production WebSocket server",
-      "pathname": "/v1/realtime"
+      "pathname": "/v1/realtime",
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/apiKey"
+        }
+      ]
     }
   },
-  "channels": {
-    "auth": {
-      "address": "auth",
-      "messages": {
-        "authRequest": {
-          "name": "Authentication",
-          "title": "Authenticate Connection",
-          "summary": "Authenticate the WebSocket connection with API key",
-          "contentType": "application/json",
-          "payload": {
-            "type": "object",
-            "properties": {
-              "action": {
-                "type": "string",
-                "const": "auth",
-                "description": "Authentication action"
-              },
-              "api_key": {
-                "type": "string",
-                "description": "Your TickDB API key",
-                "example": "your_api_key_here"
-              }
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "httpApiKey",
+        "name": "api_key",
+        "in": "query"
+      }
+    },
+    "messages": {
+      "SubscribeMessage": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "cmd": {
+              "type": "string",
+              "const": "subscribe"
             },
-            "required": ["action", "api_key"]
+            "data": {
+              "type": "object",
+              "properties": {
+                "channel": {
+                  "type": "string",
+                  "examples": [
+                    "ticker",
+                    "depth",
+                    "trade"
+                  ]
+                }
+              },
+              "symbols": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "AAPL.US",
+                  "GOOGL.US",
+                  "NVDA.US"
+                ]
+              }
+            }
           }
         }
       }
-    },
+    }
+  },
+  "channels": {
     "ticker": {
-      "address": "ticker",
+      "address": "/v1/realtime",
       "messages": {
         "subscribe": {
           "name": "TickerSubscription",
           "title": "Subscribe to Ticker",
-          "summary": "Subscribe to real-time ticker updates for a symbol",
+          "summary": "Subscribe to real-time ticker updates for one or multi symbols",
           "contentType": "application/json",
           "payload": {
             "type": "object",
             "properties": {
-              "action": {
+              "cmd": {
                 "type": "string",
                 "const": "subscribe",
                 "description": "Subscription action"
               },
-              "channel": {
-                "type": "string",
-                "const": "ticker",
-                "description": "Channel type"
-              },
-              "symbol": {
-                "type": "string",
-                "description": "Trading symbol",
-                "examples": ["BTCUSDT", "AAPL.US", "700.HK", "EURUSD", "SPX", "XAUUSD"]
+              "data": {
+                "type": "object",
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "const": "ticker"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT"
+                    ],
+                    "description": "trading symbols"
+                  }
+                }
               }
             },
-            "required": ["action", "channel", "symbol"]
+            "required": [
+              "cmd",
+              "data"
+            ]
           }
         },
         "data": {
@@ -109,7 +149,7 @@
       }
     },
     "depth": {
-      "address": "depth",
+      "address": "/v1/realtime",
       "messages": {
         "subscribe": {
           "name": "DepthSubscription",
@@ -119,21 +159,39 @@
           "payload": {
             "type": "object",
             "properties": {
-              "action": {
+              "cmd": {
                 "type": "string",
-                "const": "subscribe"
+                "const": "subscribe",
+                "description": "Subscription action"
               },
-              "channel": {
-                "type": "string",
-                "const": "depth"
-              },
-              "symbol": {
-                "type": "string",
-                "description": "Trading symbol",
-                "examples": ["BTCUSDT", "AAPL.US", "700.HK"]
+              "data": {
+                "type": "object",
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "const": "depth"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT"
+                    ],
+                    "description": "trading symbols"
+                  }
+                }
               }
             },
-            "required": ["action", "channel", "symbol"]
+            "required": [
+              "cmd",
+              "data"
+            ]
           }
         },
         "data": {
@@ -165,7 +223,16 @@
                       "minItems": 2,
                       "maxItems": 2
                     },
-                    "example": [["43250.50", "0.125"], ["43250.00", "0.250"]]
+                    "example": [
+                      [
+                        "43250.50",
+                        "0.125"
+                      ],
+                      [
+                        "43250.00",
+                        "0.250"
+                      ]
+                    ]
                   },
                   "asks": {
                     "type": "array",
@@ -177,7 +244,16 @@
                       "minItems": 2,
                       "maxItems": 2
                     },
-                    "example": [["43251.00", "0.180"], ["43251.50", "0.320"]]
+                    "example": [
+                      [
+                        "43251.00",
+                        "0.180"
+                      ],
+                      [
+                        "43251.50",
+                        "0.320"
+                      ]
+                    ]
                   },
                   "timestamp": {
                     "type": "integer",
@@ -191,7 +267,7 @@
       }
     },
     "trade": {
-      "address": "trade",
+      "address": "/v1/realtime",
       "messages": {
         "subscribe": {
           "name": "TradeSubscription",
@@ -201,21 +277,39 @@
           "payload": {
             "type": "object",
             "properties": {
-              "action": {
+              "cmd": {
                 "type": "string",
-                "const": "subscribe"
+                "const": "subscribe",
+                "description": "Subscription action"
               },
-              "channel": {
-                "type": "string",
-                "const": "trade"
-              },
-              "symbol": {
-                "type": "string",
-                "description": "Trading symbol",
-                "examples": ["BTCUSDT", "AAPL.US", "700.HK"]
+              "data": {
+                "type": "object",
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "const": "trade"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT"
+                    ],
+                    "description": "trading symbols"
+                  }
+                }
               }
             },
-            "required": ["action", "channel", "symbol"]
+            "required": [
+              "cmd",
+              "data"
+            ]
           }
         },
         "data": {
@@ -247,7 +341,10 @@
                   },
                   "side": {
                     "type": "string",
-                    "enum": ["buy", "sell"],
+                    "enum": [
+                      "buy",
+                      "sell"
+                    ],
                     "example": "buy"
                   },
                   "timestamp": {
@@ -263,17 +360,6 @@
     }
   },
   "operations": {
-    "authenticate": {
-      "action": "send",
-      "channel": {
-        "$ref": "#/channels/auth"
-      },
-      "messages": [
-        {
-          "$ref": "#/channels/auth/messages/authRequest"
-        }
-      ]
-    },
     "subscribeToTicker": {
       "action": "send",
       "channel": {

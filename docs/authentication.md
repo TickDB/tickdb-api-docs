@@ -2,7 +2,6 @@
 title: Authentication
 description: How to authenticate with TickDB using your API key.
 ---
-# Authentication
 
 TickDB uses API Key authentication.
 

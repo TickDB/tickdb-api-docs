@@ -4,8 +4,6 @@ description: Get historical candlestick data for a symbol.
 openapi: GET /v1/market/kline
 ---
 
-# K-line (Candlestick) Data
-
 **GET** `/v1/market/kline`
 
 ## Overview

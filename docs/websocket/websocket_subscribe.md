@@ -2,7 +2,6 @@
 title: Subscribe & Unsubscribe
 description: Client command format and supported channels.
 ---
-# Subscribe & Unsubscribe
 
 After the WebSocket connection is open, you can subscribe or unsubscribe to channels.
 

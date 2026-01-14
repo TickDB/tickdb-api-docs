@@ -4,8 +4,6 @@ description: Get latest trade prints for a symbol.
 openapi: GET /v1/market/trades
 ---
 
-# Recent Trades
-
 **GET** `/v1/market/trades`
 
 ## Overview

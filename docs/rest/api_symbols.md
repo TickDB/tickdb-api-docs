@@ -4,8 +4,6 @@ description: List tradable instruments and supported markets.
 openapi: GET /v1/symbols/available
 ---
 
-# Available Symbols
-
 **GET** `/v1/symbols/available`
 
 ## Overview
