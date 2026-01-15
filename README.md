@@ -1,77 +1,167 @@
-# TickDB API Documentation
+# TickDB API 文檔
 
-Official API documentation for TickDB - Real-time market data API.
+[繁體中文](README.md) | [简体中文](README.zh-Hans.md) | [English](README.en.md)
 
-## 🚀 Quick Start
+![License](https://img.shields.io/github/license/TickDB/tickdb-unified-realtime-marketdata-api)
+[![Website](https://img.shields.io/badge/docs.tickdb.ai-online-blue)](https://docs.tickdb.ai)
+![Docs](https://img.shields.io/badge/documentation-live-brightgreen)
+![API](https://img.shields.io/badge/API-REST%20%26%20WebSocket-blue)
 
-This documentation is built with [Mintlify](https://mintlify.com) and automatically deployed from GitHub.
+> TickDB 官方 API 文檔。透過 REST 與 WebSocket 提供外匯、貴金屬、指數、美股、港股、A 股及加密貨幣的統一即時行情數據。
 
-### Local Development
+## 🚀 快速開始
+
+本文檔使用 [Mintlify](https://mintlify.com) 建構，並透過 GitHub 整合自動部署。
+
+### 本地開發
 
 ```bash
-# Install dependencies
+# 安裝依賴
 npm install
 
-# Start local development server
+# 啟動本地開發服務器
 npm run dev
 ```
 
-Visit `http://localhost:3000` to preview the documentation locally.
+訪問 `http://localhost:3000` 在本地預覽文檔。
 
-### Deployment
+### 部署
 
-Documentation is automatically deployed to Mintlify when changes are pushed to the `main` branch.
+當變更推送至 `main` 分支時，文檔將自動部署至 Mintlify。
 
-- **Live Site**: https://docs.tickdb.ai
-- **Mintlify Dashboard**: Connected via GitHub integration
+- **在線站點**：https://docs.tickdb.ai
+- **部署方式**：透過 Mintlify GitHub App 管理
 
-## 📁 Project Structure
+## 📁 專案結構
 
 ```
-├── docs.json          # Mintlify configuration
-├── asyncapi.json      # WebSocket API specification  
-├── package.json       # Dependencies and scripts
-└── docs/              # Documentation content
-    ├── index.md       # Homepage
-    ├── getting-started.md
+├── docs.json              # Mintlify 配置檔
+├── asyncapi.json          # WebSocket API 規範（AsyncAPI 3.0）
+├── openapi.yaml           # REST API 規範（OpenAPI 3.0）
+├── package.json           # Node.js 相依套件與腳本
+├── logo.png               # TickDB 標誌
+├── en/                    # 英文文件
+│   ├── index.md
+│   ├── quick-start.md
+│   ├── authentication.md
+│   ├── data-specification.md
+│   ├── errors.md
+│   ├── rest/
+│   └── websocket/
+├── zh-Hans/               # 簡體中文文件
+│   ├── index.md
+│   ├── quick-start.md
+│   ├── authentication.md
+│   ├── data-specification.md
+│   ├── errors.md
+│   ├── rest/
+│   └── websocket/
+└── zh-Hant/               # 繁體中文文件
+    ├── index.md
+    ├── quick-start.md
     ├── authentication.md
-    ├── rest/          # REST API documentation
-    ├── websocket/     # WebSocket API documentation
-    └── assets/        # Images and static files
+    ├── data-specification.md
+    ├── errors.md
+    ├── rest/
+    └── websocket/
 ```
 
-## 🔧 Configuration
+## 🌍 多語言支援
 
-- **Main config**: `docs.json` (Mintlify configuration)
-- **API spec**: `docs/openapi.yaml` (REST API specification)
-- **WebSocket spec**: `asyncapi.json` (WebSocket API specification)
+文件提供以下語言版本：
 
-## 📚 Documentation Features
+- **繁體中文** (`zh-Hant`)
+- **简体中文** (`zh-Hans`)
+- **English** (`en`)
 
-- ✅ Interactive API testing (Try-It functionality)
-- ✅ WebSocket playground
-- ✅ Multi-market examples (Crypto, Stocks, Forex, etc.)
-- ✅ OpenAPI integration
-- ✅ Search functionality
-- ✅ Mobile responsive
+可於文件站點右上角切換語言。
 
-## 🛠 Development
+## 🔧 配置檔案說明
 
-### Adding New Pages
+### docs.json
 
-1. Create a new `.md` file in the appropriate directory
-2. Add frontmatter with title and description
-3. Update `docs.json` navigation if needed
-4. Push to GitHub - auto-deploys to Mintlify
+Mintlify 的主要配置檔，包含：
 
-### Updating API Specifications
+- 主題與品牌設定
+- 多語言導覽結構
+- API 參考文件整合
+- WebSocket Playground 的 AsyncAPI 設定
 
-- **REST APIs**: Edit `docs/openapi.yaml`
-- **WebSocket APIs**: Edit `asyncapi.json`
+### asyncapi.json
 
-Changes are automatically reflected in the interactive documentation.
+WebSocket API 規範（AsyncAPI 3.0），用於定義：
 
-## 📞 Support
+- WebSocket 連線端點
+- 頻道定義（如 ticker、depth、trades）
+- 訊息結構與範例
+- 身分驗證需求
 
-- **Email**: support@tickdb.ai
-- **Dashboard**: https://tickdb.ai
+> **說明**：Mintlify 會依此檔案自動產生互動式 WebSocket Playground。
+
+### openapi.yaml
+
+REST API 規範（OpenAPI 3.0），用於定義：
+
+- 所有 REST 端點
+- 請求與回應結構
+- 身分驗證方式
+- Try-It 互動式範例
+
+## 📚 文件特色
+
+- ✅ **多語言支援**：繁體中文、簡體中文、英文
+- ✅ **互動式 REST API**：支援 API Key 輸入的 Try-It 測試
+- ✅ **WebSocket Playground**：由 AsyncAPI 規範自動產生
+- ✅ **多市場範例**：外匯、貴金屬、指數、美股、港股、A 股、加密貨幣
+- ✅ **OpenAPI 整合**：自動產生 REST API 參考文件
+- ✅ **AsyncAPI 整合**：互動式 WebSocket 測試
+- ✅ **內建搜尋**：快速全文搜尋
+- ✅ **響應式設計**：適用桌機與行動裝置
+- ✅ **深色模式**：自動明暗主題切換
+
+## 🛠 開發工作流程
+
+### 新增文件頁面
+
+1. 於對應語言目錄中新增 `.md` 檔案：
+   - 繁體中文：`zh-Hant/`
+   - 简体中文：`zh-Hans/`
+   - English：`en/`
+
+2. 在檔案頂部加入 frontmatter：
+
+   ```markdown
+   ---
+   title: "頁面標題"
+   description: "用於 SEO 的頁面描述"
+   ---
+   ```
+
+3. 更新 `docs.json` 中各語言的導覽設定
+
+4. 使用 `npm run dev` 進行本地預覽
+
+5. 推送至 GitHub，自動觸發部署
+
+### 更新 API 規範
+
+**REST APIs**：
+- 編輯 `openapi.yaml`
+- Mintlify 會自動更新 Try-It 介面
+- 部署完成後立即生效
+
+**WebSocket APIs**：
+- 編輯 `asyncapi.json`
+- Mintlify 重新產生 WebSocket Playground
+- 互動式 UI 會自動更新
+
+## 📧 支援
+
+- **官網**：https://tickdb.ai
+- **文件**：https://docs.tickdb.ai
+- **電子郵件**：support@tickdb.ai
+- **Telegram**：https://t.me/TickDB_Support
+
+## 📄 授權條款
+
+本專案依據 LICENSE 檔案中所述條款進行授權。
