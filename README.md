@@ -30,29 +30,28 @@ Documentation is automatically deployed to Mintlify when changes are pushed to t
 ```
 ├── docs.json              # Mintlify configuration
 ├── asyncapi.json          # WebSocket API specification (AsyncAPI 3.0)
+├── openapi.yaml           # REST API OpenAPI spec
 ├── package.json           # Dependencies and scripts
 ├── vercel.json            # Vercel deployment configuration
 ├── logo.png               # TickDB logo
 ├── .gitignore             # Git ignore rules
-└── docs/                  # Documentation content
-    ├── index.md           # Homepage
-    ├── quick-start.md     # Quick start guide
-    ├── authentication.md  # Authentication guide
-    ├── data-specification.md  # Data formats
-    ├── errors.md          # Error codes reference
-    ├── openapi.yaml       # REST API OpenAPI spec
-    ├── rest/              # REST API documentation
-    │   ├── api_symbols.md
-    │   ├── api_ticker.md
-    │   ├── api_kline.md
-    │   ├── api_depth.md
-    │   └── api_trades.md
-    └── websocket/         # WebSocket API documentation
-        ├── websocket_overview.md
-        ├── websocket_quickstart.md
-        ├── websocket_subscribe.md
-        └── websocket_message_schema.md
-
+├── index.md               # Homepage
+├── quick-start.md         # Quick start guide
+├── getting-started.md     # Getting started guide
+├── authentication.md      # Authentication guide
+├── data-specification.md  # Data formats
+├── errors.md              # Error codes reference
+├── rest/                  # REST API documentation
+│   ├── api_symbols.md
+│   ├── api_ticker.md
+│   ├── api_kline.md
+│   ├── api_depth.md
+│   └── api_trades.md
+└── websocket/             # WebSocket API documentation
+    ├── websocket_overview.md
+    ├── websocket_quickstart.md
+    ├── websocket_subscribe.md
+    └── websocket_message_schema.md
 ```
 
 ## 🔧 Configuration Files
@@ -73,7 +72,7 @@ WebSocket API specification (AsyncAPI 3.0) defining:
 
 **Note**: Mintlify automatically generates an interactive WebSocket playground from this file under "WebSocket Docs → WebSocket Playground".
 
-### docs/openapi.yaml
+### openapi.yaml
 REST API specification (OpenAPI 3.0) defining:
 - All REST endpoints
 - Request/response schemas
@@ -96,9 +95,9 @@ REST API specification (OpenAPI 3.0) defining:
 ### Adding New Documentation Pages
 
 1. Create a new `.md` file in the appropriate directory:
-   - REST API docs → `docs/rest/`
-   - WebSocket docs → `docs/websocket/`
-   - General docs → `docs/`
+   - REST API docs → `rest/`
+   - WebSocket docs → `websocket/`
+   - General docs → root directory
 
 2. Add frontmatter to the file:
    ```markdown
@@ -117,7 +116,7 @@ REST API specification (OpenAPI 3.0) defining:
 ### Updating API Specifications
 
 **REST APIs**:
-- Edit `docs/openapi.yaml`
+- Edit `openapi.yaml`
 - Mintlify automatically updates the Try-It interface
 - Changes reflect immediately after deployment
 

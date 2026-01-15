@@ -7,7 +7,7 @@
     "light": "#07C983",
     "dark": "#0D9373"
   },
-  "favicon": "/docs/assets/images/logo.png",
+  "favicon": "/logo.png",
   "api": {
     "mdx": {
       "server": "https://api.tickdb.ai",
@@ -25,44 +25,44 @@
           {
             "group": "Introduction",
             "pages": [
-              "docs/index"
+              "index"
             ]
           },
           {
             "group": "Getting Started",
             "pages": [
-              "docs/quick-start",
-              "docs/authentication"
+              "quick-start",
+              "authentication"
             ]
           },
           {
             "group": "REST API",
             "pages": [
-              "docs/rest/api_symbols",
-              "docs/rest/api_ticker",
-              "docs/rest/api_kline",
-              "docs/rest/api_depth",
-              "docs/rest/api_trades"
+              "rest/api_symbols",
+              "rest/api_ticker",
+              "rest/api_kline",
+              "rest/api_depth",
+              "rest/api_trades"
             ]
           },
           {
             "group": "WebSocket Docs",
             "pages": [
-              "docs/websocket/websocket_overview",
-              "docs/websocket/websocket_quickstart",
-              "docs/websocket/websocket_subscribe",
-              "docs/websocket/websocket_message_schema"
+              "websocket/websocket_overview",
+              "websocket/websocket_quickstart",
+              "websocket/websocket_subscribe",
+              "websocket/websocket_message_schema"
             ],
             "asyncapi": {
               "source": "/asyncapi.json",
-              "directory": "docs/websocket/websocket_playground"
+              "directory": "websocket/websocket_playground"
             }
           },
           {
             "group": "Reference",
             "pages": [
-              "docs/data-specification",
-              "docs/errors"
+              "data-specification",
+              "errors"
             ]
           }
         ]
