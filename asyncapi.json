@@ -105,7 +105,8 @@
                     ],
                     "description": "trading symbols"
                   }
-                }
+                },
+                "required": ["channel", "symbols"]
               }
             },
             "required": [
@@ -185,7 +186,8 @@
                     ],
                     "description": "trading symbols"
                   }
-                }
+                },
+                "required": ["channel", "symbols"]
               }
             },
             "required": [
@@ -303,7 +305,8 @@
                     ],
                     "description": "trading symbols"
                   }
-                }
+                },
+                "required": ["channel", "symbols"]
               }
             },
             "required": [
