@@ -51,6 +51,7 @@
                   "zh-Hant/rest/api_symbols",
                   "zh-Hant/rest/api_ticker",
                   "zh-Hant/rest/api_kline",
+                  "zh-Hant/rest/api_intervals",
                   "zh-Hant/rest/api_depth",
                   "zh-Hant/rest/api_trades"
                 ]
