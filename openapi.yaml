@@ -73,6 +73,38 @@ paths:
                         timestamp:
                           type: integer
                           example: 1703123456789
+  /v1/market/intervals/kline:
+    get:
+      summary: Kline Intervals
+      description: Get supported K-line time intervals for historical data queries
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                        example: 11
+                      description:
+                        type: string
+                        example: "Supported K-line time intervals for historical data queries"
+                      intervals:
+                        type: array
+                        items:
+                          type: string
+                        example: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1w", "1M"]
   /v1/market/kline:
     get:
       summary: K-line (Candlestick) Data
