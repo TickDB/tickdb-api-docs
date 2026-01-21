@@ -159,6 +159,7 @@
                   "en/rest/api_symbols",
                   "en/rest/api_ticker",
                   "en/rest/api_kline",
+                  "en/rest/api_intervals",
                   "en/rest/api_depth",
                   "en/rest/api_trades"
                 ]
