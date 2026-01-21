@@ -1,109 +1,371 @@
 ---
-title: 錯誤代碼
-description: 錯誤響應格式、常見 HTTP 和 WebSocket 錯誤代碼。
+title: API 錯誤碼說明
+description: 接口返回的錯誤碼含義及處理建議。
 ---
 
-本頁面描述了 **TickDB** 如何在 **REST** 和 **WebSocket** API 中報告錯誤。
-它解釋了錯誤格式、常見狀態碼以及如何正確處理它們。
-
-有關特定端點的錯誤詳情，請參閱**按端點分類的錯誤代碼**。
+本文檔面向 API 用戶，說明接口返回的錯誤碼含義及處理建議。
 
 ---
 
-## REST API 錯誤格式
+## 響應格式
 
-REST API 錯誤返回 HTTP 狀態碼和 JSON 響應體。
-
-### 示例：身份驗證錯誤 (401)
+### HTTP API
 
 ```json
 {
-  "success": false,
-  "error": "Invalid or inactive API key",
-  "code": 401
+  "code": 0,
+  "message": "success",
+  "data": { ... }
 }
 ```
 
-### 示例：速率限制錯誤 (429)
-
-速率限制響應可能包含額外字段以幫助客戶端恢復或升級。
-
-```json
-{
-  "success": false,
-  "error": "Rate limit exceeded",
-  "code": 429,
-  "limit": 60,
-  "used": 60,
-  "reset_at": 1700000000,
-  "plan": "free",
-  "upgrade_to": "standard"
-}
-```
-
----
-
-## WebSocket 錯誤格式
-
-WebSocket 錯誤分為兩類：
-
-1. **連接級錯誤**（HTTP 狀態碼如 `401`、`403`、`429`）
-2. **消息級錯誤**（自定義錯誤代碼）
-
-### 示例：消息級錯誤
+### WebSocket
 
 ```json
 {
   "cmd": "subscribe",
-  "code": 2001,
-  "message": "symbols parameter is required"
+  "code": 0,
+  "message": "success",
+  "data": { ... }
 }
 ```
 
 ---
 
-## 常見 HTTP 狀態碼
+## 錯誤碼速查表
 
-| HTTP 狀態 | 描述 | 典型原因 |
-|------------:|-------------|---------------|
-| 200 | 成功 | 請求成功 |
-| 400 | 錯誤請求 | 缺少或無效的參數 |
-| 401 | 未授權 | 缺少、無效或已停用的 API 密鑰 |
-| 403 | 禁止訪問 | 此端點或市場的權限被拒絕 |
-| 404 | 未找到 | 端點或交易品種未找到 |
-| 429 | 請求過多 | 超出速率限制 |
-| 500 | 內部服務器錯誤 | 意外的服務器錯誤 |
-| 502 | 網關錯誤 | 上游服務錯誤 |
-| 503 | 服務不可用 | 臨時服務中斷 |
-
----
-
-## 常見 WebSocket 錯誤代碼
-
-> WebSocket 錯誤代碼是**自定義代碼**，不是 HTTP 狀態碼。
-
-| 代碼 | 描述 | 典型原因 |
-|-----:|-------------|---------------|
-| 2001 | 無效的消息格式或命令 | JSON 格式錯誤、未知命令或缺少字段 |
-| 2003 | 深度訂閱不可用 | 深度頻道暫時禁用 |
-| 2004 | 交易訂閱不可用 | 交易頻道暫時禁用 |
-
----
-
-## 錯誤處理最佳實踐
-
-- 在解析響應之前始終檢查 HTTP 狀態碼。
-- 對於 `429` 錯誤，在 `reset_at` 之前等待後再重試。
-- 不要立即重試 `500` 錯誤；使用指數退避。
-- 在本地驗證請求參數以避免 `400` 錯誤。
-- 對於 WebSocket API：
-  - 確保消息是有效的 JSON
-  - 始終包含必需字段（`cmd`、`channel`、`symbols`）
+| 錯誤碼 | 含義 | 處理建議 |
+|--------|------|----------|
+| 0 | 成功 | - |
+| 1001 | API Key 無效或已過期 | 檢查 API Key 是否正確 |
+| 1002 | 未提供 API Key | 在請求頭添加 `X-API-Key` |
+| 1003 | IP 不在白名單 | 聯繫管理員添加 IP |
+| 1004 | 權限不足 | 升級套餐或聯繫管理員 |
+| 2001 | 參數錯誤 | 檢查請求參數 |
+| 2002 | 交易品種不存在 | 使用 `/v1/symbols/available` 查詢可用品種 |
+| 2003 | 時間範圍無效 | 檢查 start_time/end_time 參數 |
+| 2004 | 請求數量超限 | 減少 limit 參數值 |
+| 3001 | 請求頻率超限 | 降低請求頻率，參考 Retry-After 頭 |
+| 3002 | 配額已用盡 | 等待配額重置或升級套餐 |
+| 3003 | 連接數超限 | 關閉多餘連接 |
+| 3004 | 訂閱數超限 | 取消部分訂閱 |
+| 4001 | 未知命令 | 檢查 WebSocket 消息的 cmd 字段 |
+| 4002 | 消息格式錯誤 | 檢查 JSON 格式 |
+| 4003 | 深度訂閱暫不可用 | 使用 HTTP API 獲取深度數據 |
+| 4004 | 成交訂閱暫不可用 | 使用 HTTP API 獲取成交數據 |
+| 5000 | 服務器內部錯誤 | 稍後重試，如持續請聯繫支持 |
+| 5001 | 數據源不可用 | 稍後重試 |
+| 5002 | 服務暫時不可用 | 稍後重試 |
 
 ---
 
-## 相關文檔
+## 詳細說明
 
-- **身份驗證** – API 密鑰使用和權限
-- **數據規範** – 交易品種格式和市場定義
-- **按端點分類的錯誤代碼** – 每個 API 端點的詳細錯誤消息
+### 認證錯誤 (1xxx)
+
+#### 1001 - API Key 無效或已過期
+
+```json
+{
+  "code": 1001,
+  "message": "Invalid or expired token"
+}
+```
+
+**原因**：
+- API Key 輸入錯誤
+- API Key 已被禁用
+- API Key 已過期
+
+**解決**：檢查 API Key 是否正確，或聯繫管理員確認狀態。
+
+#### 1002 - 未提供 API Key
+
+```json
+{
+  "code": 1002,
+  "message": "Token is required"
+}
+```
+
+**解決**：在 HTTP 請求頭中添加 `X-API-Key: your_api_key`，或在 WebSocket URL 中添加 `?api_key=your_api_key`。
+
+#### 1003 - IP 不在白名單
+
+```json
+{
+  "code": 1003,
+  "message": "IP address not in whitelist"
+}
+```
+
+**原因**：企業版套餐啟用了 IP 白名單限制。
+
+**解決**：聯繫管理員將您的 IP 添加到白名單。
+
+#### 1004 - 權限不足
+
+```json
+{
+  "code": 1004,
+  "message": "Permission denied"
+}
+```
+
+**原因**：當前套餐不支持該功能。
+
+**解決**：升級套餐或聯繫管理員。
+
+---
+
+### 參數錯誤 (2xxx)
+
+#### 2001 - 參數錯誤
+
+```json
+{
+  "code": 2001,
+  "message": "Invalid parameter: symbol is required"
+}
+```
+
+**解決**：檢查請求參數是否完整、格式是否正確。
+
+#### 2002 - 交易品種不存在
+
+```json
+{
+  "code": 2002,
+  "message": "Symbol not found"
+}
+```
+
+**解決**：調用 `GET /v1/symbols/available` 獲取可用品種列表。
+
+#### 2003 - 時間範圍無效
+
+```json
+{
+  "code": 2003,
+  "message": "Invalid time range"
+}
+```
+
+**原因**：
+- start_time 大於 end_time
+- 時間格式錯誤
+- 時間範圍超出限制
+
+**解決**：使用 Unix 毫秒時間戳，確保 start_time < end_time。
+
+#### 2004 - 請求數量超限
+
+```json
+{
+  "code": 2004,
+  "message": "Request limit exceeded"
+}
+```
+
+**解決**：減少 `limit` 參數值（通常最大 1000）。
+
+---
+
+### 限流錯誤 (3xxx)
+
+#### 3001 - 請求頻率超限
+
+```json
+{
+  "code": 3001,
+  "message": "Rate limit exceeded"
+}
+```
+
+HTTP 響應會包含 `Retry-After` 頭，指示等待秒數。
+
+**解決**：
+- 降低請求頻率
+- 使用 WebSocket 訂閱替代輪詢
+- 升級套餐獲取更高配額
+
+#### 3002 - 配額已用盡
+
+```json
+{
+  "code": 3002,
+  "message": "Quota exhausted"
+}
+```
+
+**解決**：等待配額重置（通常每月重置）或升級套餐。
+
+#### 3003 - 連接數超限
+
+```json
+{
+  "code": 3003,
+  "message": "Connection limit exceeded"
+}
+```
+
+**解決**：
+- 調用 `GET /v1/connections` 查看當前連接
+- 調用 `DELETE /v1/connections/:id` 關閉多餘連接
+
+#### 3004 - 訂閱數超限
+
+```json
+{
+  "code": 3004,
+  "message": "Subscription limit exceeded"
+}
+```
+
+**解決**：取消部分訂閱後再訂閱新品種。
+
+---
+
+### WebSocket 錯誤 (4xxx)
+
+#### 4001 - 未知命令
+
+```json
+{
+  "cmd": "unknown",
+  "code": 4001,
+  "message": "Unknown command"
+}
+```
+
+**解決**：檢查 `cmd` 字段，支持的命令：`subscribe`、`unsubscribe`、`ping`。
+
+#### 4002 - 消息格式錯誤
+
+```json
+{
+  "cmd": "subscribe",
+  "code": 4002,
+  "message": "Invalid message format"
+}
+```
+
+**解決**：確保發送的是有效 JSON，包含必需字段。
+
+#### 4003 / 4004 - 訂閱暫不可用
+
+```json
+{
+  "cmd": "subscribe",
+  "code": 4003,
+  "message": "Depth subscriptions temporarily unavailable",
+  "data": {
+    "channel": "depth",
+    "suggestion": "Use HTTP API /v1/market/depth for current depth data"
+  }
+}
+```
+
+**解決**：使用 HTTP API 獲取數據。
+
+---
+
+### 服務錯誤 (5xxx)
+
+#### 5000 - 服務器內部錯誤
+
+```json
+{
+  "code": 5000,
+  "message": "Internal server error"
+}
+```
+
+**解決**：稍後重試。如持續出現，請聯繫技術支持。
+
+#### 5001 - 數據源不可用
+
+```json
+{
+  "code": 5001,
+  "message": "Data source unavailable"
+}
+```
+
+**解決**：稍後重試，通常會自動恢復。
+
+#### 5002 - 服務暫時不可用
+
+```json
+{
+  "code": 5002,
+  "message": "Service temporarily unavailable"
+}
+```
+
+**解決**：服務可能正在維護，稍後重試。
+
+---
+
+## 錯誤處理示例
+
+### JavaScript
+
+```javascript
+async function fetchTicker(symbol) {
+  const response = await fetch(`/v1/market/ticker/${symbol}`, {
+    headers: { 'X-API-Key': API_KEY }
+  });
+  
+  const data = await response.json();
+  
+  if (data.code !== 0) {
+    switch (data.code) {
+      case 1001:
+      case 1002:
+        throw new Error('認證失敗，請檢查 API Key');
+      case 2002:
+        throw new Error(`交易品種 ${symbol} 不存在`);
+      case 3001:
+        const retryAfter = response.headers.get('Retry-After') || 60;
+        console.log(`請求過快，${retryAfter} 秒後重試`);
+        break;
+      default:
+        throw new Error(data.message);
+    }
+  }
+  
+  return data.data;
+}
+```
+
+### Python
+
+```python
+import requests
+
+def fetch_ticker(symbol, api_key):
+    response = requests.get(
+        f'/v1/market/ticker/{symbol}',
+        headers={'X-API-Key': api_key}
+    )
+    
+    data = response.json()
+    
+    if data['code'] != 0:
+        if data['code'] in [1001, 1002]:
+            raise Exception('認證失敗，請檢查 API Key')
+        elif data['code'] == 2002:
+            raise Exception(f'交易品種 {symbol} 不存在')
+        elif data['code'] == 3001:
+            retry_after = response.headers.get('Retry-After', 60)
+            print(f'請求過快，{retry_after} 秒後重試')
+        else:
+            raise Exception(data['message'])
+    
+    return data['data']
+```
+
+---
+
+*如有疑問，請聯繫技術支持。*

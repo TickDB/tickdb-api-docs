@@ -8,6 +8,7 @@ description: 交易品种命名、时间戳和 K 线间隔规则。
 - 加密货币：`BTCUSDT`
 - 美股：`AAPL.US`
 - 港股：`700.HK`
+- A 股：`000001.SZ`（深圳）、`600000.SH`（上海）
 - 外汇：`EURUSD`
 - 贵金属：`XAUUSD`
 

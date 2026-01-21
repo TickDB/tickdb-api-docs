@@ -1,13 +1,20 @@
 # TickDB API Documentation
 
-[繁體中文](README.md) | [简体中文](README.zh-Hans.md) | [English](README.en.md)
+Official TickDB API documentation repository. One unified connection for real-time market data across forex, precious metals, indices, US stocks, HK stocks, A-shares, and crypto, delivered via REST and WebSocket.
+
+🌐 **Website**: https://tickdb.ai  
+📘 **Live Docs**: https://docs.tickdb.ai  
+💻 **GitHub**: https://github.com/TickDB  
+
+---
+
+[简体中文](README.md) | [繁體中文](README.zh-Hant.md) | [English](README.en.md)
 
 ![License](https://img.shields.io/github/license/TickDB/tickdb-unified-realtime-marketdata-api)
 [![Website](https://img.shields.io/badge/docs.tickdb.ai-online-blue)](https://docs.tickdb.ai)
 ![Docs](https://img.shields.io/badge/documentation-live-brightgreen)
 ![API](https://img.shields.io/badge/API-REST%20%26%20WebSocket-blue)
 
-> Official TickDB API documentation. One connection for Forex, precious metals, indices, US stocks, HK stocks, A-shares, and crypto, delivering unified real-time market data via REST and WebSocket.
 
 ## 🚀 Quick Start
 

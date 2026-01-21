@@ -2,11 +2,11 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "TickDB Docs",
-  "defaultLanguage": "zh-Hant",
+  "defaultLanguage": "zh-Hans",
   "redirects": [
     {
       "source": "/",
-      "destination": "/zh-Hant/index"
+      "destination": "/zh-Hans/index"
     }
   ],
   "colors": {
@@ -26,59 +26,6 @@
   },
   "navigation": {
     "languages": [
-      {
-        "language": "zh-Hant",
-        "tabs": [
-          {
-            "tab": "文檔",
-            "groups": [
-              {
-                "group": "介紹",
-                "pages": [
-                  "zh-Hant/index"
-                ]
-              },
-              {
-                "group": "入門指南",
-                "pages": [
-                  "zh-Hant/quick-start",
-                  "zh-Hant/authentication"
-                ]
-              },
-              {
-                "group": "REST API",
-                "pages": [
-                  "zh-Hant/rest/api_symbols",
-                  "zh-Hant/rest/api_ticker",
-                  "zh-Hant/rest/api_kline",
-                  "zh-Hant/rest/api_depth",
-                  "zh-Hant/rest/api_trades"
-                ]
-              },
-              {
-                "group": "WebSocket 文檔",
-                "pages": [
-                  "zh-Hant/websocket/websocket_overview",
-                  "zh-Hant/websocket/websocket_quickstart",
-                  "zh-Hant/websocket/websocket_subscribe",
-                  "zh-Hant/websocket/websocket_message_schema"
-                ],
-                "asyncapi": {
-                  "source": "/asyncapi.json",
-                  "directory": "zh-Hant/websocket/websocket_playground"
-                }
-              },
-              {
-                "group": "參考",
-                "pages": [
-                  "zh-Hant/data-specification",
-                  "zh-Hant/errors"
-                ]
-              }
-            ]
-          }
-        ]
-      },
       {
         "language": "zh-Hans",
         "tabs": [
@@ -102,8 +49,10 @@
                 "group": "REST API",
                 "pages": [
                   "zh-Hans/rest/api_symbols",
-                  "zh-Hans/rest/api_ticker",
+                  "zh-Hans/rest/api_intervals",
                   "zh-Hans/rest/api_kline",
+                  "zh-Hans/rest/api_kline_latest",
+                  "zh-Hans/rest/api_ticker",
                   "zh-Hans/rest/api_depth",
                   "zh-Hans/rest/api_trades"
                 ]
@@ -133,6 +82,61 @@
         ]
       },
       {
+        "language": "zh-Hant",
+        "tabs": [
+          {
+            "tab": "文檔",
+            "groups": [
+              {
+                "group": "介紹",
+                "pages": [
+                  "zh-Hant/index"
+                ]
+              },
+              {
+                "group": "入門指南",
+                "pages": [
+                  "zh-Hant/quick-start",
+                  "zh-Hant/authentication"
+                ]
+              },
+              {
+                "group": "REST API",
+                "pages": [
+                  "zh-Hant/rest/api_symbols",
+                  "zh-Hant/rest/api_intervals",
+                  "zh-Hant/rest/api_kline",
+                  "zh-Hant/rest/api_kline_latest",
+                  "zh-Hant/rest/api_ticker",
+                  "zh-Hant/rest/api_depth",
+                  "zh-Hant/rest/api_trades"
+                ]
+              },
+              {
+                "group": "WebSocket 文檔",
+                "pages": [
+                  "zh-Hant/websocket/websocket_overview",
+                  "zh-Hant/websocket/websocket_quickstart",
+                  "zh-Hant/websocket/websocket_subscribe",
+                  "zh-Hant/websocket/websocket_message_schema"
+                ],
+                "asyncapi": {
+                  "source": "/asyncapi.json",
+                  "directory": "zh-Hant/websocket/websocket_playground"
+                }
+              },
+              {
+                "group": "參考",
+                "pages": [
+                  "zh-Hant/data-specification",
+                  "zh-Hant/errors"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
         "language": "en",
         "tabs": [
           {
@@ -155,8 +159,10 @@
                 "group": "REST API",
                 "pages": [
                   "en/rest/api_symbols",
-                  "en/rest/api_ticker",
+                  "en/rest/api_intervals",
                   "en/rest/api_kline",
+                  "en/rest/api_kline_latest",
+                  "en/rest/api_ticker",
                   "en/rest/api_depth",
                   "en/rest/api_trades"
                 ]

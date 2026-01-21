@@ -8,6 +8,7 @@ description: Symbol naming, timestamps, and K-line interval rules.
 - Crypto: `BTCUSDT`
 - US Stocks: `AAPL.US`
 - HK Stocks: `700.HK`
+- A-Shares: `000001.SZ` (Shenzhen), `600000.SH` (Shanghai)
 - Forex: `EURUSD`
 - Metals: `XAUUSD`
 

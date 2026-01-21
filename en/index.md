@@ -57,9 +57,29 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 
 ## 📚 Documentation Sections
 
-- Introduction
-- Getting Started
-- Authentication
-- REST API Reference
-- Data Specification
-- Errors
+### Getting Started
+- **Quick Start** - Get up and running in minutes
+- **Authentication** - API key setup and usage
+
+### REST API
+- **Available Symbols** - Query supported trading symbols
+- **Kline Intervals** - Available time intervals
+- **Kline (Candlesticks)** - Historical candlestick data
+- **Latest Kline** - Current period kline data
+- **Market Ticker** - Real-time ticker snapshots
+- **Order Book Depth** - Real-time order book
+- **Recent Trades** - Latest trade executions
+
+### WebSocket
+- **WebSocket Overview** - Connection and authentication
+- **Quick Start** - Get started with WebSocket
+- **Subscribe & Unsubscribe** - Channel subscription
+- **Message Schema** - Data format specifications
+
+### Reference
+- **Data Specification** - Symbol naming and formats
+- **Errors** - Error codes and handling
+
+---
+
+**Docs Version**: v1.0.0

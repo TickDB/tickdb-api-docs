@@ -348,3 +348,132 @@ paths:
                       limit:
                         type: integer
                         example: 50
+  /v1/market/kline/latest:
+    get:
+      summary: Latest K-line Data
+      description: Get the latest candlestick data for one or more symbols
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated symbols (e.g., AAPL.US,00700.HK)
+          schema:
+            type: string
+            example: "AAPL.US,00700.HK"
+        - name: interval
+          in: query
+          required: true
+          description: K-line interval
+          schema:
+            type: string
+            enum: ["1m", "3m", "5m", "15m", "30m", "1h", "4h", "12h", "1d", "1w", "1M"]
+            example: "3m"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                          example: "AAPL.US"
+                        interval:
+                          type: string
+                          example: "3m"
+                        klines:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              time:
+                                type: integer
+                                example: 1768942620000
+                              open:
+                                type: string
+                                example: "246.035"
+                              high:
+                                type: string
+                                example: "246.93"
+                              low:
+                                type: string
+                                example: "245.58"
+                              close:
+                                type: string
+                                example: "246.7"
+                              volume:
+                                type: string
+                                example: "3608863"
+                              quote_volume:
+                                type: string
+                                example: "889235872.74"
+        '400':
+          description: Bad Request - Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Invalid parameters"
+        '401':
+          description: Unauthorized - Invalid or missing API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: "Unauthorized"
+  /v1/market/intervals/kline:
+    get:
+      summary: Kline Intervals
+      description: Get supported K-line time intervals for historical data queries
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      count:
+                        type: integer
+                        example: 11
+                      description:
+                        type: string
+                        example: "Supported K-line time intervals for historical data queries"
+                      intervals:
+                        type: array
+                        items:
+                          type: string
+                        example: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1w", "1M"]
