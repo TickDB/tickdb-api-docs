@@ -105,6 +105,7 @@
                   "zh-Hans/rest/api_symbols",
                   "zh-Hans/rest/api_ticker",
                   "zh-Hans/rest/api_kline",
+                  "zh-Hans/rest/api_intervals",
                   "zh-Hans/rest/api_depth",
                   "zh-Hans/rest/api_trades"
                 ]
