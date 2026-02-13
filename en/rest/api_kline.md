@@ -1,36 +1,75 @@
 ---
-title: Kline (Candlesticks)
-description: Get historical candlestick data for a symbol.
+title: Historical K-Line
+description: Get historical K-line data for completed time periods.
 openapi: GET /v1/market/kline
 ---
 
 **GET** `/v1/market/kline`
 
-## Overview
-Retrieve historical candlestick (K-line) data for a trading symbol.
+---
+
+## 📌 Description
+
+This endpoint returns **historical K-line data for completed time periods**.
+
+- Data is fixed and will not change
+- Suitable for backtesting and historical analysis
+- For real-time K-line data in the current period, use 👉 Real-time K-Line: `/v1/market/kline/latest`
+
+---
+
+## 🧠 Lifecycle Explanation
+
+Period Start → Real-time Updates → Period End → Becomes Historical Data
+Historical K-line represents stable data for "completed periods".
+
+---
+
+## 🎯 Use Cases
+
+- Strategy backtesting
+- Technical indicator calculation
+- Data archiving and storage
+
+---
+
+## 🔍 Difference from Real-time K-Line
+
+| Item | Historical K-Line | Real-time K-Line |
+|------|-------------------|------------------|
+| Time Range | Completed periods | Current period |
+| Data Status | Fixed | Continuously updating |
+| Use Case | Analysis / Backtesting | Real-time quotes |
+| Updates | No | Yes |
+
+---
 
 ## Multi-Market Examples
 
-**Crypto**: `BTCUSDT`, `ETHUSDT`, `ADAUSDT`
-**US Stocks**: `AAPL.US`, `TSLA.US`, `MSFT.US`
-**HK Stocks**: `700.HK`, `9988.HK`, `3690.HK`
-**Forex**: `EURUSD`, `GBPUSD`, `USDJPY`
-**Metals**: `XAUUSD`, `XAGUSD`
+**Cryptocurrency**: `BTCUSDT`, `ETHUSDT`, `ADAUSDT`  
+**US Stocks**: `AAPL.US`, `TSLA.US`, `MSFT.US`  
+**Hong Kong Stocks**: `700.HK`, `9988.HK`, `3690.HK`  
+**Forex**: `EURUSD`, `GBPUSD`, `USDJPY`  
+**Precious Metals**: `XAUUSD`, `XAGUSD`
 
-## Supported Intervals
+---
+
+## Supported Time Intervals
 
 - **Minutes**: `1m`, `5m`, `15m`, `30m`
 - **Hours**: `1h`, `4h`, `12h`
 - **Days**: `1d`, `1w`, `1M`
 
-## Example Request
+---
+
+## Request Example
 
 ```bash
 curl -H "X-API-Key: YOUR_API_KEY" \
      "https://api.tickdb.ai/v1/market/kline?symbol=AAPL.US&interval=1m&limit=5"
 ```
 
-## Example Response
+## Response Example
 
 ```json
 {
