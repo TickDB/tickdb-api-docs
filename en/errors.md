@@ -1,5 +1,5 @@
 ---
-title: API Error Codes
+title: Error Codes
 description: Error code meanings and handling recommendations.
 ---
 

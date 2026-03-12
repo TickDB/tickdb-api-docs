@@ -29,7 +29,8 @@ paths:
           description: Comma-separated symbols (max 50)
           schema:
             type: string
-            example: "BTCUSDT,AAPL.US"
+            default: "700.HK,AAPL.US"
+            example: "700.HK,AAPL.US"
       responses:
         '200':
           description: Successful response
@@ -51,28 +52,37 @@ paths:
                       properties:
                         symbol:
                           type: string
-                          example: "BTCUSDT"
-                        price:
+                        last_price:
                           type: string
-                          example: "43250.50"
-                        change:
+                        volume_24h:
                           type: string
-                          example: "1250.30"
-                        change_percent:
+                        high_24h:
                           type: string
-                          example: "2.98"
-                        volume:
+                        low_24h:
                           type: string
-                          example: "15420.5"
-                        high:
+                        price_change_24h:
                           type: string
-                          example: "43800.00"
-                        low:
+                        price_change_percent_24h:
                           type: string
-                          example: "41900.00"
                         timestamp:
                           type: integer
-                          example: 1703123456789
+                    example:
+                      - symbol: "700.HK"
+                        last_price: "543"
+                        volume_24h: "11205874"
+                        high_24h: "557"
+                        low_24h: "543"
+                        price_change_24h: "-9"
+                        price_change_percent_24h: "-1.63"
+                        timestamp: 1773292807000
+                      - symbol: "AAPL.US"
+                        last_price: "260.81"
+                        volume_24h: "26218927"
+                        high_24h: "262.13"
+                        low_24h: "259.55"
+                        price_change_24h: "-0.02"
+                        price_change_percent_24h: "-0.01"
+                        timestamp: 1773259201000
   /v1/market/kline:
     get:
       summary: K-line (Candlestick) Data
@@ -84,7 +94,8 @@ paths:
           description: Trading symbol
           schema:
             type: string
-            example: "BTCUSDT"
+            default: "700.HK"
+            example: "700.HK"
         - name: interval
           in: query
           required: true
@@ -92,6 +103,7 @@ paths:
           schema:
             type: string
             enum: ["1m", "5m", "15m", "30m", "1h", "4h", "12h", "1d", "1w", "1M"]
+            default: "1h"
             example: "1h"
         - name: limit
           in: query
@@ -101,8 +113,7 @@ paths:
             type: integer
             minimum: 1
             maximum: 1000
-            default: 100
-            example: 24
+            example: 100
         - name: start_time
           in: query
           required: false
@@ -132,31 +143,44 @@ paths:
                     type: string
                     example: "success"
                   data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        timestamp:
-                          type: integer
-                          example: 1703123456789
-                        open:
-                          type: string
-                          example: "43000.00"
-                        high:
-                          type: string
-                          example: "43250.50"
-                        low:
-                          type: string
-                          example: "42800.00"
-                        close:
-                          type: string
-                          example: "43100.00"
-                        volume:
-                          type: string
-                          example: "1250.5"
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: "700.HK"
+                      interval:
+                        type: string
+                        example: "1h"
+                      klines:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            time:
+                              type: integer
+                            open:
+                              type: string
+                            high:
+                              type: string
+                            low:
+                              type: string
+                            close:
+                              type: string
+                            volume:
+                              type: string
+                            quote_volume:
+                              type: string
+                        example:
+                          - time: 1773291600000
+                            open: "545.5"
+                            high: "546.5"
+                            low: "541.5"
+                            close: "543.5"
+                            volume: "1549300"
+                            quote_volume: "842560983.33"
   /v1/market/depth:
     get:
-      summary: Order Book Depth
+      summary: Order Book
       description: Get real-time order book bids and asks
       parameters:
         - name: symbol
@@ -165,7 +189,8 @@ paths:
           description: Trading symbol
           schema:
             type: string
-            example: "BTCUSDT"
+            default: "700.HK"
+            example: "700.HK"
         - name: limit
           in: query
           required: false
@@ -174,7 +199,6 @@ paths:
             type: integer
             minimum: 1
             maximum: 50
-            default: 10
             example: 20
       responses:
         '200':
@@ -195,28 +219,30 @@ paths:
                     properties:
                       symbol:
                         type: string
-                        example: "BTCUSDT"
+                        example: "700.HK"
                       timestamp:
                         type: integer
-                        example: 1703123456789
+                        example: 1768274016162
                       bids:
                         type: array
+                        description: Buy orders sorted by price descending
                         items:
                           type: array
                           items:
                             type: string
-                          example: ["43100.00", "1.25"]
+                        example: [["626", "19700"], ["625.5", "40800"]]
                       asks:
                         type: array
+                        description: Sell orders sorted by price ascending
                         items:
                           type: array
                           items:
                             type: string
-                          example: ["43101.00", "0.85"]
+                        example: [["626.5", "36100"], ["627", "50700"]]
   /v1/market/trades:
     get:
       summary: Recent Trades
-      description: Get latest trade prints for a symbol
+      description: Get latest trade prints for a symbol. Note - This endpoint does not support US Stocks and A-shares (CN market).
       parameters:
         - name: symbol
           in: query
@@ -224,7 +250,8 @@ paths:
           description: Trading symbol
           schema:
             type: string
-            example: "BTCUSDT"
+            default: "700.HK"
+            example: "700.HK"
         - name: limit
           in: query
           required: false
@@ -233,7 +260,6 @@ paths:
             type: integer
             minimum: 1
             maximum: 200
-            default: 50
             example: 100
       responses:
         '200':
@@ -291,16 +317,14 @@ paths:
             type: integer
             minimum: 1
             maximum: 500
-            default: 100
             example: 50
         - name: page
           in: query
           required: false
-          description: Page number for pagination
+          description: Page number for pagination (default 1)
           schema:
             type: integer
             minimum: 1
-            default: 1
             example: 1
       responses:
         '200':
@@ -359,6 +383,7 @@ paths:
           description: Comma-separated symbols (e.g., AAPL.US,00700.HK)
           schema:
             type: string
+            default: "AAPL.US,00700.HK"
             example: "AAPL.US,00700.HK"
         - name: interval
           in: query
@@ -367,6 +392,7 @@ paths:
           schema:
             type: string
             enum: ["1m", "3m", "5m", "15m", "30m", "1h", "4h", "12h", "1d", "1w", "1M"]
+            default: "3m"
             example: "3m"
       responses:
         '200':
@@ -389,10 +415,8 @@ paths:
                       properties:
                         symbol:
                           type: string
-                          example: "AAPL.US"
                         interval:
                           type: string
-                          example: "3m"
                         klines:
                           type: array
                           items:
@@ -400,25 +424,39 @@ paths:
                             properties:
                               time:
                                 type: integer
-                                example: 1768942620000
                               open:
                                 type: string
-                                example: "246.035"
                               high:
                                 type: string
-                                example: "246.93"
                               low:
                                 type: string
-                                example: "245.58"
                               close:
                                 type: string
-                                example: "246.7"
                               volume:
                                 type: string
-                                example: "3608863"
                               quote_volume:
                                 type: string
-                                example: "889235872.74"
+                    example:
+                      - symbol: "AAPL.US"
+                        interval: "3m"
+                        klines:
+                          - time: 1773259020000
+                            open: "260.86"
+                            high: "261.05"
+                            low: "260.7"
+                            close: "260.81"
+                            volume: "963419"
+                            quote_volume: "251311057.55"
+                      - symbol: "00700.HK"
+                        interval: "3m"
+                        klines:
+                          - time: 1773293400000
+                            open: "542.5"
+                            high: "544.5"
+                            low: "542"
+                            close: "544.5"
+                            volume: "80300"
+                            quote_volume: "43656433.33"
         '400':
           description: Bad Request - Invalid parameters
           content:
@@ -447,7 +485,7 @@ paths:
                     example: "Unauthorized"
   /v1/market/intervals/kline:
     get:
-      summary: Kline Intervals
+      summary: Kline Periods
       description: Get supported K-line time intervals for historical data queries
       responses:
         '200':
@@ -477,3 +515,477 @@ paths:
                         items:
                           type: string
                         example: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1w", "1M"]
+  /v1/market/intraday:
+    get:
+      summary: Intraday Data
+      description: Get intraday time-series data for stocks
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated stock symbols (max 50)
+          schema:
+            type: string
+            default: "700.HK,9988.HK"
+            example: "700.HK,9988.HK"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                          example: "700.HK"
+                        lines:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              timestamp:
+                                type: integer
+                                example: 1773192600000
+                                description: "Timestamp in milliseconds"
+                              price:
+                                type: string
+                                example: "568"
+                                description: "Current price"
+                              volume:
+                                type: integer
+                                example: 7294905
+                                description: "Cumulative volume"
+                              turnover:
+                                type: string
+                                example: "4181560679.96"
+                                description: "Cumulative turnover"
+                              avg_price:
+                                type: string
+                                example: "573.216605"
+                                description: "Average price"
+              examples:
+                single_symbol:
+                  summary: Single symbol response
+                  value:
+                    code: 0
+                    message: "success"
+                    data:
+                      - symbol: "700.HK"
+                        lines:
+                          - timestamp: 1773192600000
+                            price: "568"
+                            volume: 7294905
+                            turnover: "4181560679.96"
+                            avg_price: "573.216605"
+  /v1/market/trading-sessions:
+    get:
+      summary: Trading Sessions
+      description: Get trading session information for a specific market
+      parameters:
+        - name: market
+          in: query
+          required: true
+          description: Market code (US, HK, CN)
+          schema:
+            type: string
+            enum: ["US", "HK", "CN"]
+            default: "US"
+            example: "US"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        market:
+                          type: string
+                        trading_sessions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              begin_time:
+                                type: integer
+                              end_time:
+                                type: integer
+                              trade_session:
+                                type: integer
+                    example:
+                      - market: "US"
+                        trading_sessions:
+                          - begin_time: 400
+                            end_time: 930
+                            trade_session: 1
+                          - begin_time: 930
+                            end_time: 1600
+                          - begin_time: 1600
+                            end_time: 2000
+                            trade_session: 2
+  /v1/market/trade-days:
+    get:
+      summary: Trading Days
+      description: Get trading days for a specific market within a date range
+      parameters:
+        - name: market
+          in: query
+          required: true
+          description: Market code (US, HK, CN)
+          schema:
+            type: string
+            enum: ["US", "HK", "CN"]
+            default: "US"
+            example: "US"
+        - name: beg_day
+          in: query
+          required: true
+          description: Start date (format YYYYMMDD)
+          schema:
+            type: string
+            default: "20260201"
+            example: "20260201"
+        - name: end_day
+          in: query
+          required: true
+          description: End date (format YYYYMMDD)
+          schema:
+            type: string
+            default: "20260228"
+            example: "20260228"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      market:
+                        type: string
+                      trade_days:
+                        type: array
+                        items:
+                          type: string
+                      half_trade_days:
+                        type: array
+                        items:
+                          type: string
+                    example:
+                      market: "US"
+                      trade_days: ["20260202", "20260203", "20260204", "20260205", "20260206", "20260209", "20260210", "20260211", "20260212", "20260213", "20260217", "20260218", "20260219", "20260220", "20260223", "20260224", "20260225", "20260226", "20260227"]
+                      half_trade_days: []
+  /v1/market/stock-info:
+    get:
+      summary: Stock Information
+      description: Get detailed information for stocks
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated stock symbols (max 50)
+          schema:
+            type: string
+            default: "700.HK,AAPL.US,000001.SZ"
+            example: "700.HK,AAPL.US,000001.SZ"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        name_cn:
+                          type: string
+                        name_en:
+                          type: string
+                        name_hk:
+                          type: string
+                        exchange:
+                          type: string
+                        currency:
+                          type: string
+                        lot_size:
+                          type: integer
+                        total_shares:
+                          type: integer
+                        circulating_shares:
+                          type: integer
+                        hk_shares:
+                          type: integer
+                        eps:
+                          type: string
+                        eps_ttm:
+                          type: string
+                        bps:
+                          type: string
+                        dividend_yield:
+                          type: string
+                        stock_derivatives:
+                          type: array
+                          items:
+                            type: integer
+                    example:
+                      - symbol: "700.HK"
+                        name_cn: "腾讯控股"
+                        name_en: "TENCENT"
+                        name_hk: "騰訊控股"
+                        exchange: "SEHK"
+                        currency: "HKD"
+                        lot_size: 100
+                        total_shares: 9106356125
+                        circulating_shares: 9106356125
+                        hk_shares: 9106356125
+                        eps: "23.013927604754377"
+                        eps_ttm: "26.2097750997138276"
+                        bps: "140.9780051897266427"
+                        dividend_yield: "4.5408485490127919"
+                        stock_derivatives: [2]
+                      - symbol: "AAPL.US"
+                        name_cn: "苹果"
+                        name_en: "Apple Inc."
+                        name_hk: "蘋果"
+                        exchange: "NASD"
+                        currency: "USD"
+                        lot_size: 1
+                        total_shares: 14681140000
+                        circulating_shares: 14656175336
+                        eps: "7.6295165089359546"
+                        eps_ttm: "8.0223334155249524"
+                        bps: "6.0070267022860623"
+                        dividend_yield: "1.04"
+                        stock_derivatives: [1]
+                      - symbol: "000001.SZ"
+                        name_cn: "平安银行"
+                        name_en: "PAB"
+                        name_hk: "平安銀行"
+                        exchange: "SZSE"
+                        currency: "CNY"
+                        lot_size: 100
+                        total_shares: 19405918198
+                        circulating_shares: 19405762053
+                        eps: "2.146707"
+                        eps_ttm: "2.2218995030311835"
+                        bps: "23.0845557231179667"
+                        dividend_yield: "0.5980134452589843"
+  /v1/market/calc-index:
+    get:
+      summary: Market Metrics
+      description: Retrieve comprehensive market metrics for stocks, including market statistics, valuation indicators, capital flow, and derivatives-related indicators
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated stock symbols (max 50)
+          schema:
+            type: string
+            default: "700.HK"
+            example: "700.HK,AAPL.US"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        last_done:
+                          type: string
+                        change_val:
+                          type: string
+                        change_rate:
+                          type: string
+                        volume:
+                          type: string
+                        turnover:
+                          type: string
+                        ytd_change_rate:
+                          type: string
+                        turnover_rate:
+                          type: string
+                        total_market_value:
+                          type: string
+                        capital_flow:
+                          type: string
+                        amplitude:
+                          type: string
+                        volume_ratio:
+                          type: string
+                        pe_ttm_ratio:
+                          type: string
+                        pb_ratio:
+                          type: string
+                        dividend_ratio_ttm:
+                          type: string
+                        five_day_change_rate:
+                          type: string
+                        ten_day_change_rate:
+                          type: string
+                        half_year_change_rate:
+                          type: string
+                        five_minutes_change_rate:
+                          type: string
+                    example:
+                      - symbol: "700.HK"
+                        last_done: "547.5"
+                        change_val: "-4.5"
+                        change_rate: "-0.0082"
+                        volume: "16521084"
+                        turnover: "0.0018"
+                        ytd_change_rate: "-0.086"
+                        turnover_rate: "0.18"
+                        total_market_value: "4985729978437.5"
+                        capital_flow: "-277985600"
+                        amplitude: "0.0281"
+                        volume_ratio: "0.47"
+                        pe_ttm_ratio: "20.89"
+                        pb_ratio: "3.88"
+                        dividend_ratio_ttm: "0.83"
+                        five_day_change_rate: "0.0906"
+                        ten_day_change_rate: "0.0693"
+                        half_year_change_rate: "-0.1492"
+                        five_minutes_change_rate: "0"
+
+  /v1/market/capital-flow:
+    get:
+      summary: Capital Flow
+      description: Get capital flow data for a stock
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Stock symbol
+          schema:
+            type: string
+            example: "700.HK"
+            default: "700.HK"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                      timestamp:
+                        type: integer
+                      intraday_flow:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            timestamp:
+                              type: integer
+                            inflow:
+                              type: string
+                      distribution:
+                        type: object
+                        properties:
+                          timestamp:
+                            type: integer
+                          capital_in:
+                            type: object
+                            properties:
+                              large:
+                                type: string
+                              medium:
+                                type: string
+                              small:
+                                type: string
+                          capital_out:
+                            type: object
+                            properties:
+                              large:
+                                type: string
+                              medium:
+                                type: string
+                              small:
+                                type: string
+                    example:
+                      symbol: "700.HK"
+                      timestamp: 1773306211
+                      intraday_flow:
+                        - timestamp: 1773279000
+                          inflow: "-12199.34"
+                        - timestamp: 1773279060
+                          inflow: "-15137.59"
+                      distribution:
+                        timestamp: 1773303000
+                        capital_in:
+                          large: "173056.31"
+                          medium: "164958.55"
+                          small: "83945.69"
+                        capital_out:
+                          large: "179434.39"
+                          medium: "176045.91"
+                          small: "92979.74"

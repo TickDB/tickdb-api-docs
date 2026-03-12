@@ -1,5 +1,5 @@
 ---
-title: API 错误码说明
+title: 错误码说明
 description: 接口返回的错误码含义及处理建议。
 ---
 

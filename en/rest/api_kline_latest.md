@@ -4,114 +4,43 @@ description: Get real-time K-line data for the current time period that is being
 openapi: GET /v1/market/kline/latest
 ---
 
-**GET** `/v1/market/kline/latest`
+## Notes
+- This endpoint returns K-line data for the current period being formed, data updates continuously with trades
+- Suitable for real-time chart display, current price monitoring, and intraday dynamic updates
+- Not recommended for historical backtesting, technical indicator statistics, or fixed data storage
+- For completed period data, use Historical K-Line: `/v1/market/kline`
 
-## 📌 Description
+## Supported Markets
 
-This endpoint returns **K-line data for the current time period being formed**.
+**Forex**, **Metals**, **Indices**, **US Stocks**, **HK Stocks**, **A-Shares**, **Crypto**
 
-- Data updates continuously with trades
-- When the current period ends, this K-line becomes historical
-- For completed period data, use 👉 Historical K-Line: `/v1/market/kline`
+Examples:
+- Forex: EURUSD, GBPUSD, USDJPY
+- Metals: XAUUSD, XAGUSD
+- Indices: SPX, NDX, DJI
+- US Stocks: AAPL.US, TSLA.US, MSFT.US
+- HK Stocks: 700.HK, 9988.HK, 3690.HK
+- A-Shares: 000001.SH, 000001.SZ
+- Crypto: BTCUSDT, ETHUSDT, ADAUSDT
 
----
+## Request Parameters
 
-## 🧠 Lifecycle Explanation
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| symbols | Yes | Trading symbol codes, comma-separated, e.g., AAPL.US,00700.HK |
+| interval | Yes | K-line period, options: 1m, 3m, 5m, 15m, 30m, 1h, 4h, 12h, 1d, 1w, 1M |
 
-Period Start → Real-time Updates → Period End → Becomes Historical Data
-Real-time K-line represents data in "ongoing period" status.
+## Response Fields
 
----
-
-## 🎯 Use Cases
-
-- Real-time chart display
-- Current price monitoring
-- Intraday dynamic updates
-
----
-
-## ⚠️ Not Recommended For
-
-- Historical backtesting
-- Technical indicator statistics
-- Fixed data storage
-
----
-
-## 🔍 Difference from Historical K-Line
-
-| Item | Real-time K-Line | Historical K-Line |
-|------|------------------|-------------------|
-| Time Range | Current period | Completed periods |
-| Data Status | Continuously updating | Fixed |
-| Use Case | Real-time display | Backtesting / Analysis |
-| Updates | Yes | No |
-
----
-
-## Multi-Market Examples
-
-**Forex**: `EURUSD`, `GBPUSD`, `USDJPY`  
-**Precious Metals**: `XAUUSD`, `XAGUSD`  
-**US Stocks**: `AAPL.US`, `TSLA.US`, `MSFT.US`  
-**Hong Kong Stocks**: `700.HK`, `9988.HK`, `3690.HK`  
-**Cryptocurrency**: `BTCUSDT`, `ETHUSDT`, `ADAUSDT`
-
----
-
-## Supported Time Intervals
-
-- **Minutes**: `1m`, `5m`, `15m`, `30m`
-- **Hours**: `1h`, `4h`, `12h`
-- **Days**: `1d`, `1w`, `1M`
-
----
-
-## Request Example
-
-```bash
-curl -H "X-API-Key: YOUR_API_KEY" \
-     "https://api.tickdb.ai/v1/market/kline/latest?symbols=AAPL.US,00700.HK&interval=3m"
-```
-
-## Response Example
-
-```json
-{
-    "code": 0,
-    "message": "success",
-    "data": [
-        {
-            "symbol": "AAPL.US",
-            "interval": "3m",
-            "klines": [
-                {
-                    "time": 1768942620000,
-                    "open": "246.035",
-                    "high": "246.93",
-                    "low": "245.58",
-                    "close": "246.7",
-                    "volume": "3608863",
-                    "quote_volume": "889235872.74"
-                }
-            ]
-        },
-        {
-            "symbol": "00700.HK",
-            "interval": "3m",
-            "klines": [
-                {
-                    "time": 1768982400000,
-                    "open": "602",
-                    "high": "602",
-                    "low": "601.5",
-                    "close": "601.5",
-                    "volume": "35900",
-                    "quote_volume": "21599833.33"
-                }
-            ]
-        }
-    ]
-}
-```
+| Field | Description |
+|-------|-------------|
+| symbol | Trading Symbol |
+| interval | K-line period |
+| klines | K-line data array |
+| └─ time | K-line timestamp (milliseconds) |
+| └─ open | Opening price |
+| └─ high | Highest price |
+| └─ low | Lowest price |
+| └─ close | Closing price |
+| └─ volume | Trading volume |
+| └─ quote_volume | Trading amount |

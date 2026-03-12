@@ -5,19 +5,15 @@ description: 交易品種命名、時間戳和 K 線間隔規則。
 
 ## 交易品種命名規則
 
-- 加密貨幣：`BTCUSDT`
+- 外匯：`EURUSD`
+- 貴金屬：`XAUUSD`
+- 指數：`SPX`
 - 美股：`AAPL.US`
 - 港股：`700.HK`
 - A 股：`000001.SZ`（深圳）、`600000.SH`（上海）
-- 外匯：`EURUSD`
-- 貴金屬：`XAUUSD`
+- 加密貨幣：`BTCUSDT`
 
 ## 時間戳
 
 - 所有時間戳均為**毫秒 (ms)**
 - 基於 UTC
-
-## K 線間隔
-
-參考：
-**GET** `/v1/market/intervals/kline`

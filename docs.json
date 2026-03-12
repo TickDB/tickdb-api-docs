@@ -41,29 +41,44 @@
               {
                 "group": "入门指南",
                 "pages": [
-                  "zh-Hans/quick-start",
-                  "zh-Hans/authentication"
+                  "zh-Hans/quick-start"
                 ]
               },
               {
                 "group": "REST API",
                 "pages": [
-                  "zh-Hans/rest/api_symbols",
-                  "zh-Hans/rest/api_intervals",
-                  "zh-Hans/rest/api_kline",
-                  "zh-Hans/rest/api_kline_latest",
-                  "zh-Hans/rest/api_ticker",
-                  "zh-Hans/rest/api_depth",
-                  "zh-Hans/rest/api_trades"
+                  {
+                    "group": "行情数据（多市场通用）",
+                    "expanded": true,
+                    "pages": [
+                      "zh-Hans/rest/api_symbols",
+                      "zh-Hans/rest/api_ticker",
+                      "zh-Hans/rest/api_kline",
+                      "zh-Hans/rest/api_kline_latest",
+                      "zh-Hans/rest/api_depth",
+                      "zh-Hans/rest/api_trades",
+                      "zh-Hans/rest/api_intervals"
+                    ]
+                  },
+                  {
+                    "group": "股票市场（仅股票相关）",
+                    "expanded": true,
+                    "pages": [
+                      "zh-Hans/rest/api_intraday",
+                      "zh-Hans/rest/api_stock_info",
+                      "zh-Hans/rest/api_trading_sessions",
+                      "zh-Hans/rest/api_trade_days",
+                      "zh-Hans/rest/api_calc_index",
+                      "zh-Hans/rest/api_capital_flow"
+                    ]
+                  }
                 ]
               },
               {
                 "group": "WebSocket 文档",
                 "pages": [
-                  "zh-Hans/websocket/websocket_overview",
                   "zh-Hans/websocket/websocket_quickstart",
-                  "zh-Hans/websocket/websocket_subscribe",
-                  "zh-Hans/websocket/websocket_message_schema"
+                  "zh-Hans/websocket/websocket_subscribe"
                 ],
                 "asyncapi": {
                   "source": "/asyncapi.json",
@@ -96,29 +111,44 @@
               {
                 "group": "入門指南",
                 "pages": [
-                  "zh-Hant/quick-start",
-                  "zh-Hant/authentication"
+                  "zh-Hant/quick-start"
                 ]
               },
               {
                 "group": "REST API",
                 "pages": [
-                  "zh-Hant/rest/api_symbols",
-                  "zh-Hant/rest/api_intervals",
-                  "zh-Hant/rest/api_kline",
-                  "zh-Hant/rest/api_kline_latest",
-                  "zh-Hant/rest/api_ticker",
-                  "zh-Hant/rest/api_depth",
-                  "zh-Hant/rest/api_trades"
+                  {
+                    "group": "行情數據（多市場通用）",
+                    "expanded": true,
+                    "pages": [
+                      "zh-Hant/rest/api_symbols",
+                      "zh-Hant/rest/api_ticker",
+                      "zh-Hant/rest/api_kline",
+                      "zh-Hant/rest/api_kline_latest",
+                      "zh-Hant/rest/api_depth",
+                      "zh-Hant/rest/api_trades",
+                      "zh-Hant/rest/api_intervals"
+                    ]
+                  },
+                  {
+                    "group": "股票市場（僅股票相關）",
+                    "expanded": true,
+                    "pages": [
+                      "zh-Hant/rest/api_intraday",
+                      "zh-Hant/rest/api_stock_info",
+                      "zh-Hant/rest/api_trading_sessions",
+                      "zh-Hant/rest/api_trade_days",
+                      "zh-Hant/rest/api_calc_index",
+                      "zh-Hant/rest/api_capital_flow"
+                    ]
+                  }
                 ]
               },
               {
                 "group": "WebSocket 文檔",
                 "pages": [
-                  "zh-Hant/websocket/websocket_overview",
                   "zh-Hant/websocket/websocket_quickstart",
-                  "zh-Hant/websocket/websocket_subscribe",
-                  "zh-Hant/websocket/websocket_message_schema"
+                  "zh-Hant/websocket/websocket_subscribe"
                 ],
                 "asyncapi": {
                   "source": "/asyncapi.json",
@@ -151,29 +181,44 @@
               {
                 "group": "Getting Started",
                 "pages": [
-                  "en/quick-start",
-                  "en/authentication"
+                  "en/quick-start"
                 ]
               },
               {
                 "group": "REST API",
                 "pages": [
-                  "en/rest/api_symbols",
-                  "en/rest/api_intervals",
-                  "en/rest/api_kline",
-                  "en/rest/api_kline_latest",
-                  "en/rest/api_ticker",
-                  "en/rest/api_depth",
-                  "en/rest/api_trades"
+                  {
+                    "group": "Market Data (Multi-Market)",
+                    "expanded": true,
+                    "pages": [
+                      "en/rest/api_symbols",
+                      "en/rest/api_ticker",
+                      "en/rest/api_kline",
+                      "en/rest/api_kline_latest",
+                      "en/rest/api_depth",
+                      "en/rest/api_trades",
+                      "en/rest/api_intervals"
+                    ]
+                  },
+                  {
+                    "group": "Stock Market (Stocks Only)",
+                    "expanded": true,
+                    "pages": [
+                      "en/rest/api_intraday",
+                      "en/rest/api_stock_info",
+                      "en/rest/api_trading_sessions",
+                      "en/rest/api_trade_days",
+                      "en/rest/api_calc_index",
+                      "en/rest/api_capital_flow"
+                    ]
+                  }
                 ]
               },
               {
                 "group": "WebSocket Docs",
                 "pages": [
-                  "en/websocket/websocket_overview",
                   "en/websocket/websocket_quickstart",
-                  "en/websocket/websocket_subscribe",
-                  "en/websocket/websocket_message_schema"
+                  "en/websocket/websocket_subscribe"
                 ],
                 "asyncapi": {
                   "source": "/asyncapi.json",

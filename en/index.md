@@ -9,7 +9,7 @@ TickDB is a **developer-first unified real-time market data API** that provides 
 
 ---
 
-## 🎯 What is TickDB?
+## What is TickDB?
 
 TickDB is built for developers who **require reliable, low-latency, and production-grade** market data.
 
@@ -20,23 +20,23 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **🔌 Unified Access**  
+- **Unified Access**  
   One API covering multiple markets and asset classes
 
-- **⚡ Real-time Data**  
+- **Real-time Data**  
   WebSocket-based streaming suitable for real-time market applications
 
-- **🌍 Multi-Market Support**  
+- **Multi-Market Support**  
   Forex, precious metals, indices, US stocks, HK stocks, A-shares, and crypto
 
-- **🛠️ Developer-Friendly**  
+- **Developer-Friendly**  
   REST APIs and WebSocket with clear interfaces, complete documentation, and practical examples
 
 ---
 
-## 🏗️ Typical Use Cases
+## Typical Use Cases
 
 - **Quantitative Trading**  
   Real-time market data source for algorithmic and strategy systems
@@ -55,30 +55,37 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 
 ---
 
-## 📚 Documentation Sections
+## Documentation Sections
 
 ### Getting Started
 - **Quick Start** - Get up and running in minutes
-- **Authentication** - API key setup and usage
 
 ### REST API
-- **Available Symbols** - Query supported trading symbols
-- **Kline Intervals** - Available time intervals
-- **Kline (Candlesticks)** - Historical candlestick data
-- **Latest Kline** - Current period kline data
-- **Market Ticker** - Real-time ticker snapshots
-- **Order Book Depth** - Real-time order book
-- **Recent Trades** - Latest trade executions
 
-### WebSocket
-- **WebSocket Overview** - Connection and authentication
-- **Quick Start** - Get started with WebSocket
-- **Subscribe & Unsubscribe** - Channel subscription
-- **Message Schema** - Data format specifications
+#### Market Data (Multi-Market)
+- **Available Symbols** - Query supported trading symbols
+- **Ticker Snapshot** - Real-time market ticker data
+- **Historical K-Line** - Historical candlestick data for completed periods
+- **Real-time K-Line** - Current period K-line data being formed
+- **Order Book** - Real-time order book depth data
+- **Recent Trades** - Latest trade executions
+- **Kline Periods** - Supported K-line period list
+
+#### Stock Market (Stocks Only)
+- **Intraday Data** - Intraday time-series data for stocks
+- **Stock Information** - Detailed stock information and fundamentals
+- **Trading Sessions** - Market trading session information
+- **Trading Calendar** - Trading days list query
+- **Market Metrics** - Comprehensive market metrics data
+- **Capital Flow** - Stock capital flow data
+
+### WebSocket Docs
+- **Quick Start** - WebSocket connection and subscription guide
+- **Channels & Messages** - Channel subscription and message formats
 
 ### Reference
 - **Data Specification** - Symbol naming and formats
-- **Errors** - Error codes and handling
+- **Error Codes** - Error codes and handling
 
 ---
 
