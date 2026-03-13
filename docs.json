@@ -41,14 +41,15 @@
               {
                 "group": "入门指南",
                 "pages": [
-                  "zh-Hans/quick-start"
+                  "zh-Hans/quick-start",
+                  "zh-Hans/release-notes"
                 ]
               },
               {
                 "group": "REST API",
                 "pages": [
                   {
-                    "group": "行情数据（多市场通用）",
+                    "group": "通用行情接口",
                     "expanded": true,
                     "pages": [
                       "zh-Hans/rest/api_symbols",
@@ -61,7 +62,7 @@
                     ]
                   },
                   {
-                    "group": "股票市场（仅股票相关）",
+                    "group": "股票市场接口",
                     "expanded": true,
                     "pages": [
                       "zh-Hans/rest/api_intraday",
@@ -111,14 +112,15 @@
               {
                 "group": "入門指南",
                 "pages": [
-                  "zh-Hant/quick-start"
+                  "zh-Hant/quick-start",
+                  "zh-Hant/release-notes"
                 ]
               },
               {
                 "group": "REST API",
                 "pages": [
                   {
-                    "group": "行情數據（多市場通用）",
+                    "group": "通用行情接口",
                     "expanded": true,
                     "pages": [
                       "zh-Hant/rest/api_symbols",
@@ -131,7 +133,7 @@
                     ]
                   },
                   {
-                    "group": "股票市場（僅股票相關）",
+                    "group": "股票市場接口",
                     "expanded": true,
                     "pages": [
                       "zh-Hant/rest/api_intraday",
@@ -181,14 +183,15 @@
               {
                 "group": "Getting Started",
                 "pages": [
-                  "en/quick-start"
+                  "en/quick-start",
+                  "en/release-notes"
                 ]
               },
               {
                 "group": "REST API",
                 "pages": [
                   {
-                    "group": "Market Data (Multi-Market)",
+                    "group": "Market Data APIs",
                     "expanded": true,
                     "pages": [
                       "en/rest/api_symbols",
@@ -201,7 +204,7 @@
                     ]
                   },
                   {
-                    "group": "Stock Market (Stocks Only)",
+                    "group": "Stock Market APIs",
                     "expanded": true,
                     "pages": [
                       "en/rest/api_intraday",
@@ -237,25 +240,7 @@
         ]
       }
     ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Dashboard",
-          "href": "https://tickdb.ai",
-          "icon": "chart-line"
-        },
-        {
-          "anchor": "Telegram",
-          "icon": "send",
-          "href": "https://t.me/TickDB_Support"
-        },
-        {
-          "anchor": "Support",
-          "href": "mailto:support@tickdb.ai",
-          "icon": "envelope"
-        }
-      ]
-    }
+    "global": {}
   },
   "logo": {
     "light": "/logo.png",
@@ -265,13 +250,17 @@
   "navbar": {
     "links": [
       {
+        "label": "Telegram",
+        "href": "https://t.me/TickDB_Support"
+      },
+      {
         "label": "Support",
         "href": "mailto:support@tickdb.ai"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Dashboard",
+      "label": "Get API Key",
       "href": "https://tickdb.ai"
     }
   }

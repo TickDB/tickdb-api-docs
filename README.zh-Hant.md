@@ -5,6 +5,7 @@
 
 🌐 **官網**：https://tickdb.ai  
 📘 **線上文件**：https://docs.tickdb.ai  
+📝 **更新日誌**：https://docs.tickdb.ai/zh-Hant/release-notes  
 💻 **GitHub**：https://github.com/TickDB  
 
 ---
@@ -48,30 +49,17 @@ npm run dev
 ├── openapi.yaml           # REST API 規範（OpenAPI 3.0）
 ├── package.json           # Node.js 相依套件與腳本
 ├── logo.png               # TickDB 標誌
-├── en/                    # 英文文件
+├── zh-Hant/               # 繁體中文文件
 │   ├── index.md
+│   ├── getting-started.md
 │   ├── quick-start.md
-│   ├── authentication.md
+│   ├── release-notes.md
 │   ├── data-specification.md
 │   ├── errors.md
 │   ├── rest/
 │   └── websocket/
 ├── zh-Hans/               # 簡體中文文件
-│   ├── index.md
-│   ├── quick-start.md
-│   ├── authentication.md
-│   ├── data-specification.md
-│   ├── errors.md
-│   ├── rest/
-│   └── websocket/
-└── zh-Hant/               # 繁體中文文件
-    ├── index.md
-    ├── quick-start.md
-    ├── authentication.md
-    ├── data-specification.md
-    ├── errors.md
-    ├── rest/
-    └── websocket/
+└── en/                    # 英文文件
 ```
 
 ## 🌍 多語言支援

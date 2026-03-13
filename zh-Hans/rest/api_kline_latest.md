@@ -28,7 +28,7 @@ openapi: GET /v1/market/kline/latest
 | 参数名 | 是否必须 | 描述 |
 |--------|----------|------|
 | symbols | 是 | 交易产品代码，多个用逗号分隔，例如：AAPL.US,00700.HK |
-| interval | 是 | K线周期，可选值：1m, 3m, 5m, 15m, 30m, 1h, 4h, 12h, 1d, 1w, 1M |
+| interval | 是 | K线周期，可选值：1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
 
 ## 返回字段说明
 

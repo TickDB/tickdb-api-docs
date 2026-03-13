@@ -27,7 +27,7 @@ openapi: GET /v1/market/kline
 | 參數名 | 是否必須 | 描述 |
 |--------|----------|------|
 | symbol | 是 | 交易產品代碼 |
-| interval | 是 | K線週期，可選值：1m, 5m, 15m, 30m, 1h, 4h, 12h, 1d, 1w, 1M |
+| interval | 是 | K線週期，可選值：1m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
 | limit | 否 | 返回記錄數，默認100，最大1000 |
 | start_time | 否 | 開始時間戳（毫秒） |
 | end_time | 否 | 結束時間戳（毫秒） |

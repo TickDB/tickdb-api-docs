@@ -4,6 +4,7 @@ Official TickDB API documentation repository. One unified connection for real-ti
 
 🌐 **Website**: https://tickdb.ai  
 📘 **Live Docs**: https://docs.tickdb.ai  
+📝 **Changelog**: https://docs.tickdb.ai/en/release-notes  
 💻 **GitHub**: https://github.com/TickDB  
 
 ---
@@ -49,28 +50,15 @@ Documentation is automatically deployed to Mintlify whenever changes are pushed 
 ├── logo.png               # TickDB logo
 ├── en/                    # English documentation
 │   ├── index.md
+│   ├── getting-started.md
 │   ├── quick-start.md
-│   ├── authentication.md
+│   ├── release-notes.md
 │   ├── data-specification.md
 │   ├── errors.md
 │   ├── rest/
 │   └── websocket/
 ├── zh-Hans/               # Simplified Chinese documentation
-│   ├── index.md
-│   ├── quick-start.md
-│   ├── authentication.md
-│   ├── data-specification.md
-│   ├── errors.md
-│   ├── rest/
-│   └── websocket/
 └── zh-Hant/               # Traditional Chinese documentation
-    ├── index.md
-    ├── quick-start.md
-    ├── authentication.md
-    ├── data-specification.md
-    ├── errors.md
-    ├── rest/
-    └── websocket/
 ```
 
 ## 🌍 Multi-Language Support

@@ -34,6 +34,19 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 - **Developer-Friendly**  
   REST APIs and WebSocket with clear interfaces, complete documentation, and practical examples
 
+- **AI-Friendly**  
+  Standardized [SKILL file](https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/blob/main/SKILL/SKILL.md) enabling AI assistants to understand and invoke all APIs automatically
+
+---
+
+## AI Integration
+
+TickDB provides a standardized [SKILL file](https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/blob/main/SKILL/SKILL.md) for AI assistant integration.
+
+Example: Enter the following prompt in your AI assistant to get started:
+
+> Read https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/blob/main/SKILL/SKILL.md and install it as a Skill (name: tickdb-market-data), then query the real-time gold price.
+
 ---
 
 ## Typical Use Cases
@@ -59,10 +72,11 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 
 ### Getting Started
 - **Quick Start** - Get up and running in minutes
+- **Changelog** - Version update history
 
 ### REST API
 
-#### Market Data (Multi-Market)
+#### Market Data APIs
 - **Available Symbols** - Query supported trading symbols
 - **Ticker Snapshot** - Real-time market ticker data
 - **Historical K-Line** - Historical candlestick data for completed periods
@@ -71,7 +85,7 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 - **Recent Trades** - Latest trade executions
 - **Kline Periods** - Supported K-line period list
 
-#### Stock Market (Stocks Only)
+#### Stock Market APIs
 - **Intraday Data** - Intraday time-series data for stocks
 - **Stock Information** - Detailed stock information and fundamentals
 - **Trading Sessions** - Market trading session information
@@ -89,4 +103,4 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 
 ---
 
-**Docs Version**: v1.0.0
+**Docs Version**: v1.0.1
