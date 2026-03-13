@@ -59,10 +59,11 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 
 ### Getting Started
 - **Quick Start** - Get up and running in minutes
+- **Changelog** - Version update history
 
 ### REST API
 
-#### Market Data (Multi-Market)
+#### Market Data APIs
 - **Available Symbols** - Query supported trading symbols
 - **Ticker Snapshot** - Real-time market ticker data
 - **Historical K-Line** - Historical candlestick data for completed periods
@@ -71,7 +72,7 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 - **Recent Trades** - Latest trade executions
 - **Kline Periods** - Supported K-line period list
 
-#### Stock Market (Stocks Only)
+#### Stock Market APIs
 - **Intraday Data** - Intraday time-series data for stocks
 - **Stock Information** - Detailed stock information and fundamentals
 - **Trading Sessions** - Market trading session information
@@ -89,4 +90,4 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 
 ---
 
-**Docs Version**: v1.0.0
+**Docs Version**: v1.0.1

@@ -2,7 +2,7 @@
   "asyncapi": "3.0.0",
   "info": {
     "title": "TickDB WebSocket API",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Unified real-time market data WebSocket API for Forex, indices, US stocks, HK stocks, A-shares, and Crypto.",
     "contact": {
       "email": "support@tickdb.ai"

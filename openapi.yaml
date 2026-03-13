@@ -3,7 +3,7 @@ info:
   title: TickDB API
   description: Unified real-time market data API — one connection for Forex, indices,
     US stocks, HK stocks, A-shares, and Crypto via REST and WebSocket.
-  version: 1.0.0
+  version: 1.0.1
   contact:
     email: support@tickdb.ai
 servers:
