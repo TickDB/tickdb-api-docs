@@ -1,12 +1,17 @@
 ---
 title: 产品查询
-description: 查询 TickDB 支持的产品，覆盖外汇、指数、美股、港股、A股、加密货币等市场，共计超过 27,000 个产品，且持续增加中。
+description: 查询 TickDB 支持的产品，覆盖外汇、指数、美股、港股、A股、加密货币等市场，共计超过 35,000 个产品，且持续增加中。
 openapi: GET /v1/symbols/available
 ---
 
 ## 注意事项
 - 市场代码不区分大小写
 - 产品命名规则请参阅数据规范文档
+- 除 API 查询外，您也可以登录 [TickDB 官网](https://tickdb.ai) 用户中心，在产品管理页面直接浏览和搜索所有支持的产品
+
+<Frame>
+  <img src="/symbols.png" alt="TickDB 用户中心 - 产品查询" />
+</Frame>
 
 ## 市场与产品类型
 
@@ -17,7 +22,7 @@ openapi: GET /v1/symbols/available
 | GLOBAL | forex | 外汇货币对、贵金属 | 1,200+ |
 | GLOBAL | indices | 市场指数 | 12,700+ |
 | GLOBAL | crypto | 加密货币交易对 | 800+ |
-| US | stock | 美国股票 | 4,000+ |
+| US | stock | 美国股票 | 12,000+ |
 | HK | stock | 香港股票 | 2,800+ |
 | CN | stock | A股 | 6,000+ |
 
