@@ -5,15 +5,15 @@ openapi: GET /v1/market/trades
 ---
 
 ## 注意事項
-- 本接口不支持美股和A股市場
 - side：買入（buy）/ 賣出（sell）
 - 時間戳單位為毫秒（UTC）
 
 ## 支持的市場
 
-**港股**、**加密貨幣**
+**美股**、**港股**、**加密貨幣**
 
 示例：
+- 美股：AAPL.US、TSLA.US、MSFT.US
 - 港股：700.HK、9988.HK、3690.HK
 - 加密貨幣：BTCUSDT、ETHUSDT、ADAUSDT
 

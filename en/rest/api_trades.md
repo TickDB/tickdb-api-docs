@@ -5,15 +5,15 @@ openapi: GET /v1/market/trades
 ---
 
 ## Notes
-- This endpoint does not support US Stocks and A-shares (CN market)
 - side: buy / sell
 - timestamp in milliseconds (UTC)
 
 ## Supported Markets
 
-**HK Stocks**, **Crypto**
+**US Stocks**, **HK Stocks**, **Crypto**
 
 Examples:
+- US Stocks: AAPL.US, TSLA.US, MSFT.US
 - HK Stocks: 700.HK, 9988.HK, 3690.HK
 - Crypto: BTCUSDT, ETHUSDT, ADAUSDT
 

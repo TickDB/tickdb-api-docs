@@ -242,7 +242,7 @@ paths:
   /v1/market/trades:
     get:
       summary: Recent Trades
-      description: Get latest trade prints for a symbol. Note - This endpoint does not support US Stocks and A-shares (CN market).
+      description: Get latest trade prints for a symbol. Note - This endpoint does not support A-shares (CN market).
       parameters:
         - name: symbol
           in: query

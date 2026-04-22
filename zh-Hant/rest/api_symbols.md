@@ -1,6 +1,6 @@
 ---
 title: 產品查詢
-description: 查詢 TickDB 支持的產品，涵蓋外匯、指數、美股、港股、A股、加密貨幣等市場，共計超過 35,000 個產品，且持續增加中。
+description: 查詢 TickDB 支持的產品，涵蓋外匯、指數、美股、港股、A股、加密貨幣等市場，共計超過 37,000 個產品，且持續增加中。
 openapi: GET /v1/symbols/available
 ---
 
@@ -20,10 +20,10 @@ openapi: GET /v1/symbols/available
 | market | type | 說明 | 產品量級 |
 |--------|------|------|----------|
 | GLOBAL | forex | 外匯貨幣對、貴金屬 | 1,200+ |
-| GLOBAL | indices | 市場指數 | 12,700+ |
+| GLOBAL | indices | 市場指數 | 12,900+ |
 | GLOBAL | crypto | 加密貨幣交易對 | 800+ |
-| US | stock | 美國股票 | 12,000+ |
-| HK | stock | 香港股票 | 2,800+ |
+| US | stock | 美國股票 | 12,400+ |
+| HK | stock | 香港股票 | 4,300+ |
 | CN | stock | A股 | 6,000+ |
 
 - `market` 按具體市場過濾，如 `market=CN` 僅返回A股

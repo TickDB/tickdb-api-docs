@@ -1,6 +1,6 @@
 ---
 title: Symbol Query
-description: Query products supported by TickDB, covering forex, indices, US stocks, HK stocks, A-shares, and crypto markets with over 35,000 products and growing.
+description: Query products supported by TickDB, covering forex, indices, US stocks, HK stocks, A-shares, and crypto markets with over 37,000 products and growing.
 openapi: GET /v1/symbols/available
 ---
 
@@ -20,10 +20,10 @@ Use `market` and `type` parameters to filter products flexibly. They can be used
 | market | type | Description | Volume |
 |--------|------|-------------|--------|
 | GLOBAL | forex | Forex pairs & precious metals | 1,200+ |
-| GLOBAL | indices | Market indices | 12,700+ |
+| GLOBAL | indices | Market indices | 12,900+ |
 | GLOBAL | crypto | Cryptocurrency pairs | 800+ |
-| US | stock | US stocks | 12,000+ |
-| HK | stock | Hong Kong stocks | 2,800+ |
+| US | stock | US stocks | 12,400+ |
+| HK | stock | Hong Kong stocks | 4,300+ |
 | CN | stock | A-shares | 6,000+ |
 
 - `market` filters by specific market, e.g. `market=CN` returns only A-shares

@@ -42,6 +42,7 @@
                 "group": "入门指南",
                 "pages": [
                   "zh-Hans/quick-start",
+                  "zh-Hans/pricing",
                   "zh-Hans/release-notes"
                 ]
               },
@@ -113,6 +114,7 @@
                 "group": "入門指南",
                 "pages": [
                   "zh-Hant/quick-start",
+                  "zh-Hant/pricing",
                   "zh-Hant/release-notes"
                 ]
               },
@@ -184,6 +186,7 @@
                 "group": "Getting Started",
                 "pages": [
                   "en/quick-start",
+                  "en/pricing",
                   "en/release-notes"
                 ]
               },
