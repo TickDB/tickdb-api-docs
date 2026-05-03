@@ -35,17 +35,66 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
   REST APIs and WebSocket with clear interfaces, complete documentation, and practical examples
 
 - **AI-Friendly**  
-  Standardized [SKILL file](https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/blob/main/SKILL/SKILL.md) enabling AI assistants to understand and invoke all APIs automatically
+  Three tiers of AI integration — Skill, MCP, and CLI — covering everything from chat to deep automation
 
 ---
 
 ## AI Integration
 
-TickDB provides a standardized [SKILL file](https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/blob/main/SKILL/SKILL.md) for AI assistant integration.
+TickDB offers three tiers of AI-native access, from zero-config chat to terminal automation.
 
-Example: Enter the following prompt in your AI assistant to get started:
+### Skill — Chat-ready, Zero Config
 
-> Read https://github.com/TickDB/tickdb-unified-realtime-marketdata-api/blob/main/SKILL/SKILL.md and install it as a Skill (name: tickdb-market-data), then query the real-time gold price.
+Install via [ClawHub](https://clawhub.com) and use TickDB market data with any LLM instantly.
+
+```bash
+npx clawhub@latest install tickdb-market-data
+```
+
+- Zero signup, auto trial
+- 72 core symbols free
+- Works with any LLM
+
+### MCP — Permanent Integration, One-time Setup
+
+Connect via Hosted MCP Server, compatible with Claude Code, Cursor, Kiro, Zed, and all MCP clients.
+
+Configuration example (Claude, path: `~/.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "tickdb": {
+      "type": "http",
+      "url": "https://mcp.tickdb.ai/",
+      "headers": {
+        "X-TickDB-Key": "<YOUR_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+- Hosted at mcp.tickdb.ai, no self-deployment needed
+- HTTPS + Header authentication
+- Compatible with all MCP protocol clients
+- 13 tools available, mapping 1:1 to REST API endpoints
+
+### CLI — Terminal & AI Agent Ready
+
+Install globally to query market data from the terminal, also suitable for Agent bash-tool invocation.
+
+```bash
+npm install -g tickdb
+tickdb config set-key <YOUR_KEY>
+tickdb ticker BTCUSDT,XAUUSD,AAPL.US
+```
+
+- JSON / table dual output
+- 16 native commands
+- Bash-tool friendly, ideal for Agent workflows
+
+For more details, visit [TickDB AI Access](https://tickdb.ai/ai-tools).
 
 ---
 
