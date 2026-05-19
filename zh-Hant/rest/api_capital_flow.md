@@ -22,3 +22,4 @@ openapi: GET /v1/market/capital-flow
 | 參數名 | 是否必須 | 描述 |
 |--------|----------|------|
 | symbol | 是 | 股票代碼 |
+| type | 否 | 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex` |

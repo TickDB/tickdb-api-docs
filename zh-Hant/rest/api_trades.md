@@ -23,6 +23,7 @@ openapi: GET /v1/market/trades
 |--------|----------|------|
 | symbol | 是 | 交易產品代碼 |
 | limit | 否 | 返回成交記錄數，默認50，最大200 |
+| type | 否 | 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex` |
 
 ## 返回字段說明
 

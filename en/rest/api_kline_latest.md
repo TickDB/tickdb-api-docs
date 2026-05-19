@@ -29,6 +29,7 @@ Examples:
 |-----------|----------|-------------|
 | symbols | Yes | Trading symbol codes, comma-separated, e.g., AAPL.US,00700.HK |
 | interval | Yes | K-line period, options: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
+| type | No | Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex` |
 
 ## Response Fields
 

@@ -22,6 +22,7 @@ Examples:
 | Parameter | Required | Description |
 |-----------|----------|-------------|
 | symbol | Yes | Stock symbol code |
+| type | No | Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex` |
 
 ## Response Fields
 

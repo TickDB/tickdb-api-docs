@@ -19,12 +19,13 @@ description: WebSocket 频道、订阅命令和消息格式。
 
 ### 订阅
 
-```json
+```jsonc
 {
   "cmd": "subscribe",
   "data": {
     "channel": "ticker",
-    "symbols": ["AAPL.US", "BTCUSDT"]
+    "symbols": ["AAPL.US", "BTCUSDT"],
+    "type": "stock" // 可选，收到 AMBIGUOUS_SYMBOL 错误时按提示传入
   }
 }
 ```
@@ -52,11 +53,8 @@ ticker 消息根据不同市场类型返回不同的字段。
   "cmd": "ticker",
   "data": {
     "symbol": "SPX",
-    "last_price": "6703.59",
-    "ask_price": "0.00",
-    "bid_price": "0.00",
-    "type": "index",
-    "timestamp": 1773331355037
+    "last_price": "7342.86",
+    "timestamp": 1779204386000
   }
 }
 ```
@@ -175,11 +173,10 @@ A股：
 | symbol | string | 交易品种 | 全部 |
 | last_price | string | 最新成交价 | 全部 |
 | timestamp | int | 服务器时间戳（毫秒） | 全部 |
-| ask_price | string | 卖价 | 外汇、贵金属、指数 |
-| bid_price | string | 买价 | 外汇、贵金属、指数 |
+| ask_price | string | 卖价 | 外汇、贵金属 |
+| bid_price | string | 买价 | 外汇、贵金属 |
 | spread | string | 买卖价差 | 外汇、贵金属 |
 | exchange | int | 交易所代码 | 外汇、贵金属 |
-| type | string | 类型标识（如 "index"） | 指数 |
 | volume_24h | string | 24小时成交量 | 股票、加密货币 |
 | high_24h | string | 24小时最高价 | 股票、加密货币 |
 | low_24h | string | 24小时最低价 | 股票、加密货币 |
@@ -193,12 +190,13 @@ A股：
 
 ### 订阅
 
-```json
+```jsonc
 {
   "cmd": "subscribe",
   "data": {
     "channel": "depth",
-    "symbols": ["AAPL.US", "BTCUSDT"]
+    "symbols": ["AAPL.US", "BTCUSDT"],
+    "type": "stock" // 可选，收到 AMBIGUOUS_SYMBOL 错误时按提示传入
   }
 }
 ```
@@ -254,12 +252,13 @@ A股：
 
 ### 订阅
 
-```json
+```jsonc
 {
   "cmd": "subscribe",
   "data": {
     "channel": "trade",
-    "symbols": ["700.HK", "BTCUSDT"]
+    "symbols": ["700.HK", "BTCUSDT"],
+    "type": "stock" // 可选，收到 AMBIGUOUS_SYMBOL 错误时按提示传入
   }
 }
 ```

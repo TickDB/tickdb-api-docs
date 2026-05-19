@@ -24,10 +24,13 @@ description: WebSocket 頻道、訂閱命令和消息格式。
   "cmd": "subscribe",
   "data": {
     "channel": "ticker",
-    "symbols": ["AAPL.US", "BTCUSDT"]
+    "symbols": ["AAPL.US", "BTCUSDT"],
+    "type": "stock"
   }
 }
 ```
+
+> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
 
 ### 取消訂閱
 
@@ -52,11 +55,8 @@ ticker 消息根據不同市場類型返回不同的字段。
   "cmd": "ticker",
   "data": {
     "symbol": "SPX",
-    "last_price": "6703.59",
-    "ask_price": "0.00",
-    "bid_price": "0.00",
-    "type": "index",
-    "timestamp": 1773331355037
+    "last_price": "7342.86",
+    "timestamp": 1779204386000
   }
 }
 ```
@@ -175,11 +175,10 @@ A股：
 | symbol | string | 交易品種 | 全部 |
 | last_price | string | 最新成交價 | 全部 |
 | timestamp | int | 服務器時間戳（毫秒） | 全部 |
-| ask_price | string | 賣價 | 外匯、貴金屬、指數 |
-| bid_price | string | 買價 | 外匯、貴金屬、指數 |
+| ask_price | string | 賣價 | 外匯、貴金屬 |
+| bid_price | string | 買價 | 外匯、貴金屬 |
 | spread | string | 買賣價差 | 外匯、貴金屬 |
 | exchange | int | 交易所代碼 | 外匯、貴金屬 |
-| type | string | 類型標識（如 "index"） | 指數 |
 | volume_24h | string | 24小時成交量 | 股票、加密貨幣 |
 | high_24h | string | 24小時最高價 | 股票、加密貨幣 |
 | low_24h | string | 24小時最低價 | 股票、加密貨幣 |
@@ -198,10 +197,13 @@ A股：
   "cmd": "subscribe",
   "data": {
     "channel": "depth",
-    "symbols": ["AAPL.US", "BTCUSDT"]
+    "symbols": ["AAPL.US", "BTCUSDT"],
+    "type": "stock"
   }
 }
 ```
+
+> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
 
 ### 取消訂閱
 
@@ -259,10 +261,13 @@ A股：
   "cmd": "subscribe",
   "data": {
     "channel": "trade",
-    "symbols": ["700.HK", "BTCUSDT"]
+    "symbols": ["700.HK", "BTCUSDT"],
+    "type": "stock"
   }
 }
 ```
+
+> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
 
 ### 取消訂閱
 

@@ -25,6 +25,7 @@ Examples:
 |-----------|----------|-------------|
 | symbol | Yes | Trading symbol code |
 | limit | No | Depth levels, default 10, max 50 |
+| type | No | Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex` |
 
 ## Response Fields
 

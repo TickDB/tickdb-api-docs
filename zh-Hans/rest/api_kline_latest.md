@@ -29,6 +29,7 @@ openapi: GET /v1/market/kline/latest
 |--------|----------|------|
 | symbols | 是 | 交易产品代码，多个用逗号分隔，例如：AAPL.US,00700.HK |
 | interval | 是 | K线周期，可选值：1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
+| type | 否 | 产品类型，可选。代码无歧义时无需传递；若返回 `AMBIGUOUS_SYMBOL` 错误，按提示传入对应值即可。可选值：`stock`、`indices`、`crypto`、`forex` |
 
 ## 返回字段说明
 

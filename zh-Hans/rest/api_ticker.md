@@ -26,6 +26,7 @@ openapi: GET /v1/market/ticker
 | 参数名 | 是否必须 | 描述 |
 |--------|----------|------|
 | symbols | 是 | 交易产品代码，多个用逗号分隔，最多50个 |
+| type | 否 | 产品类型，可选。代码无歧义时无需传递；若返回 `AMBIGUOUS_SYMBOL` 错误，按提示传入对应值即可。可选值：`stock`、`indices`、`crypto`、`forex` |
 
 ## 返回字段说明
 

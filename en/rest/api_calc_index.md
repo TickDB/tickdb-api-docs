@@ -13,6 +13,13 @@ Examples:
 - HK Stocks: 700.HK, 9988.HK, 3690.HK
 - A-Shares: 000001.SH, 000001.SZ
 
+## Request Parameters
+
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| symbols | Yes | Stock symbol codes, comma-separated, max 50 |
+| type | No | Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex` |
+
 ## Response Fields
 
 | Field Name | Description |

@@ -31,6 +31,7 @@ openapi: GET /v1/market/kline
 | limit | 否 | 返回記錄數，默認100，最大1000 |
 | start_time | 否 | 開始時間戳（毫秒） |
 | end_time | 否 | 結束時間戳（毫秒） |
+| type | 否 | 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex` |
 
 ## 返回字段說明
 

@@ -31,6 +31,14 @@ paths:
             type: string
             default: "700.HK,AAPL.US"
             example: "700.HK,AAPL.US"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response
@@ -128,6 +136,14 @@ paths:
           schema:
             type: integer
             example: 1703209856789
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response
@@ -200,6 +216,14 @@ paths:
             minimum: 1
             maximum: 50
             example: 20
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response
@@ -261,6 +285,14 @@ paths:
             minimum: 1
             maximum: 200
             example: 100
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response
@@ -445,6 +477,14 @@ paths:
             enum: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1w", "1M"]
             default: "3m"
             example: "3m"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response
@@ -579,6 +619,14 @@ paths:
             type: string
             default: "700.HK,9988.HK"
             example: "700.HK,9988.HK"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response
@@ -771,6 +819,14 @@ paths:
             type: string
             default: "700.HK,AAPL.US,000001.SZ"
             example: "700.HK,AAPL.US,000001.SZ"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response
@@ -878,6 +934,14 @@ paths:
             type: string
             default: "700.HK"
             example: "700.HK,AAPL.US"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response
@@ -969,6 +1033,14 @@ paths:
             type: string
             example: "700.HK"
             default: "700.HK"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
       responses:
         '200':
           description: Successful response

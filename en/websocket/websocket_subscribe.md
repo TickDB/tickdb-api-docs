@@ -24,10 +24,13 @@ This page documents WebSocket channels, how to subscribe/unsubscribe, and the me
   "cmd": "subscribe",
   "data": {
     "channel": "ticker",
-    "symbols": ["AAPL.US", "BTCUSDT"]
+    "symbols": ["AAPL.US", "BTCUSDT"],
+    "type": "stock"
   }
 }
 ```
+
+> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`
 
 ### Unsubscribe
 
@@ -52,11 +55,8 @@ The ticker message returns different fields based on market type.
   "cmd": "ticker",
   "data": {
     "symbol": "SPX",
-    "last_price": "6703.59",
-    "ask_price": "0.00",
-    "bid_price": "0.00",
-    "type": "index",
-    "timestamp": 1773331355037
+    "last_price": "7342.86",
+    "timestamp": 1779204386000
   }
 }
 ```
@@ -175,11 +175,10 @@ A-Shares:
 | symbol | string | Trading symbol | All |
 | last_price | string | Last traded price | All |
 | timestamp | int | Server timestamp in ms | All |
-| ask_price | string | Ask price | Forex, Metals, Index |
-| bid_price | string | Bid price | Forex, Metals, Index |
+| ask_price | string | Ask price | Forex, Metals |
+| bid_price | string | Bid price | Forex, Metals |
 | spread | string | Bid-ask spread | Forex, Metals |
 | exchange | int | Exchange code | Forex, Metals |
-| type | string | Type identifier (e.g., "index") | Index |
 | volume_24h | string | 24-hour trading volume | Stocks, Crypto |
 | high_24h | string | 24-hour high price | Stocks, Crypto |
 | low_24h | string | 24-hour low price | Stocks, Crypto |
@@ -198,10 +197,13 @@ A-Shares:
   "cmd": "subscribe",
   "data": {
     "channel": "depth",
-    "symbols": ["AAPL.US", "BTCUSDT"]
+    "symbols": ["AAPL.US", "BTCUSDT"],
+    "type": "stock"
   }
 }
 ```
+
+> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`
 
 ### Unsubscribe
 
@@ -259,10 +261,13 @@ A-Shares:
   "cmd": "subscribe",
   "data": {
     "channel": "trade",
-    "symbols": ["700.HK", "BTCUSDT"]
+    "symbols": ["700.HK", "BTCUSDT"],
+    "type": "stock"
   }
 }
 ```
+
+> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`
 
 ### Unsubscribe
 

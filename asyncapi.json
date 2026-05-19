@@ -78,6 +78,16 @@
                       "BTCUSDT"
                     ],
                     "description": "List of trading symbols to subscribe/unsubscribe"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex"
+                    ],
+                    "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
                   }
                 },
                 "required": [
@@ -188,6 +198,16 @@
                       "BTCUSDT"
                     ],
                     "description": "List of trading symbols to subscribe/unsubscribe"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex"
+                    ],
+                    "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
                   }
                 },
                 "required": [
@@ -338,6 +358,16 @@
                       "BTCUSDT"
                     ],
                     "description": "List of trading symbols to subscribe/unsubscribe"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex"
+                    ],
+                    "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
                   }
                 },
                 "required": [
