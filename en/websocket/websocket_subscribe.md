@@ -97,24 +97,55 @@ The ticker message returns different fields based on market type.
 
 #### Stocks
 
-```json
+US Stocks:
+
+```jsonc
 {
   "cmd": "ticker",
   "data": {
-    "symbol": "TSLA.US",
-    "last_price": "400.67",
-    "timestamp": 1773335203000
+    "symbol": "NVDA",
+    "last_price": "221.25",
+    "volume_24h": "462724",
+    "high_24h": "223.44",
+    "low_24h": "220.04",
+    // Only present outside regular trading hours
+    // Values: pre_market, post_market, overnight
+    "trade_session": "overnight",
+    "timestamp": 1779171600000
   }
 }
 ```
+
+HK Stocks:
 
 ```json
 {
   "cmd": "ticker",
   "data": {
-    "symbol": "600519.SH",
-    "last_price": "1401",
-    "timestamp": 1769756400000
+    "symbol": "700",
+    "last_price": "461.4",
+    "volume_24h": "24687716",
+    "high_24h": "468.8",
+    "low_24h": "448.6",
+    "timestamp": 1779171608000
+  }
+}
+```
+
+A-Shares:
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "600519",
+    "last_price": "1319.01",
+    "volume_24h": "37263",
+    "high_24h": "1329.99",
+    "low_24h": "1318",
+    "price_change_24h": "-3.99",
+    "price_change_percent_24h": "-0.30",
+    "timestamp": 1779171605000
   }
 }
 ```
@@ -149,11 +180,12 @@ The ticker message returns different fields based on market type.
 | spread | string | Bid-ask spread | Forex, Metals |
 | exchange | int | Exchange code | Forex, Metals |
 | type | string | Type identifier (e.g., "index") | Index |
-| volume_24h | string | 24-hour trading volume | Crypto |
-| high_24h | string | 24-hour high price | Crypto |
-| low_24h | string | 24-hour low price | Crypto |
-| price_change_24h | string | 24-hour price change | Crypto |
-| price_change_percent_24h | string | 24-hour price change percentage | Crypto |
+| volume_24h | string | 24-hour trading volume | Stocks, Crypto |
+| high_24h | string | 24-hour high price | Stocks, Crypto |
+| low_24h | string | 24-hour low price | Stocks, Crypto |
+| price_change_24h | string | 24-hour price change | A-Shares, Crypto |
+| price_change_percent_24h | string | 24-hour price change percentage | A-Shares, Crypto |
+| trade_session | string | Present outside regular trading hours, see example | US Stocks |
 
 ---
 

@@ -19,7 +19,7 @@ Examples:
 - Indices: SPX, NDX, DJI
 - US Stocks: AAPL.US, TSLA.US, MSFT.US
 - HK Stocks: 700.HK, 9988.HK, 3690.HK
-- A-Shares: 000001.SH, 000001.SZ
+- A-Shares: 600519.SH, 000001.SZ, 920186.BJ
 - Crypto: BTCUSDT, ETHUSDT, ADAUSDT
 
 ## Request Parameters

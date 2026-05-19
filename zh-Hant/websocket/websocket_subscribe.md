@@ -97,24 +97,55 @@ ticker 消息根據不同市場類型返回不同的字段。
 
 #### 股票
 
-```json
+美股：
+
+```jsonc
 {
   "cmd": "ticker",
   "data": {
-    "symbol": "TSLA.US",
-    "last_price": "400.67",
-    "timestamp": 1773335203000
+    "symbol": "NVDA",
+    "last_price": "221.25",
+    "volume_24h": "462724",
+    "high_24h": "223.44",
+    "low_24h": "220.04",
+    // 僅非正常交易時段返回，正常交易時段無此字段
+    // 可選值：pre_market（盤前）、post_market（盤後）、overnight（夜盤）
+    "trade_session": "overnight",
+    "timestamp": 1779171600000
   }
 }
 ```
+
+港股：
 
 ```json
 {
   "cmd": "ticker",
   "data": {
-    "symbol": "600519.SH",
-    "last_price": "1401",
-    "timestamp": 1769756400000
+    "symbol": "700",
+    "last_price": "461.4",
+    "volume_24h": "24687716",
+    "high_24h": "468.8",
+    "low_24h": "448.6",
+    "timestamp": 1779171608000
+  }
+}
+```
+
+A股：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "600519",
+    "last_price": "1319.01",
+    "volume_24h": "37263",
+    "high_24h": "1329.99",
+    "low_24h": "1318",
+    "price_change_24h": "-3.99",
+    "price_change_percent_24h": "-0.30",
+    "timestamp": 1779171605000
   }
 }
 ```
@@ -149,11 +180,12 @@ ticker 消息根據不同市場類型返回不同的字段。
 | spread | string | 買賣價差 | 外匯、貴金屬 |
 | exchange | int | 交易所代碼 | 外匯、貴金屬 |
 | type | string | 類型標識（如 "index"） | 指數 |
-| volume_24h | string | 24小時成交量 | 加密貨幣 |
-| high_24h | string | 24小時最高價 | 加密貨幣 |
-| low_24h | string | 24小時最低價 | 加密貨幣 |
-| price_change_24h | string | 24小時價格變化 | 加密貨幣 |
-| price_change_percent_24h | string | 24小時價格變化百分比 | 加密貨幣 |
+| volume_24h | string | 24小時成交量 | 股票、加密貨幣 |
+| high_24h | string | 24小時最高價 | 股票、加密貨幣 |
+| low_24h | string | 24小時最低價 | 股票、加密貨幣 |
+| price_change_24h | string | 24小時價格變化 | A股、加密貨幣 |
+| price_change_percent_24h | string | 24小時價格變化百分比 | A股、加密貨幣 |
+| trade_session | string | 非開盤交易期間返回，詳見示例 | 美股 |
 
 ---
 

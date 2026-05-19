@@ -20,7 +20,7 @@ openapi: GET /v1/market/kline/latest
 - 指數：SPX、NDX、DJI
 - 美股：AAPL.US、TSLA.US、MSFT.US
 - 港股：700.HK、9988.HK、3690.HK
-- A股：000001.SH、000001.SZ
+- A股：600519.SH、000001.SZ、920186.BJ
 - 加密貨幣：BTCUSDT、ETHUSDT、ADAUSDT
 
 ## 請求參數

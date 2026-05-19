@@ -11,11 +11,12 @@ openapi: GET /v1/market/depth
 
 ## Supported Markets
 
-**US Stocks**, **HK Stocks**, **Crypto**
+**US Stocks**, **HK Stocks**, **A-Shares**, **Crypto**
 
 Examples:
 - US Stocks: AAPL.US, TSLA.US, MSFT.US
 - HK Stocks: 700.HK, 9988.HK, 3690.HK
+- A-Shares: 600519.SH, 000001.SZ, 920186.BJ
 - Crypto: BTCUSDT, ETHUSDT, ADAUSDT
 
 ## Request Parameters

@@ -11,11 +11,12 @@ openapi: GET /v1/market/depth
 
 ## 支持的市场
 
-**美股**、**港股**、**加密货币**
+**美股**、**港股**、**A股**、**加密货币**
 
 示例：
 - 美股：AAPL.US、TSLA.US、MSFT.US
 - 港股：700.HK、9988.HK、3690.HK
+- A股：600519.SH、000001.SZ、920186.BJ
 - 加密货币：BTCUSDT、ETHUSDT、ADAUSDT
 
 ## 请求参数
