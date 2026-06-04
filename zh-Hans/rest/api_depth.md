@@ -1,6 +1,6 @@
 ---
 title: 订单簿
-description: 获取交易品种的实时订单簿深度（买卖盘）数据。
+description: 获取交易品种的实时盘口、实时订单簿深度（买卖盘）数据。
 openapi: GET /v1/market/depth
 ---
 

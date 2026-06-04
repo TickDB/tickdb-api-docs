@@ -1,6 +1,6 @@
 ---
 title: 訂單簿
-description: 獲取交易品種的實時訂單簿深度（買賣盤）數據。
+description: 獲取交易品種的實時盤口、實時訂單簿深度（買賣盤）數據。
 openapi: GET /v1/market/depth
 ---
 

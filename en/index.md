@@ -94,6 +94,20 @@ tickdb ticker BTCUSDT,XAUUSD,AAPL.US
 - 16 native commands
 - Bash-tool friendly, ideal for Agent workflows
 
+### llms.txt — Feed All Docs to AI
+
+Want an AI assistant to understand all of TickDB at once? Copy the link below and paste it to any AI:
+
+```text
+https://docs.tickdb.ai/llms.txt
+```
+
+For the full text (with all page content), use:
+
+```text
+https://docs.tickdb.ai/llms-full.txt
+```
+
 For more details, visit [TickDB AI Access](https://tickdb.ai/ai-tools).
 
 ---

@@ -1,6 +1,6 @@
 ---
 title: 最近成交
-description: 獲取交易品種的最近成交執行記錄。
+description: 獲取交易品種的逐筆成交、最近成交執行記錄。
 openapi: GET /v1/market/trades
 ---
 
@@ -22,7 +22,7 @@ openapi: GET /v1/market/trades
 | 參數名 | 是否必須 | 描述 |
 |--------|----------|------|
 | symbol | 是 | 交易產品代碼 |
-| limit | 否 | 返回成交記錄數，默認50，最大200 |
+| limit | 否 | 返回成交記錄數，默認100，最大1000 |
 | type | 否 | 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex` |
 
 ## 返回字段說明

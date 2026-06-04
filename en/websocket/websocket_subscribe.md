@@ -11,7 +11,7 @@ This page documents WebSocket channels, how to subscribe/unsubscribe, and the me
 |--------|-------------|-------------------|
 | `ticker` | Real-time ticker updates | Forex, Metals, Indices, US Stocks, HK Stocks, A-Shares, Crypto |
 | `depth`  | Order book depth updates | US Stocks, HK Stocks, A-Shares, Crypto |
-| `trade`  | Trade records | HK Stocks, Crypto |
+| `trade`  | Trade records | US Stocks, HK Stocks, Crypto |
 
 ---
 
