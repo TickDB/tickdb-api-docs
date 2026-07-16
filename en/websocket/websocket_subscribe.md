@@ -9,9 +9,9 @@ This page documents WebSocket channels, how to subscribe/unsubscribe, and the me
 
 | Channel | Description | Supported Markets |
 |--------|-------------|-------------------|
-| `ticker` | Real-time ticker updates | Forex, Metals, Indices, US Stocks, HK Stocks, A-Shares, Crypto |
-| `depth`  | Order book depth updates | US Stocks, HK Stocks, A-Shares, Crypto |
-| `trade`  | Trade records | US Stocks, HK Stocks, Crypto |
+| `ticker` | Real-time ticker updates | Forex, Metals, Indices, US Stocks, HK Stocks, A-Shares, China Futures, Crypto |
+| `depth`  | Order book depth updates | US Stocks, HK Stocks, A-Shares, China Futures, Crypto |
+| `trade`  | Trade records | US Stocks, HK Stocks, A-Shares, China Futures, Crypto |
 
 ---
 
@@ -30,7 +30,7 @@ This page documents WebSocket channels, how to subscribe/unsubscribe, and the me
 }
 ```
 
-> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`
+> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures`
 
 ### Unsubscribe
 
@@ -168,6 +168,25 @@ A-Shares:
 }
 ```
 
+#### China Futures
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "last_price": "4309",
+    "bid_price": "4308",
+    "ask_price": "4310",
+    "volume_24h": "37263",
+    "high_24h": "4336",
+    "low_24h": "4278",
+    "timestamp": 1784012398000
+  }
+}
+```
+
 #### Fields
 
 | Field | Type | Description | Markets |
@@ -175,13 +194,13 @@ A-Shares:
 | symbol | string | Trading symbol | All |
 | last_price | string | Last traded price | All |
 | timestamp | int | Server timestamp in ms | All |
-| ask_price | string | Ask price | Forex, Metals |
-| bid_price | string | Bid price | Forex, Metals |
+| ask_price | string | Ask price | Forex, Metals, China Futures |
+| bid_price | string | Bid price | Forex, Metals, China Futures |
 | spread | string | Bid-ask spread | Forex, Metals |
 | exchange | int | Exchange code | Forex, Metals |
-| volume_24h | string | 24-hour trading volume | Stocks, Crypto |
-| high_24h | string | 24-hour high price | Stocks, Crypto |
-| low_24h | string | 24-hour low price | Stocks, Crypto |
+| volume_24h | string | 24-hour trading volume | Stocks, China Futures, Crypto |
+| high_24h | string | 24-hour high price | Stocks, China Futures, Crypto |
+| low_24h | string | 24-hour low price | Stocks, China Futures, Crypto |
 | price_change_24h | string | 24-hour price change | A-Shares, Crypto |
 | price_change_percent_24h | string | 24-hour price change percentage | A-Shares, Crypto |
 | trade_session | string | Present outside regular trading hours, see example | US Stocks |
@@ -203,7 +222,7 @@ A-Shares:
 }
 ```
 
-> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`
+> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures`
 
 ### Unsubscribe
 
@@ -267,7 +286,7 @@ A-Shares:
 }
 ```
 
-> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`
+> `type` is optional. Not required when the symbol is unambiguous; if the server returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures`
 
 ### Unsubscribe
 
@@ -277,6 +296,24 @@ A-Shares:
   "data": {
     "channel": "trade",
     "symbols": ["700.HK"]
+  }
+}
+```
+
+China futures trade pushes contain one trade per message and include optional position metadata:
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "price": "4309",
+    "quantity": "1",
+    "side": "sell",
+    "timestamp": 1784012398000,
+    "open_interest_change": 0,
+    "position_effect": "short_transfer"
   }
 }
 ```
@@ -294,7 +331,7 @@ A-Shares:
         "price": "553.000",
         "quantity": "100",
         "side": "buy",
-        "timestamp": 1773371154
+        "timestamp": 1773371154000
       }
     ]
   }
@@ -310,5 +347,7 @@ A-Shares:
 | └─ id | string | Trade ID |
 | └─ price | string | Trade price |
 | └─ quantity | string | Trade quantity |
-| └─ side | string | `buy` or `sell` |
-| └─ timestamp | int | Trade timestamp (seconds) |
+| └─ side | string | `buy`, `sell`, or `neutral` |
+| └─ timestamp | int | Trade timestamp (milliseconds) |
+| open_interest_change | int | Change in open interest; China futures only |
+| position_effect | string | Position effect; China futures only: `long_open`, `short_open`, `both_open`, `long_close`, `short_close`, `both_close`, `long_transfer`, or `short_transfer` |

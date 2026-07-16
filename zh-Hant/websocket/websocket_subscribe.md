@@ -9,9 +9,9 @@ description: WebSocket 頻道、訂閱命令和消息格式。
 
 | 頻道 | 描述 | 支持的市場 |
 |--------|-------------|------------|
-| `ticker` | 實時行情更新 | 外匯、貴金屬、指數、美股、港股、A股、加密貨幣 |
-| `depth`  | 訂單簿深度更新 | 美股、港股、A股、加密貨幣 |
-| `trade`  | 成交記錄 | 美股、港股、加密貨幣 |
+| `ticker` | 實時行情更新 | 外匯、貴金屬、指數、美股、港股、A股、中國期貨、加密貨幣 |
+| `depth`  | 訂單簿深度更新 | 美股、港股、A股、中國期貨、加密貨幣 |
+| `trade`  | 成交記錄 | 美股、港股、A股、中國期貨、加密貨幣 |
 
 ---
 
@@ -30,7 +30,7 @@ description: WebSocket 頻道、訂閱命令和消息格式。
 }
 ```
 
-> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
+> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures`
 
 ### 取消訂閱
 
@@ -150,6 +150,25 @@ A股：
 }
 ```
 
+中國期貨：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "last_price": "4309",
+    "bid_price": "4308",
+    "ask_price": "4310",
+    "volume_24h": "37263",
+    "high_24h": "4336",
+    "low_24h": "4278",
+    "timestamp": 1784012398000
+  }
+}
+```
+
 #### 加密貨幣
 
 ```json
@@ -175,13 +194,13 @@ A股：
 | symbol | string | 交易品種 | 全部 |
 | last_price | string | 最新成交價 | 全部 |
 | timestamp | int | 服務器時間戳（毫秒） | 全部 |
-| ask_price | string | 賣價 | 外匯、貴金屬 |
-| bid_price | string | 買價 | 外匯、貴金屬 |
+| ask_price | string | 賣價 | 外匯、貴金屬、中國期貨 |
+| bid_price | string | 買價 | 外匯、貴金屬、中國期貨 |
 | spread | string | 買賣價差 | 外匯、貴金屬 |
 | exchange | int | 交易所代碼 | 外匯、貴金屬 |
-| volume_24h | string | 24小時成交量 | 股票、加密貨幣 |
-| high_24h | string | 24小時最高價 | 股票、加密貨幣 |
-| low_24h | string | 24小時最低價 | 股票、加密貨幣 |
+| volume_24h | string | 24小時成交量 | 股票、中國期貨、加密貨幣 |
+| high_24h | string | 24小時最高價 | 股票、中國期貨、加密貨幣 |
+| low_24h | string | 24小時最低價 | 股票、中國期貨、加密貨幣 |
 | price_change_24h | string | 24小時價格變化 | A股、加密貨幣 |
 | price_change_percent_24h | string | 24小時價格變化百分比 | A股、加密貨幣 |
 | trade_session | string | 非開盤交易期間返回，詳見示例 | 美股 |
@@ -203,7 +222,7 @@ A股：
 }
 ```
 
-> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
+> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures`
 
 ### 取消訂閱
 
@@ -267,7 +286,7 @@ A股：
 }
 ```
 
-> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
+> `type` 可選，代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures`
 
 ### 取消訂閱
 
@@ -283,6 +302,24 @@ A股：
 
 ### 服務器響應
 
+中國期貨每條消息推送一筆成交，並附帶可選的持倉資訊：
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "price": "4309",
+    "quantity": "1",
+    "side": "sell",
+    "timestamp": 1784012398000,
+    "open_interest_change": 0,
+    "position_effect": "short_transfer"
+  }
+}
+```
+
 ```json
 {
   "cmd": "trade",
@@ -294,7 +331,7 @@ A股：
         "price": "553.000",
         "quantity": "100",
         "side": "buy",
-        "timestamp": 1773371154
+        "timestamp": 1773371154000
       }
     ]
   }
@@ -310,5 +347,7 @@ A股：
 | └─ id | string | 成交ID |
 | └─ price | string | 成交價格 |
 | └─ quantity | string | 成交數量 |
-| └─ side | string | `buy`（買入）或 `sell`（賣出） |
-| └─ timestamp | int | 成交時間戳（秒） |
+| └─ side | string | `buy`（買入）、`sell`（賣出）或 `neutral`（中性） |
+| └─ timestamp | int | 成交時間戳（毫秒） |
+| open_interest_change | int | 持倉變化，僅中國期貨返回 |
+| position_effect | string | 持倉影響，僅中國期貨返回：`long_open`（多開）、`short_open`（空開）、`both_open`（雙開）、`long_close`（多平）、`short_close`（空平）、`both_close`（雙平）、`long_transfer`（多換）、`short_transfer`（空換） |

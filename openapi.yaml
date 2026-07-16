@@ -2,8 +2,8 @@ openapi: 3.0.0
 info:
   title: TickDB API
   description: Unified real-time market data API — one connection for Forex, indices,
-    US stocks, HK stocks, A-shares, and Crypto via REST and WebSocket.
-  version: 1.0.1
+    US stocks, HK stocks, A-shares, China futures, and Crypto via REST and WebSocket.
+  version: 1.0.2
   contact:
     email: support@tickdb.ai
 servers:
@@ -37,7 +37,7 @@ paths:
           description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
           schema:
             type: string
-            enum: ["stock", "indices", "crypto", "forex"]
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
             example: "stock"
       responses:
         '200':
@@ -60,7 +60,16 @@ paths:
                       properties:
                         symbol:
                           type: string
+                        name:
+                          type: string
+                        type:
+                          type: string
+                          enum: ["stock", "indices", "crypto", "forex", "futures"]
                         last_price:
+                          type: string
+                        bid_price:
+                          type: string
+                        ask_price:
                           type: string
                         volume_24h:
                           type: string
@@ -142,7 +151,7 @@ paths:
           description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
           schema:
             type: string
-            enum: ["stock", "indices", "crypto", "forex"]
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
             example: "stock"
       responses:
         '200':
@@ -164,6 +173,9 @@ paths:
                       symbol:
                         type: string
                         example: "700.HK"
+                      type:
+                        type: string
+                        enum: ["stock", "indices", "crypto", "forex", "futures"]
                       interval:
                         type: string
                         example: "1h"
@@ -186,6 +198,10 @@ paths:
                               type: string
                             quote_volume:
                               type: string
+                              description: Trading amount; normally omitted for futures
+                            open_interest:
+                              type: string
+                              description: Open interest; returned for futures
                         example:
                           - time: 1773291600000
                             open: "545.5"
@@ -222,7 +238,7 @@ paths:
           description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
           schema:
             type: string
-            enum: ["stock", "indices", "crypto", "forex"]
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
             example: "stock"
       responses:
         '200':
@@ -244,6 +260,9 @@ paths:
                       symbol:
                         type: string
                         example: "700.HK"
+                      type:
+                        type: string
+                        enum: ["stock", "indices", "crypto", "forex", "futures"]
                       timestamp:
                         type: integer
                         example: 1768274016162
@@ -266,7 +285,7 @@ paths:
   /v1/market/trades:
     get:
       summary: Recent Trades
-      description: Get latest trade prints for a symbol. Note - This endpoint does not support A-shares (CN market).
+      description: Get latest trade prints for a symbol, including A-shares and China futures.
       parameters:
         - name: symbol
           in: query
@@ -291,7 +310,7 @@ paths:
           description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
           schema:
             type: string
-            enum: ["stock", "indices", "crypto", "forex"]
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
             example: "stock"
       responses:
         '200':
@@ -308,26 +327,46 @@ paths:
                     type: string
                     example: "success"
                   data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: string
-                          example: "12345678"
-                        price:
-                          type: string
-                          example: "43150.00"
-                        quantity:
-                          type: string
-                          example: "0.025"
-                        side:
-                          type: string
-                          enum: ["buy", "sell"]
-                          example: "buy"
-                        timestamp:
-                          type: integer
-                          example: 1703123456789
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: "BU2609"
+                      type:
+                        type: string
+                        enum: ["stock", "indices", "crypto", "forex", "futures"]
+                        example: "futures"
+                      trades:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: "1703123456789_0"
+                            price:
+                              type: string
+                              example: "4315.00"
+                            quantity:
+                              type: string
+                              example: "2"
+                            side:
+                              type: string
+                              enum: ["buy", "sell", "neutral"]
+                              example: "sell"
+                            timestamp:
+                              type: integer
+                              example: 1703123456789
+                            open_interest_change:
+                              type: integer
+                              nullable: true
+                              description: Change in open interest caused by this trade; futures only
+                              example: 0
+                            position_effect:
+                              type: string
+                              description: Effect of the trade on positions; futures only
+                              enum: ["long_open", "short_open", "both_open", "long_close", "short_close", "both_close", "long_transfer", "short_transfer"]
+                              example: "short_transfer"
   /v1/symbols/available:
     get:
       summary: Available Symbols
@@ -339,7 +378,7 @@ paths:
           description: Product type filter
           schema:
             type: string
-            enum: ["stock", "crypto", "forex", "indices"]
+            enum: ["stock", "crypto", "forex", "indices", "futures"]
             example: "stock"
         - name: market
           in: query
@@ -483,7 +522,7 @@ paths:
           description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
           schema:
             type: string
-            enum: ["stock", "indices", "crypto", "forex"]
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
             example: "stock"
       responses:
         '200':
@@ -506,6 +545,9 @@ paths:
                       properties:
                         symbol:
                           type: string
+                        type:
+                          type: string
+                          enum: ["stock", "indices", "crypto", "forex", "futures"]
                         interval:
                           type: string
                         klines:
@@ -527,6 +569,10 @@ paths:
                                 type: string
                               quote_volume:
                                 type: string
+                                description: Trading amount; normally omitted for futures
+                              open_interest:
+                                type: string
+                                description: Open interest; returned for futures
                     example:
                       - symbol: "AAPL.US"
                         interval: "3m"

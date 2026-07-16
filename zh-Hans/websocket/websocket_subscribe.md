@@ -9,9 +9,9 @@ description: WebSocket 频道、订阅命令和消息格式。
 
 | 频道 | 描述 | 支持的市场 |
 |--------|-------------|------------|
-| `ticker` | 实时行情更新 | 外汇、贵金属、指数、美股、港股、A股、加密货币 |
-| `depth`  | 订单簿深度更新 | 美股、港股、A股、加密货币 |
-| `trade`  | 成交记录 | 美股、港股、加密货币 |
+| `ticker` | 实时行情更新 | 外汇、贵金属、指数、美股、港股、A股、中国期货、加密货币 |
+| `depth`  | 订单簿深度更新 | 美股、港股、A股、中国期货、加密货币 |
+| `trade`  | 成交记录 | 美股、港股、A股、中国期货、加密货币 |
 
 ---
 
@@ -148,6 +148,25 @@ A股：
 }
 ```
 
+中国期货：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "last_price": "4309",
+    "bid_price": "4308",
+    "ask_price": "4310",
+    "volume_24h": "37263",
+    "high_24h": "4336",
+    "low_24h": "4278",
+    "timestamp": 1784012398000
+  }
+}
+```
+
 #### 加密货币
 
 ```json
@@ -173,13 +192,13 @@ A股：
 | symbol | string | 交易品种 | 全部 |
 | last_price | string | 最新成交价 | 全部 |
 | timestamp | int | 服务器时间戳（毫秒） | 全部 |
-| ask_price | string | 卖价 | 外汇、贵金属 |
-| bid_price | string | 买价 | 外汇、贵金属 |
+| ask_price | string | 卖价 | 外汇、贵金属、中国期货 |
+| bid_price | string | 买价 | 外汇、贵金属、中国期货 |
 | spread | string | 买卖价差 | 外汇、贵金属 |
 | exchange | int | 交易所代码 | 外汇、贵金属 |
-| volume_24h | string | 24小时成交量 | 股票、加密货币 |
-| high_24h | string | 24小时最高价 | 股票、加密货币 |
-| low_24h | string | 24小时最低价 | 股票、加密货币 |
+| volume_24h | string | 24小时成交量 | 股票、中国期货、加密货币 |
+| high_24h | string | 24小时最高价 | 股票、中国期货、加密货币 |
+| low_24h | string | 24小时最低价 | 股票、中国期货、加密货币 |
 | price_change_24h | string | 24小时价格变化 | A股、加密货币 |
 | price_change_percent_24h | string | 24小时价格变化百分比 | A股、加密货币 |
 | trade_session | string | 非开盘交易期间返回，详见示例 | 美股 |
@@ -214,6 +233,24 @@ A股：
 ```
 
 ### 服务器响应
+
+中国期货每条消息推送一笔成交，并附带可选的持仓信息：
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "price": "4309",
+    "quantity": "1",
+    "side": "sell",
+    "timestamp": 1784012398000,
+    "open_interest_change": 0,
+    "position_effect": "short_transfer"
+  }
+}
+```
 
 ```json
 {
@@ -288,7 +325,7 @@ A股：
         "price": "553.000",
         "quantity": "100",
         "side": "buy",
-        "timestamp": 1773371154
+        "timestamp": 1773371154000
       }
     ]
   }
@@ -304,5 +341,7 @@ A股：
 | └─ id | string | 成交ID |
 | └─ price | string | 成交价格 |
 | └─ quantity | string | 成交数量 |
-| └─ side | string | `buy`（买入）或 `sell`（卖出） |
-| └─ timestamp | int | 成交时间戳（秒） |
+| └─ side | string | `buy`（买入）、`sell`（卖出）或 `neutral`（中性） |
+| └─ timestamp | int | 成交时间戳（毫秒） |
+| open_interest_change | int | 持仓变化，仅中国期货返回 |
+| position_effect | string | 持仓影响，仅中国期货返回：`long_open`（多开）、`short_open`（空开）、`both_open`（双开）、`long_close`（多平）、`short_close`（空平）、`both_close`（双平）、`long_transfer`（多换）、`short_transfer`（空换） |

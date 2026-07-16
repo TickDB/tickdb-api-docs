@@ -12,7 +12,7 @@ openapi: GET /v1/market/kline/latest
 
 ## 支持的市场
 
-**外汇**、**贵金属**、**指数**、**美股**、**港股**、**A股**、**加密货币**
+**外汇**、**贵金属**、**指数**、**美股**、**港股**、**A股**、**中国期货**、**加密货币**
 
 示例：
 - 外汇：EURUSD、GBPUSD、USDJPY
@@ -21,6 +21,7 @@ openapi: GET /v1/market/kline/latest
 - 美股：AAPL.US、TSLA.US、MSFT.US
 - 港股：700.HK、9988.HK、3690.HK
 - A股：600519.SH、000001.SZ、920186.BJ
+- 中国期货：BU2609、IC2606、AP8888
 - 加密货币：BTCUSDT、ETHUSDT、ADAUSDT
 
 ## 请求参数
@@ -29,13 +30,14 @@ openapi: GET /v1/market/kline/latest
 |--------|----------|------|
 | symbols | 是 | 交易产品代码，多个用逗号分隔，例如：AAPL.US,00700.HK |
 | interval | 是 | K线周期，可选值：1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
-| type | 否 | 产品类型，可选。代码无歧义时无需传递；若返回 `AMBIGUOUS_SYMBOL` 错误，按提示传入对应值即可。可选值：`stock`、`indices`、`crypto`、`forex` |
+| type | 否 | 产品类型，可选。代码无歧义时无需传递；若返回 `AMBIGUOUS_SYMBOL` 错误，按提示传入对应值即可。可选值：`stock`、`indices`、`crypto`、`forex`、`futures` |
 
 ## 返回字段说明
 
 | 字段 | 说明 |
 |------|------|
 | symbol | 交易产品 |
+| type | 产品类型 |
 | interval | K线周期 |
 | klines | K线数据数组 |
 | └─ time | K线时间戳（毫秒） |
@@ -44,4 +46,5 @@ openapi: GET /v1/market/kline/latest
 | └─ low | 最低价 |
 | └─ close | 收盘价 |
 | └─ volume | 成交量 |
-| └─ quote_volume | 成交额 |
+| └─ quote_volume | 成交额，期货通常不返回 |
+| └─ open_interest | 持仓量，仅期货返回 |

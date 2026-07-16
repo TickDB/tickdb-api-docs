@@ -11,12 +11,13 @@ openapi: GET /v1/market/depth
 
 ## 支持的市場
 
-**美股**、**港股**、**A股**、**加密貨幣**
+**美股**、**港股**、**A股**、**中國期貨**、**加密貨幣**
 
 示例：
 - 美股：AAPL.US、TSLA.US、MSFT.US
 - 港股：700.HK、9988.HK、3690.HK
 - A股：600519.SH、000001.SZ、920186.BJ
+- 中國期貨：BU2609、IC2606、AP8888
 - 加密貨幣：BTCUSDT、ETHUSDT、ADAUSDT
 
 ## 請求參數
@@ -25,13 +26,14 @@ openapi: GET /v1/market/depth
 |--------|----------|------|
 | symbol | 是 | 交易產品代碼 |
 | limit | 否 | 深度檔位數，默認10，最大50 |
-| type | 否 | 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex` |
+| type | 否 | 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures` |
 
 ## 返回字段說明
 
 | 字段 | 說明 |
 |------|------|
 | symbol | 交易產品 |
+| type | 產品類型 |
 | timestamp | 數據時間戳（毫秒，UTC） |
 | bids | 買盤數組，每個元素為 [價格, 數量] |
 | asks | 賣盤數組，每個元素為 [價格, 數量] |

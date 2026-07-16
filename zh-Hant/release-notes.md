@@ -3,6 +3,15 @@ title: 更新日誌
 description: TickDB API 文檔版本更新記錄
 ---
 
+## v1.0.2 (2026-07-16)
+
+### 新增功能
+
+- 產品查詢、REST 行情接口和 WebSocket 頻道新增中國期貨支持，產品類型使用 `type=futures`。
+- 新增期貨持倉相關字段：K 線 `open_interest`，成交數據 `open_interest_change` 和 `position_effect`。
+
+---
+
 ## v1.0.1 (2026-03-13)
 
 ### 新增功能

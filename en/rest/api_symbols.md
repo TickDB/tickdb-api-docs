@@ -1,12 +1,14 @@
 ---
 title: Symbol Query
-description: Query products supported by TickDB, covering forex, indices, US stocks, HK stocks, A-shares, and crypto markets with over 37,000 products and growing.
+description: Query products supported by TickDB, covering forex, indices, US stocks, HK stocks, A-shares, China futures, and crypto markets, with the product list continuously growing.
 openapi: GET /v1/symbols/available
 ---
 
 ## Notes
 - Market codes are case-insensitive
 - Refer to Data Specification for product naming conventions
+- Only active products with confirmed availability are returned
+- Use `market=CN&type=futures` to query available China futures
 - You can also browse and search all supported products in the [TickDB Dashboard](https://tickdb.ai) product management page
 
 <Frame>
@@ -25,8 +27,9 @@ Use `market` and `type` parameters to filter products flexibly. They can be used
 | US | stock | US stocks | 12,400+ |
 | HK | stock | Hong Kong stocks | 4,300+ |
 | CN | stock | A-shares | 6,000+ |
+| CN | futures | China futures | Continuously updated |
 
-- `market` filters by specific market, e.g. `market=CN` returns only A-shares
+- `market` filters by specific market, e.g. `market=CN` returns A-shares and China futures
 - `type` filters by product category, e.g. `type=stock` returns all stocks across US + HK + CN
 - Combined: `market=HK&type=stock` returns only HK stocks
 
@@ -34,7 +37,7 @@ Use `market` and `type` parameters to filter products flexibly. They can be used
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| type | No | Product type filter: stock, crypto, forex, indices |
+| type | No | Product type filter: stock, crypto, forex, indices, futures |
 | market | No | Market filter: GLOBAL, US, HK, CN |
 | limit | No | Number of results per page, default 100, max 1000 |
 | offset | No | Pagination offset, default 0 |
@@ -47,7 +50,7 @@ Use `market` and `type` parameters to filter products flexibly. They can be used
 | └─ symbol | Product symbol code |
 | └─ name | Product name |
 | └─ market | Market code |
-| └─ type | Product type (stock/crypto/forex/indices) |
+| └─ type | Product type (stock/crypto/forex/indices/futures) |
 | └─ currency | Trading currency (CNY/USD/HKD/USDT) |
 | └─ is_active | Whether the symbol is active |
 | └─ updated_at | Last updated time |

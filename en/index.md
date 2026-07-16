@@ -1,6 +1,6 @@
 ---
 title: TickDB Documentation
-description: Unified real-time market data API for Forex, indices, US stocks, HK stocks, A-shares, and crypto.
+description: Unified real-time market data API for Forex, indices, US stocks, HK stocks, A-shares, China futures, and crypto.
 ---
 
 Welcome to the **TickDB Online Documentation**.
@@ -13,7 +13,7 @@ TickDB is a **developer-first unified real-time market data API** that provides 
 
 TickDB is built for developers who **require reliable, low-latency, and production-grade** market data.
 
-Through **one connection**, you can seamlessly access market data across Forex, precious metals, indices, US stocks, HK stocks, A-shares, and cryptocurrencies.
+Through **one connection**, you can seamlessly access market data across Forex, precious metals, indices, US stocks, HK stocks, A-shares, China futures, and cryptocurrencies.
 
 TickDB supports multiple data types, including **tick-level trades, order book depth, and candlestick (K-line) data**,  
 and can be accessed via **REST APIs and WebSocket streams**, making it suitable for quantitative trading, real-time market systems, trading platforms, and data analytics.
@@ -29,7 +29,7 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
   WebSocket-based streaming suitable for real-time market applications
 
 - **Multi-Market Support**  
-  Forex, precious metals, indices, US stocks, HK stocks, A-shares, and crypto
+  Forex, precious metals, indices, US stocks, HK stocks, A-shares, China futures, and crypto
 
 - **Developer-Friendly**  
   REST APIs and WebSocket with clear interfaces, complete documentation, and practical examples
@@ -94,15 +94,15 @@ tickdb ticker BTCUSDT,XAUUSD,AAPL.US
 - 16 native commands
 - Bash-tool friendly, ideal for Agent workflows
 
-### llms.txt — Feed All Docs to AI
+### llms.txt — Documentation Context for AI
 
-Want an AI assistant to understand all of TickDB at once? Copy the link below and paste it to any AI:
+To help an AI assistant understand the TickDB documentation, provide it with the following URL:
 
 ```text
 https://docs.tickdb.ai/llms.txt
 ```
 
-For the full text (with all page content), use:
+For the complete version containing all page content, use:
 
 ```text
 https://docs.tickdb.ai/llms-full.txt
@@ -166,4 +166,4 @@ For more details, visit [TickDB AI Access](https://tickdb.ai/ai-tools).
 
 ---
 
-**Docs Version**: v1.0.1
+**Docs Version**: v1.0.2

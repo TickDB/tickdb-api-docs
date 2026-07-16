@@ -3,6 +3,15 @@ title: Changelog
 description: TickDB API documentation version history
 ---
 
+## v1.0.2 (2026-07-16)
+
+### New Features
+
+- Added China futures support across symbol query, REST market data, and WebSocket channels using `type=futures`.
+- Added futures position fields: K-line `open_interest`, and trade `open_interest_change` and `position_effect`.
+
+---
+
 ## v1.0.1 (2026-03-13)
 
 ### New Features

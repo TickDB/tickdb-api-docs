@@ -1,7 +1,7 @@
 # TickDB API 文檔
 
 官方 TickDB API 文件倉庫，提供統一的即時行情資料 API，  
-支持 **REST 與 WebSocket**，涵蓋外匯、貴金屬、指數、美股、港股、A 股與加密貨幣。
+支持 **REST 與 WebSocket**，涵蓋外匯、貴金屬、指數、美股、港股、A 股、中國期貨與加密貨幣。
 
 🌐 **官網**：https://tickdb.ai  
 📘 **線上文件**：https://docs.tickdb.ai  
@@ -108,7 +108,7 @@ REST API 規範（OpenAPI 3.0），用於定義：
 - ✅ **多語言支援**：繁體中文、簡體中文、英文
 - ✅ **互動式 REST API**：支援 API Key 輸入的 Try-It 測試
 - ✅ **WebSocket Playground**：由 AsyncAPI 規範自動產生
-- ✅ **多市場範例**：外匯、貴金屬、指數、美股、港股、A 股、加密貨幣
+- ✅ **多市場範例**：外匯、貴金屬、指數、美股、港股、A 股、中國期貨、加密貨幣
 - ✅ **OpenAPI 整合**：自動產生 REST API 參考文件
 - ✅ **AsyncAPI 整合**：互動式 WebSocket 測試
 - ✅ **內建搜尋**：快速全文搜尋

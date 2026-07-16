@@ -1,6 +1,6 @@
 # TickDB API Documentation
 
-Official TickDB API documentation repository. One unified connection for real-time market data across forex, precious metals, indices, US stocks, HK stocks, A-shares, and crypto, delivered via REST and WebSocket.
+Official TickDB API documentation repository. One unified connection for real-time market data across forex, precious metals, indices, US stocks, HK stocks, A-shares, China futures, and crypto, delivered via REST and WebSocket.
 
 🌐 **Website**: https://tickdb.ai  
 📘 **Live Docs**: https://docs.tickdb.ai  
@@ -107,7 +107,7 @@ REST API specification (OpenAPI 3.0), defining:
 - ✅ **Multi-language support**: English, Simplified Chinese, Traditional Chinese
 - ✅ **Interactive REST APIs**: Try-It testing with API key input
 - ✅ **WebSocket playground**: Auto-generated from AsyncAPI
-- ✅ **Multi-market examples**: Forex, precious metals, indices, US stocks, HK stocks, A-shares, crypto
+- ✅ **Multi-market examples**: Forex, precious metals, indices, US stocks, HK stocks, A-shares, China futures, crypto
 - ✅ **OpenAPI integration**: Automatic REST API reference generation
 - ✅ **AsyncAPI integration**: Interactive WebSocket testing
 - ✅ **Built-in search**: Fast, full-text documentation search

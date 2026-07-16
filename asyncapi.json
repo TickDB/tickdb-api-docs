@@ -2,8 +2,8 @@
   "asyncapi": "3.0.0",
   "info": {
     "title": "TickDB WebSocket API",
-    "version": "1.0.1",
-    "description": "Unified real-time market data WebSocket API for Forex, indices, US stocks, HK stocks, A-shares, and Crypto.",
+    "version": "1.0.2",
+    "description": "Unified real-time market data WebSocket API for Forex, indices, US stocks, HK stocks, A-shares, China futures, and Crypto.",
     "contact": {
       "email": "support@tickdb.ai"
     }
@@ -75,7 +75,8 @@
                       "700.HK",
                       "EURUSD",
                       "XAUUSD",
-                      "BTCUSDT"
+                      "BTCUSDT",
+                      "IC2606"
                     ],
                     "description": "List of trading symbols to subscribe/unsubscribe"
                   },
@@ -85,7 +86,8 @@
                       "stock",
                       "indices",
                       "crypto",
-                      "forex"
+                      "forex",
+                      "futures"
                     ],
                     "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
                   }
@@ -124,6 +126,11 @@
                     "type": "string",
                     "example": "AAPL.US",
                     "description": "Trading symbol"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["stock", "indices", "crypto", "forex", "futures"],
+                    "description": "Symbol type"
                   },
                   "last_price": {
                     "type": "string",
@@ -195,7 +202,8 @@
                       "700.HK",
                       "EURUSD",
                       "XAUUSD",
-                      "BTCUSDT"
+                      "BTCUSDT",
+                      "IC2606"
                     ],
                     "description": "List of trading symbols to subscribe/unsubscribe"
                   },
@@ -205,7 +213,8 @@
                       "stock",
                       "indices",
                       "crypto",
-                      "forex"
+                      "forex",
+                      "futures"
                     ],
                     "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
                   }
@@ -244,6 +253,11 @@
                     "type": "string",
                     "example": "BTCUSDT",
                     "description": "Trading symbol"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": ["stock", "indices", "crypto", "forex", "futures"],
+                    "description": "Symbol type"
                   },
                   "bids": {
                     "type": "array",
@@ -355,7 +369,8 @@
                       "700.HK",
                       "EURUSD",
                       "XAUUSD",
-                      "BTCUSDT"
+                      "BTCUSDT",
+                      "IC2606"
                     ],
                     "description": "List of trading symbols to subscribe/unsubscribe"
                   },
@@ -365,7 +380,8 @@
                       "stock",
                       "indices",
                       "crypto",
-                      "forex"
+                      "forex",
+                      "futures"
                     ],
                     "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
                   }
@@ -405,6 +421,11 @@
                     "example": "AAPL.US",
                     "description": "Trading symbol"
                   },
+                  "type": {
+                    "type": "string",
+                    "enum": ["stock", "indices", "crypto", "forex", "futures"],
+                    "description": "Symbol type"
+                  },
                   "price": {
                     "type": "string",
                     "example": "150.25",
@@ -419,7 +440,8 @@
                     "type": "string",
                     "enum": [
                       "buy",
-                      "sell"
+                      "sell",
+                      "neutral"
                     ],
                     "example": "buy",
                     "description": "Trade side"
@@ -428,6 +450,15 @@
                     "type": "integer",
                     "example": 1703123456789,
                     "description": "Unix timestamp in milliseconds"
+                  },
+                  "open_interest_change": {
+                    "type": ["integer", "null"],
+                    "description": "Change in open interest caused by this trade; futures only"
+                  },
+                  "position_effect": {
+                    "type": "string",
+                    "enum": ["long_open", "short_open", "both_open", "long_close", "short_close", "both_close", "long_transfer", "short_transfer"],
+                    "description": "Effect of the futures trade on positions; futures only"
                   }
                 },
                 "required": [

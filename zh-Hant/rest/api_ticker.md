@@ -10,7 +10,7 @@ openapi: GET /v1/market/ticker
 
 ## 支持的市場
 
-**外匯**、**貴金屬**、**指數**、**美股**、**港股**、**A股**、**加密貨幣**
+**外匯**、**貴金屬**、**指數**、**美股**、**港股**、**A股**、**中國期貨**、**加密貨幣**
 
 示例：
 - 外匯：EURUSD、GBPUSD、USDJPY
@@ -19,6 +19,7 @@ openapi: GET /v1/market/ticker
 - 美股：AAPL.US、TSLA.US、MSFT.US
 - 港股：700.HK、9988.HK、3690.HK
 - A股：600519.SH、000001.SZ、920186.BJ
+- 中國期貨：BU2609、IC2606、AP8888
 - 加密貨幣：BTCUSDT、ETHUSDT、ADAUSDT
 
 ## 請求參數
@@ -26,14 +27,18 @@ openapi: GET /v1/market/ticker
 | 參數名 | 是否必須 | 描述 |
 |--------|----------|------|
 | symbols | 是 | 交易產品代碼，多個用逗號分隔，最多50個 |
-| type | 否 | 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex` |
+| type | 否 | 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures` |
 
 ## 返回字段說明
 
 | 字段 | 說明 |
 |------|------|
 | symbol | 交易產品 |
+| name | 產品名稱（如有） |
+| type | 產品類型 |
 | last_price | 最新成交價 |
+| bid_price | 最優買價（如有） |
+| ask_price | 最優賣價（如有） |
 | volume_24h | 24小時成交量 |
 | high_24h | 24小時最高價 |
 | low_24h | 24小時最低價 |

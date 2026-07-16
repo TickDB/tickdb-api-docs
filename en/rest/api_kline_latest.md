@@ -12,7 +12,7 @@ openapi: GET /v1/market/kline/latest
 
 ## Supported Markets
 
-**Forex**, **Metals**, **Indices**, **US Stocks**, **HK Stocks**, **A-Shares**, **Crypto**
+**Forex**, **Metals**, **Indices**, **US Stocks**, **HK Stocks**, **A-Shares**, **China Futures**, **Crypto**
 
 Examples:
 - Forex: EURUSD, GBPUSD, USDJPY
@@ -21,6 +21,7 @@ Examples:
 - US Stocks: AAPL.US, TSLA.US, MSFT.US
 - HK Stocks: 700.HK, 9988.HK, 3690.HK
 - A-Shares: 600519.SH, 000001.SZ, 920186.BJ
+- China Futures: BU2609, IC2606, AP8888
 - Crypto: BTCUSDT, ETHUSDT, ADAUSDT
 
 ## Request Parameters
@@ -29,13 +30,14 @@ Examples:
 |-----------|----------|-------------|
 | symbols | Yes | Trading symbol codes, comma-separated, e.g., AAPL.US,00700.HK |
 | interval | Yes | K-line period, options: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M |
-| type | No | Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex` |
+| type | No | Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures` |
 
 ## Response Fields
 
 | Field | Description |
 |-------|-------------|
 | symbol | Trading Symbol |
+| type | Product type |
 | interval | K-line period |
 | klines | K-line data array |
 | └─ time | K-line timestamp (milliseconds) |
@@ -44,4 +46,5 @@ Examples:
 | └─ low | Lowest price |
 | └─ close | Closing price |
 | └─ volume | Trading volume |
-| └─ quote_volume | Trading amount |
+| └─ quote_volume | Trading amount; normally omitted for futures |
+| └─ open_interest | Open interest; returned for futures |

@@ -3,6 +3,15 @@ title: 更新日志
 description: TickDB API 文档版本更新记录
 ---
 
+## v1.0.2 (2026-07-16)
+
+### 新增功能
+
+- 产品查询、REST 行情接口和 WebSocket 频道新增中国期货支持，产品类型使用 `type=futures`。
+- 新增期货持仓相关字段：K 线 `open_interest`，成交数据 `open_interest_change` 和 `position_effect`。
+
+---
+
 ## v1.0.1 (2026-03-13)
 
 ### 新增功能
