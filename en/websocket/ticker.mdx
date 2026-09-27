@@ -1,0 +1,222 @@
+---
+title: Real-Time Quotes (Ticker)
+asyncapi: "/asyncapi.en.json ticker"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ✅ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
+
+## Supported Markets
+
+Supported markets: Forex, Metals, Indices, US Stocks, HK Stocks, A-Shares, China Futures, Hong Kong Futures, Crypto
+
+## Subscribe
+
+```json
+{
+  "cmd": "subscribe",
+  "data": {
+    "channel": "ticker",
+    "symbols": ["AAPL.US", "BTCUSDT"]
+  }
+}
+```
+
+> `type` applies to every symbol in that subscription. Omit it when subscribing to mixed product types. If a symbol is ambiguous, split the request by product type and pass the corresponding value.
+
+## Unsubscribe
+
+```json
+{
+  "cmd": "unsubscribe",
+  "data": {
+    "channel": "ticker",
+    "symbols": ["AAPL.US"]
+  }
+}
+```
+
+## Server Response
+
+The ticker message returns different fields based on market type.
+
+### Index
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "SPX",
+    "type": "indices",
+    "last_price": "7342.86",
+    "timestamp": 1779204386000
+  }
+}
+```
+
+### Metals
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "XAUUSD",
+    "type": "forex",
+    "last_price": "5130.72000",
+    "ask_price": "5131.07000",
+    "bid_price": "5130.37000",
+    "spread": "0.70000",
+    "timestamp": 1773334355000
+  }
+}
+```
+
+### Forex
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "EURUSD",
+    "type": "forex",
+    "last_price": "1.15200",
+    "ask_price": "1.15202",
+    "bid_price": "1.15199",
+    "spread": "0.00003",
+    "timestamp": 1773334426000
+  }
+}
+```
+
+### Stocks
+
+US Stocks:
+
+`trade_session` is returned only during extended sessions such as pre-market, post-market, or overnight trading. Values: `pre_market`, `post_market`, `overnight`.
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "NVDA.US",
+    "type": "stock",
+    "last_price": "221.25",
+    "volume_24h": "462724",
+    "high_24h": "223.44",
+    "low_24h": "220.04",
+    "trade_session": "overnight",
+    "timestamp": 1779171600000
+  }
+}
+```
+
+HK Stocks:
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "700.HK",
+    "type": "stock",
+    "last_price": "461.4",
+    "volume_24h": "24687716",
+    "high_24h": "468.8",
+    "low_24h": "448.6",
+    "timestamp": 1779171608000
+  }
+}
+```
+
+A-Shares:
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "600519.SH",
+    "type": "stock",
+    "last_price": "1319.01",
+    "volume_24h": "37263",
+    "high_24h": "1329.99",
+    "low_24h": "1318",
+    "price_change_24h": "-3.99",
+    "price_change_percent_24h": "-0.30",
+    "timestamp": 1779171605000
+  }
+}
+```
+
+### Crypto
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BTCUSDT",
+    "type": "crypto",
+    "last_price": "70480.57000000",
+    "volume_24h": "23737.52989000",
+    "high_24h": "71321.00000000",
+    "low_24h": "69205.91000000",
+    "price_change_24h": "-362.06000000",
+    "price_change_percent_24h": "-0.511",
+    "timestamp": 1773335135026
+  }
+}
+```
+
+### China Futures
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "last_price": "4309",
+    "bid_price": "4308",
+    "ask_price": "4310",
+    "volume_24h": "37263",
+    "high_24h": "4336",
+    "low_24h": "4278",
+    "timestamp": 1784012398000
+  }
+}
+```
+
+### Fields
+
+The `24h` suffix does not mean a rolling 24-hour window in every market. Crypto usually uses a rolling 24-hour window; stocks and futures usually use the current trading day or session. Except for `symbol`, `last_price`, and `timestamp`, fields depend on the product and data availability.
+
+| Field | Type | Description | Markets |
+|------|------|-------------|---------|
+| symbol | string | Trading symbol | All |
+| name | string | Product name, when available | Some products |
+| type | string | Product type | All |
+| category | string | Product category, when available | A-share market products |
+| last_price | string | Latest price | All |
+| timestamp | int | Unix timestamp in milliseconds | All |
+| open | string | Opening price, when statistics are available | Stocks, futures, crypto, and others |
+| prev_close | string | Previous close or reference price for the statistics window, when available | Stocks, futures, crypto, and others |
+| ask_price | string | Best ask, when quotes are available | Forex, metals, futures, and others |
+| bid_price | string | Best bid, when quotes are available | Forex, metals, futures, and others |
+| spread | string | Bid-ask spread, when available | Forex, metals |
+| volume_24h | string | Trading volume; see the statistics window above | Stocks, futures, crypto |
+| quote_volume_24h | string | Turnover over the same window as `volume_24h`, when available | Stocks, crypto, and others |
+| high_24h | string | High price over the same window as `volume_24h` | Stocks, futures, crypto |
+| low_24h | string | Low price over the same window as `volume_24h` | Stocks, futures, crypto |
+| price_change_24h | string | Price change over the same window as `volume_24h`, when available | Stocks, futures, crypto |
+| price_change_percent_24h | string | Price change percentage, when available | Stocks, futures, crypto |
+| trade_session | string | Extended session: `pre_market`, `post_market`, or `overnight` | US stocks in extended hours |
+| quote_volume | string | Turnover in the current extended session, when available | US stocks in extended hours |

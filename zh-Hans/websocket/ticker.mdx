@@ -1,0 +1,220 @@
+---
+title: 实时行情（Ticker）
+asyncapi: "/asyncapi.json ticker"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## 套餐权限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免费版 | ✅ |
+| 基础版 | ✅ |
+| 专业版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企业版 | ✅ |
+
+## 支持的市场
+
+支持市场：外汇、贵金属、指数、美股、港股、A股、中国期货、香港期货、加密货币
+
+## 订阅
+
+```json
+{
+  "cmd": "subscribe",
+  "data": {
+    "channel": "ticker",
+    "symbols": ["AAPL.US", "BTCUSDT"]
+  }
+}
+```
+
+> `type` 对本次订阅中的全部代码生效。混合订阅不同产品类型时请省略 `type`；仅在代码存在歧义时，按产品类型拆分订阅并传入对应值。
+
+## 取消订阅
+
+```json
+{
+  "cmd": "unsubscribe",
+  "data": {
+    "channel": "ticker",
+    "symbols": ["AAPL.US"]
+  }
+}
+```
+
+## 服务器响应
+
+ticker 消息根据不同市场类型返回不同的字段。
+
+### 指数
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "SPX",
+    "type": "indices",
+    "last_price": "7342.86",
+    "timestamp": 1779204386000
+  }
+}
+```
+
+### 贵金属
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "XAUUSD",
+    "type": "forex",
+    "last_price": "5130.72000",
+    "ask_price": "5131.07000",
+    "bid_price": "5130.37000",
+    "spread": "0.70000",
+    "timestamp": 1773334355000
+  }
+}
+```
+
+### 外汇
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "EURUSD",
+    "type": "forex",
+    "last_price": "1.15200",
+    "ask_price": "1.15202",
+    "bid_price": "1.15199",
+    "spread": "0.00003",
+    "timestamp": 1773334426000
+  }
+}
+```
+
+### 股票
+
+美股：
+
+`trade_session` 仅在盘前、盘后或夜盘等扩展交易时段返回，可选值为 `pre_market`、`post_market`、`overnight`。
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "NVDA.US",
+    "type": "stock",
+    "last_price": "221.25",
+    "volume_24h": "462724",
+    "high_24h": "223.44",
+    "low_24h": "220.04",
+    "trade_session": "overnight",
+    "timestamp": 1779171600000
+  }
+}
+```
+
+港股：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "700.HK",
+    "type": "stock",
+    "last_price": "461.4",
+    "volume_24h": "24687716",
+    "high_24h": "468.8",
+    "low_24h": "448.6",
+    "timestamp": 1779171608000
+  }
+}
+```
+
+A股：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "600519.SH",
+    "type": "stock",
+    "last_price": "1319.01",
+    "volume_24h": "37263",
+    "high_24h": "1329.99",
+    "low_24h": "1318",
+    "price_change_24h": "-3.99",
+    "price_change_percent_24h": "-0.30",
+    "timestamp": 1779171605000
+  }
+}
+```
+
+中国期货：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "last_price": "4309",
+    "bid_price": "4308",
+    "ask_price": "4310",
+    "volume_24h": "37263",
+    "high_24h": "4336",
+    "low_24h": "4278",
+    "timestamp": 1784012398000
+  }
+}
+```
+
+### 加密货币
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BTCUSDT",
+    "type": "crypto",
+    "last_price": "70480.57000000",
+    "volume_24h": "23737.52989000",
+    "high_24h": "71321.00000000",
+    "low_24h": "69205.91000000",
+    "price_change_24h": "-362.06000000",
+    "price_change_percent_24h": "-0.511",
+    "timestamp": 1773335135026
+  }
+}
+```
+
+### 字段说明
+
+| 字段 | 类型 | 描述 | 市场 |
+|------|------|-------------|------|
+| symbol | string | 交易产品代码 | 全部 |
+| name | string | 产品名称；名称可用时返回 | 部分产品 |
+| type | string | 产品类型 | 全部 |
+| category | string | 产品细分类别；分类信息可用时返回 | A股市场产品 |
+| last_price | string | 最新价格 | 全部 |
+| timestamp | int | Unix 时间戳，单位为毫秒 | 全部 |
+| open | string | 开盘价；对应行情统计可用时返回 | 股票、期货、加密货币等 |
+| prev_close | string | 昨收或统计窗口参考价；数据可用时返回 | 股票、期货、加密货币等 |
+| ask_price | string | 最优卖价；报价可用时返回 | 外汇、贵金属、期货等 |
+| bid_price | string | 最优买价；报价可用时返回 | 外汇、贵金属、期货等 |
+| spread | string | 买卖价差；报价可用时返回 | 外汇、贵金属 |
+| volume_24h | string | 成交量；统计窗口见上文 | 股票、期货、加密货币 |
+| quote_volume_24h | string | 与 `volume_24h` 同一统计窗口的成交额；数据可用时返回 | 股票、加密货币等 |
+| high_24h | string | 最高价；统计窗口与 `volume_24h` 一致 | 股票、期货、加密货币 |
+| low_24h | string | 最低价；统计窗口与 `volume_24h` 一致 | 股票、期货、加密货币 |
+| price_change_24h | string | 价格变化；统计窗口与 `volume_24h` 一致，数据可用时返回 | 股票、期货、加密货币 |
+| price_change_percent_24h | string | 价格变化百分比；数据可用时返回 | 股票、期货、加密货币 |
+| trade_session | string | 当前扩展交易时段：`pre_market`、`post_market` 或 `overnight` | 美股扩展交易时段 |
+| quote_volume | string | 当前扩展交易时段成交额；数据可用时返回 | 美股扩展交易时段 |

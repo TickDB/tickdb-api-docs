@@ -1,0 +1,32 @@
+---
+title: 心跳检测（Ping）
+asyncapi: "/asyncapi.json ping"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## 套餐权限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免费版 | ✅ |
+| 基础版 | ✅ |
+| 专业版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企业版 | ✅ |
+
+用于检查连接是否保持可用。发送 `ping` 后，服务端返回 `pong`，其中 `data.timestamp` 为毫秒级 Unix 时间戳。
+
+## 发送消息
+
+```json
+{"cmd":"ping"}
+```
+
+## 返回消息
+
+```json
+{"cmd":"pong","code":0,"message":"pong","data":{"timestamp":1768976158541}}
+```

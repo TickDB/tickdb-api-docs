@@ -1,8 +1,22 @@
 ---
-title: Recent Trades
-description: Retrieve recent trade executions for a trading symbol.
-openapi: GET /v1/market/trades
+title: Tick-by-Tick Trades
+description: Retrieve tick-by-tick trade executions for a trading symbol.
+openapi: "openapi.en.yaml GET /v1/market/trades"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ❌ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
 
 ## Notes
 - side: buy / sell
@@ -10,14 +24,14 @@ openapi: GET /v1/market/trades
 
 ## Supported Markets
 
-**US Stocks**, **HK Stocks**, **A-Shares**, **China Futures**, **Crypto**
-
-Examples:
-- US Stocks: AAPL.US, TSLA.US, MSFT.US
-- HK Stocks: 700.HK, 9988.HK, 3690.HK
-- A-Shares: 600519.SH, 000001.SZ, 920186.BJ
-- China Futures: BU2609, IC2606, AP8888
-- Crypto: BTCUSDT, ETHUSDT, ADAUSDT
+| Market | Examples |
+|---|---|
+| US Stocks | AAPL.US, TSLA.US, MSFT.US |
+| HK Stocks | 700.HK, 9988.HK, 3690.HK |
+| A-Shares | 600519.SH, 000001.SZ, 920186.BJ |
+| China Futures | BU2609, IC2606, AP8888 |
+| Hong Kong Futures | HSI8888, MHI8888, HTI8888 |
+| Crypto | BTCUSDT, ETHUSDT, ADAUSDT |
 
 ## Request Parameters
 

@@ -1,17 +1,30 @@
 ---
 title: Market Metrics
 description: Retrieve comprehensive market metrics for stocks, including market statistics, valuation indicators, capital flow, and derivatives-related indicators.
-openapi: GET /v1/market/calc-index
+openapi: "openapi.en.yaml GET /v1/market/calc-index"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ❌ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
 
 ## Supported Markets
 
-**US Stocks**, **HK Stocks**, **A-Shares**
-
-Examples:
-- US Stocks: AAPL.US, TSLA.US, MSFT.US
-- HK Stocks: 700.HK, 9988.HK, 3690.HK
-- A-Shares: 000001.SH, 000001.SZ
+| Market | Examples |
+|---|---|
+| US Stocks | AAPL.US, TSLA.US, MSFT.US |
+| HK Stocks | 700.HK, 9988.HK, 3690.HK |
+| A-Shares | 600519.SH, 000001.SZ |
 
 ## Request Parameters
 

@@ -1,0 +1,4735 @@
+openapi: 3.1.0
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info:
+  title: TickDB API
+  description: TickDB unified real-time market data API via REST and WebSocket.
+  version: 1.0.3
+  contact:
+    email: support@tickdb.ai
+servers:
+  - url: https://api.tickdb.ai
+    description: Production server
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  parameters:
+    SymbolQuery:
+      name: symbol
+      in: query
+      required: true
+      schema:
+        type: string
+        examples:
+          - AAPL
+          - "700"
+          - "600519"
+          - AAPL.US
+          - 700.HK
+          - 600519.SH
+      description: Stock symbol
+    TypeQuery:
+      name: type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - stock
+      description: Product type; currently supports `stock`
+    RequiredMarketQuery:
+      name: market
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - US
+          - HK
+          - CN
+      description: "Market code: `US` US stocks, `HK` Hong Kong stocks, or `CN` A-shares"
+    FromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+        examples:
+          - 2024-01-01
+      description: Start date in `YYYY-MM-DD` format
+    ToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+        examples:
+          - 2026-12-31
+      description: End date in `YYYY-MM-DD` format
+    DividendTypeQuery:
+      name: dividend_type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - normal
+          - special
+          - non_cash
+          - unknown
+      description: "`normal`, `special`, `non_cash`, or `unknown`"
+    DividendLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+      description: Page size; default 100, range `1–500`
+    DividendAsOfQuery:
+      name: as_of
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: As-of date in `YYYY-MM-DD` format; defaults to the current date
+    KindQuery:
+      name: kind
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - IS
+          - BS
+          - CF
+      description: "Statement type: `IS` income statement, `BS` balance sheet, or `CF` cash flow statement"
+    TTMKindQuery:
+      name: kind
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - IS
+          - CF
+      description: "Statement type: `IS` income statement or `CF` cash flow statement"
+    PeriodTypeQuery:
+      name: period_type
+      in: query
+      required: false
+      schema:
+        type: string
+        default: q1,q2,q3,q4
+        pattern: ^(q1|q2|q3|q4|saf|af)(,(q1|q2|q3|q4|saf|af))*$
+        examples:
+          - q1
+          - saf
+          - af
+          - q1,q2,q3,q4
+      description: "Financial period type: `q1` first quarter, `q2` second quarter, `q3` third quarter, `q4` fourth quarter, `saf` semiannual, or `af` annual; separate multiple values with commas"
+    NQuery:
+      name: n
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+      description: Number of periods, range `1–20`
+    SegmentLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 200
+      description: Number of records; default 200, range `1–1000`
+    IndustryRankLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+      description: Number of records; default 50, range `1–200`
+    FundHoldingsLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 200
+      description: Number of records per page; default `200`, range `1–500`
+    NewsLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+      description: Maximum number of records to return; default `50`, range `1–200`
+    NewsIDPath:
+      name: news_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: ^[1-9][0-9]*$
+      description: Opaque article ID returned by the news list; pass it as a string
+    CursorQuery:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      description: Next-page cursor; omit on the first request
+    SegmentCategoryQuery:
+      name: category
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - business
+          - regional
+      description: "Breakdown dimension: `business` for business segments or `regional` for geographic segments. Omit to return all available dimensions."
+    ReportQuery:
+      name: report
+      in: query
+      required: false
+      schema:
+        type: string
+        examples:
+          - qf
+          - saf
+          - af
+      description: "Reporting period: `qf` quarterly, `saf` semiannual, or `af` annual"
+    GranularityQuery:
+      name: granularity
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - daily
+          - monthly
+        default: daily
+      description: "`daily` or `monthly`; default `daily`"
+    ValuationFromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: Start date in `YYYY-MM-DD` format
+    ValuationToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: End date in `YYYY-MM-DD` format
+    IndustryCounterIDQuery:
+      name: industry_counter_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Industry node ID returned by Industry Metric Rankings
+    ObjectIDQuery:
+      name: object_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Object ID from a shareholder holdings record with `detail_available=true`
+    CalendarOtherCategoryQuery:
+      name: category
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - macrodata
+          - closed
+          - meeting
+          - merge
+          - halt_resume
+          - special_treatment
+          - special_treatment_start
+          - special_treatment_end
+          - listing_status
+          - listing_suspension
+          - listing_resumption
+          - delisting
+          - lockup_expiry
+      description: Other-event category; see the table below
+    CalendarMarketQuery:
+      name: market
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - US
+          - HK
+          - CN
+      description: "Market filter: `US`, `HK`, or `CN`; required for market-restricted API keys"
+    FullMarketCompressionHeader:
+      name: Accept-Encoding
+      in: header
+      required: true
+      description: Full-market responses require compression. Support at least one of gzip, br, or zstd; gzip is the default.
+      schema:
+        type: string
+        enum:
+          - gzip
+          - br
+          - zstd
+        default: gzip
+    CalendarFromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: Inclusive start date, `YYYY-MM-DD`
+    CalendarToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: Inclusive end date, `YYYY-MM-DD`
+    CalendarSymbolsQuery:
+      name: symbols
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        examples:
+          - AAPL.US
+          - AAPL.US,700.HK,600519.SH
+      description: Comma-separated stock symbols, up to 50
+    CalendarLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+      description: Page size, `1–500`; default `100`
+  responses:
+    APIKeyStatusResponse:
+      description: API Key Management response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIKeyStatusEnvelope"
+    ProfileResponse:
+      description: Company Profile response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProfileEnvelope"
+    ExecutivesResponse:
+      description: Executives and Directors response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ExecutivesEnvelope"
+    FinancialRowsResponse:
+      description: Recent Financial Statements response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/FinancialRowsEnvelope"
+    SegmentsResponse:
+      description: Historical Revenue Breakdown response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SegmentsEnvelope"
+    SegmentsLatestResponse:
+      description: Revenue Breakdown response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SegmentsLatestEnvelope"
+    ValuationLatestResponse:
+      description: Latest Valuation response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValuationLatestEnvelope"
+    ValuationTimeSeriesResponse:
+      description: Historical Valuation response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValuationTimeSeriesEnvelope"
+    IndustryPeersResponse:
+      description: Peer Valuation Comparison response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IndustryPeersEnvelope"
+    IndustryDistributionResponse:
+      description: Industry Valuation Distribution response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IndustryDistributionEnvelope"
+    IndustriesRankResponse:
+      description: Industry Metric Rankings response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IndustriesRankEnvelope"
+    IndustriesTreeResponse:
+      description: Industry Hierarchy response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IndustriesTreeEnvelope"
+    DividendsResponse:
+      description: Dividend Records response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DividendsEnvelope"
+    DividendsTTMResponse:
+      description: Dividend TTM response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DividendsTTMEnvelope"
+    BuybackResponse:
+      description: Share Buybacks response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BuybackEnvelope"
+    LatestShareholdersResponse:
+      description: Latest Shareholder Structure response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LatestShareholdersEnvelope"
+    TopShareholdersResponse:
+      description: Shareholder Holdings response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TopShareholdersEnvelope"
+    ShareholderDetailResponse:
+      description: Shareholder Holding Details response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShareholderDetailEnvelope"
+    FundHoldingsResponse:
+      description: Funds Holding a Stock response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/FundHoldingsEnvelope"
+    CorporateActionsResponse:
+      description: Corporate Actions response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CorporateActionsEnvelope"
+    NewsResponse:
+      description: Stock News response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NewsEnvelope"
+    NewsDetailResponse:
+      description: News Details response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NewsDetailEnvelope"
+    NewsErrorResponse:
+      description: Error response. Common HTTP statuses include 400 (invalid parameters), 401 (authentication failed), 403 (permission or quota restriction), 404 (no matching data), 429 (rate limit), and 503 (service temporarily unavailable).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NewsErrorEnvelope"
+    CalendarResponse:
+      description: Earnings Calendar response.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CalendarEnvelope"
+    ErrorResponse:
+      description: Error response. Common HTTP statuses include 400 (invalid parameters), 401 (authentication failed), 403 (permission or quota restriction), 404 (no matching data), 429 (rate limit), and 503 (service temporarily unavailable).
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          examples:
+            missingAPIKey:
+              summary: Missing API key
+              value:
+                code: "1002"
+                message: API key is required. Provide via X-API-Key header
+                error: "1002"
+            missingKind:
+              summary: Missing required parameter
+              value:
+                code: 40001
+                message: kind is required
+                data: null
+            endpointForbidden:
+              summary: API key cannot access this endpoint
+              value:
+                code: 3009
+                message: This endpoint is not allowed for your API key
+                data: null
+            marketForbidden:
+              summary: API key cannot access this market
+              value:
+                code: 3010
+                message: Fundamentals market not allowed for your API key
+                data:
+                  market: US
+            noAvailableSource:
+              summary: Data temporarily unavailable
+              value:
+                code: 5003
+                message: Data is temporarily unavailable
+                data: null
+            notFound:
+              summary: No matching data
+              value:
+                code: 40404
+                message: shareholder detail not found
+                data: null
+            businessNoData:
+              summary: No business data matches the query
+              value:
+                code: 40405
+                message: valuation time series not found
+                data: null
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required:
+        - code
+        - data
+      properties:
+        code:
+          type: integer
+          const: 0
+          description: Business status code; `0` means success.
+    APIKeyStatusEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required:
+            - data
+          properties:
+            message:
+              type: string
+              description: Response message.
+            data:
+              $ref: "#/components/schemas/APIKeyStatusData"
+    APIKeyStatusData:
+      type: object
+      required:
+        - server_time
+        - total
+        - api_keys
+      properties:
+        server_time:
+          type: string
+          format: date-time
+          description: Server time of this request, as a date-time string with a time zone.
+        total:
+          type: integer
+          minimum: 0
+          description: Number of API keys returned.
+        api_keys:
+          type: array
+          description: API keys under the account.
+          items:
+            $ref: "#/components/schemas/APIKeyStatusItem"
+      additionalProperties: false
+    APIKeyStatusItem:
+      type: object
+      required:
+        - key_prefix
+        - name
+        - plan
+        - status
+        - expires_at
+        - remaining_seconds
+        - created_at
+      properties:
+        key_prefix:
+          type: string
+          description: Prefix used to identify the key; this is not the complete key.
+        name:
+          type: string
+          description: API key name.
+        plan:
+          type: string
+          description: Plan identifier associated with the key.
+        status:
+          type: string
+          enum:
+            - active
+            - expired
+            - suspended
+            - revoked
+          description: "Key status: `active`, `expired`, `suspended`, or `revoked`."
+        expires_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: Expiration time, or `null` if no expiration is set.
+        remaining_seconds:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          description: Seconds until expiration; `0` if expired, or `null` if no expiration is set.
+        created_at:
+          type: string
+          format: date-time
+          description: API key creation time.
+      additionalProperties: false
+    ErrorEnvelope:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          description: TickDB API business error code; may be an integer or string. Convert it to a string before comparing.
+          oneOf:
+            - type: integer
+            - type: string
+        message:
+          type: string
+          description: Error description.
+        error:
+          type: string
+          description: Compatibility error identifier; present only in some error responses.
+        data:
+          description: Optional error context; may be null, an object, or an array.
+          oneOf:
+            - type: "null"
+            - type: object
+              additionalProperties: true
+            - type: array
+              items: {}
+    ProfileEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ProfileData"
+    ProfileData:
+      type: object
+      description: Company profile data.
+      required:
+        - symbol
+        - market
+        - name
+      properties:
+        symbol:
+          type: string
+          description: Normalized stock symbol.
+        name:
+          type: string
+          description: Display name.
+        company_name:
+          type: string
+          description: Full company name.
+        market:
+          type: string
+          description: Market.
+        region:
+          type: string
+          description: Region.
+        founded:
+          type:
+            - string
+            - "null"
+          description: Founding year or date; `null` when unavailable.
+        listing_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Listing date in `YYYY-MM-DD` format; may be `null`.
+        year_end:
+          type:
+            - string
+            - "null"
+          description: Fiscal year-end information; may be `null`.
+        address:
+          type: string
+          description: Address.
+        office_address:
+          type: string
+          description: Office address.
+        phone:
+          type: string
+          description: Telephone number.
+        email:
+          type: string
+          description: Email address.
+        website:
+          type: string
+          description: Company website.
+        employees:
+          type: integer
+          description: Number of employees.
+        chairman:
+          type: string
+          description: Chairperson.
+        manager:
+          type: string
+          description: Principal manager.
+        secretary:
+          type: string
+          description: Company secretary.
+        legal_repr:
+          type: string
+          description: Legal representative.
+        accounting_firm:
+          type: string
+          description: Accounting firm.
+        legal_counsel:
+          type: string
+          description: Legal counsel.
+        category:
+          type: string
+          description: Company category.
+        profile:
+          type: string
+          description: Business profile.
+      additionalProperties: false
+    ExecutivesEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ExecutivesData"
+    ExecutivesData:
+      type: object
+      description: Executive and director data.
+      required:
+        - symbol
+        - total
+        - members
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of people.
+        members:
+          type: array
+          description: Executives, directors, and key personnel.
+          items:
+            $ref: "#/components/schemas/Executive"
+      additionalProperties: true
+    Executive:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name.
+        title:
+          type: string
+          description: Position or title.
+        biography:
+          type: string
+          description: Biography.
+      additionalProperties: true
+    FinancialRowsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/FinancialRowsData"
+    FinancialRowsData:
+      type: object
+      description: Financial statement data. Numeric values are returned as strings to avoid JSON floating-point precision loss.
+      required:
+        - symbol
+        - kind
+        - rows
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        kind:
+          type: string
+          enum:
+            - IS
+            - BS
+            - CF
+          description: "Statement type: `IS` income statement, `BS` balance sheet, or `CF` cash flow statement."
+        rows:
+          type: array
+          description: Metric records for the selected statement type; a reporting period usually contains multiple records.
+          items:
+            $ref: "#/components/schemas/FinancialRow"
+      additionalProperties: true
+    FinancialRow:
+      type: object
+      required:
+        - kind
+        - period_type
+        - fiscal_year
+        - fiscal_period
+        - period_end
+        - field_name
+        - indicator_title
+        - value
+      properties:
+        kind:
+          type: string
+          enum:
+            - IS
+            - BS
+            - CF
+          description: "Statement type: `IS` income statement, `BS` balance sheet, or `CF` cash flow statement."
+        field_name:
+          type: string
+          description: Financial field code; see the [Financial Field Dictionary](./financial_fields_dictionary).
+        indicator_title:
+          type: string
+          description: Metric title.
+        field_display:
+          type: string
+          description: Display name.
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: "null"
+          description: Field value returned as a string.
+        fiscal_year:
+          type: integer
+          description: Fiscal year.
+        fiscal_period:
+          type: string
+          description: Reporting period.
+        period_type:
+          type: string
+          description: "Reporting period type: `q1` to `q4` are the four quarters, `saf` is semiannual, `af` is annual, and `ttm` is trailing 12 months."
+        period_end:
+          type: string
+          format: date
+          description: Period end date in `YYYY-MM-DD` format.
+        currency:
+          type:
+            - string
+            - "null"
+          description: Currency.
+        is_percent:
+          type: boolean
+          description: Whether this is a percentage field.
+        yoy:
+          type:
+            - string
+            - number
+            - "null"
+          description: Year-over-year change; may be `null`.
+        ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: Ratio; may be `null`.
+      additionalProperties: true
+    SegmentsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/SegmentsData"
+    SegmentsLatestEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/SegmentsLatestData"
+    SegmentsLatestData:
+      type: object
+      description: Most recent revenue breakdown data.
+      required:
+        - symbol
+        - segments
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        segments:
+          type: array
+          description: Latest revenue breakdown.
+          items:
+            $ref: "#/components/schemas/SegmentItem"
+      additionalProperties: false
+    SegmentsData:
+      type: object
+      required:
+        - symbol
+        - segments
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        report:
+          type:
+            - string
+            - "null"
+          description: "Requested reporting period: `qf` quarterly, `saf` semiannual, or `af` annual; may be `null` when not specified."
+        segments:
+          type: array
+          description: Revenue breakdowns for historical reporting periods.
+          items:
+            $ref: "#/components/schemas/SegmentItem"
+      additionalProperties: true
+    SegmentItem:
+      type: object
+      required:
+        - report
+        - category
+        - segment_name
+        - period_start
+        - period_end
+        - value
+      properties:
+        report:
+          type: string
+          description: "Reporting period: `qf` quarterly, `saf` semiannual, or `af` annual."
+        category:
+          type: string
+          description: "Breakdown dimension: `business` by business or `regional` by region."
+        segment_name:
+          type: string
+          description: Business segment or region name.
+        period_start:
+          type: string
+          format: date
+          description: Period start date in `YYYY-MM-DD` format.
+        period_end:
+          type: string
+          format: date
+          description: Period end date in `YYYY-MM-DD` format.
+        total_revenue:
+          type:
+            - string
+            - number
+            - "null"
+          description: Total revenue for the reporting period.
+        currency:
+          type:
+            - string
+            - "null"
+          description: Amount currency.
+        percent:
+          type:
+            - string
+            - number
+            - "null"
+          description: Percentage of total period revenue, for example `79.74` means 79.74%.
+        value:
+          type:
+            - string
+            - number
+            - "null"
+          description: Revenue amount for the business segment or region.
+      additionalProperties: true
+    ValuationLatestEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ValuationLatestData"
+    ValuationLatestData:
+      type: object
+      required:
+        - symbol
+        - metrics
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        metrics:
+          type: object
+          required:
+            - PE
+          properties:
+            PE:
+              $ref: "#/components/schemas/ValuationMetricSnapshot"
+          additionalProperties: false
+      additionalProperties: true
+    ValuationMetricSnapshot:
+      type: object
+      required:
+        - value
+        - high_1y
+        - low_1y
+        - median_1y
+        - desc
+      properties:
+        value:
+          type:
+            - string
+            - number
+            - "null"
+          description: Current metric value.
+        high_1y:
+          type:
+            - string
+            - number
+            - "null"
+          description: One-year high.
+        low_1y:
+          type:
+            - string
+            - number
+            - "null"
+          description: One-year low.
+        median_1y:
+          type:
+            - string
+            - number
+            - "null"
+          description: One-year median.
+        desc:
+          type:
+            - string
+            - "null"
+          description: Metric description; may be `null`.
+      additionalProperties: true
+    ValuationTimeSeriesEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ValuationTimeSeriesData"
+    ValuationTimeSeriesData:
+      type: object
+      required:
+        - symbol
+        - metric
+        - granularity
+        - from
+        - to
+        - points
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        metric:
+          type: string
+          enum:
+            - PE
+          description: Valuation metric; currently `PE` (price-to-earnings ratio).
+        granularity:
+          type: string
+          enum:
+            - daily
+            - monthly
+          description: Daily or monthly time granularity.
+        from:
+          type: string
+          format: date
+          description: Query range start date in `YYYY-MM-DD` format.
+        to:
+          type: string
+          format: date
+          description: Query range end date in `YYYY-MM-DD` format.
+        points:
+          type: array
+          description: Historical valuation records, each represented as `[time, metric value]`.
+          items:
+            $ref: "#/components/schemas/MetricPoint"
+      additionalProperties: true
+    MetricPoint:
+      type: array
+      minItems: 2
+      maxItems: 2
+      prefixItems:
+        - type: string
+          format: date-time
+          description: RFC 3339 date-time string with time zone information.
+        - type:
+            - string
+            - number
+            - "null"
+          description: Metric value.
+      items: false
+    IndustryPeersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/IndustryPeersData"
+    IndustryPeersData:
+      type: object
+      required:
+        - parent_symbol
+        - peers
+      properties:
+        parent_symbol:
+          type: string
+          description: Queried stock symbol.
+        peers:
+          type: array
+          description: Peer companies and comparable metrics.
+          items:
+            $ref: "#/components/schemas/PeerItem"
+      additionalProperties: true
+    PeerItem:
+      type: object
+      required:
+        - peer_symbol
+        - peer_name
+      properties:
+        peer_symbol:
+          type: string
+          description: Peer stock symbol.
+        peer_name:
+          type: string
+          description: Peer company name.
+        currency:
+          type:
+            - string
+            - "null"
+          description: Metric currency.
+        assets:
+          type:
+            - string
+            - number
+            - "null"
+          description: Asset metric.
+        bps:
+          type:
+            - string
+            - number
+            - "null"
+          description: Book value per share.
+        eps:
+          type:
+            - string
+            - number
+            - "null"
+          description: Earnings per share.
+        dps:
+          type:
+            - string
+            - number
+            - "null"
+          description: Dividend per share.
+        div_yield:
+          type:
+            - string
+            - number
+            - "null"
+          description: Dividend yield.
+        div_payout_ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: Dividend payout ratio.
+        five_y_avg_dps:
+          type:
+            - string
+            - number
+            - "null"
+          description: Five-year average dividend per share.
+        pe:
+          type:
+            - string
+            - number
+            - "null"
+          description: Price-to-earnings ratio.
+      additionalProperties: true
+    IndustryDistributionEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/IndustryDistributionData"
+    IndustryDistributionData:
+      type: object
+      required:
+        - symbol
+        - distributions
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        distributions:
+          type: array
+          description: Industry valuation distributions.
+          items:
+            $ref: "#/components/schemas/IndustryDistributionItem"
+      additionalProperties: true
+    IndustryDistributionItem:
+      type: object
+      required:
+        - metric
+        - low
+        - high
+        - median
+        - value
+        - ranking
+        - rank_index
+        - rank_total
+      properties:
+        metric:
+          type: string
+          description: Valuation metric code.
+        low:
+          type:
+            - string
+            - number
+            - "null"
+          description: Industry sample low.
+        high:
+          type:
+            - string
+            - number
+            - "null"
+          description: Industry sample high.
+        median:
+          type:
+            - string
+            - number
+            - "null"
+          description: Industry sample median.
+        value:
+          type:
+            - string
+            - number
+            - "null"
+          description: Current stock's metric value.
+        ranking:
+          type:
+            - string
+            - number
+            - "null"
+          description: Display value for the ranking.
+        rank_index:
+          type: integer
+          minimum: 0
+          description: Current rank.
+        rank_total:
+          type: integer
+          minimum: 0
+          description: Total sample size.
+      additionalProperties: true
+    IndustriesRankEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/IndustriesRankData"
+    IndustriesRankData:
+      type: object
+      required:
+        - market
+        - indicator
+        - sort_type
+        - items
+      properties:
+        market:
+          type: string
+          description: Queried market.
+        indicator:
+          type: string
+          description: Ranking metric.
+        sort_type:
+          type: string
+          description: Sort order.
+        items:
+          type: array
+          description: Ranked industry metrics.
+          items:
+            $ref: "#/components/schemas/IndustryRankItem"
+      additionalProperties: true
+    IndustryRankItem:
+      type: object
+      required:
+        - industry_counter_id
+        - industry_name
+        - rank
+        - value
+        - change_percent
+      properties:
+        industry_counter_id:
+          type: string
+          description: Industry node ID.
+        industry_name:
+          type: string
+          description: Industry name.
+        rank:
+          type: integer
+          description: Rank.
+        value:
+          type:
+            - string
+            - number
+          description: Total industry market capitalization.
+        change_percent:
+          type:
+            - string
+            - number
+            - "null"
+          description: Percentage change.
+      additionalProperties: true
+    IndustriesTreeEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/IndustriesTreeData"
+    IndustriesTreeData:
+      type: object
+      required:
+        - market
+        - industry_counter_id
+        - top
+        - chain
+      properties:
+        market:
+          type: string
+          description: Queried market.
+        industry_counter_id:
+          type: string
+          description: Industry node ID.
+        top:
+          $ref: "#/components/schemas/IndustryTop"
+        chain:
+          $ref: "#/components/schemas/IndustryChainNode"
+      additionalProperties: true
+    IndustryTop:
+      type: object
+      required:
+        - name
+        - market
+      properties:
+        name:
+          type: string
+          description: Top-level industry name.
+        market:
+          type: string
+          description: Queried market.
+      additionalProperties: false
+    IndustryChainNode:
+      type: object
+      required:
+        - name
+        - level
+        - market
+        - counter_id
+        - next
+      properties:
+        name:
+          type: string
+          description: Industry name.
+        level:
+          type: integer
+          description: Node level.
+        market:
+          type: string
+          description: Queried market.
+        counter_id:
+          type: string
+          description: Industry node ID.
+        parent_code:
+          type: string
+          description: Parent node code.
+        sharelist_id:
+          type: string
+          description: Stock-list ID.
+        symbol:
+          type: string
+          description: Associated node symbol.
+        stock_num:
+          type: integer
+          minimum: 0
+          description: Number of stocks.
+        chg:
+          type:
+            - string
+            - number
+            - "null"
+          description: Change value.
+        ytd_chg:
+          type:
+            - string
+            - number
+            - "null"
+          description: Year-to-date change.
+        next:
+          type: array
+          description: Child industry categories; each element recursively uses the same node structure.
+          items:
+            $ref: "#/components/schemas/IndustryChainNode"
+      additionalProperties: false
+    DividendsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required:
+            - page
+          properties:
+            data:
+              $ref: "#/components/schemas/DividendData"
+            page:
+              $ref: "#/components/schemas/PageInfo"
+    DividendsTTMEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/DividendTTMData"
+    BuybackEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/BuybackData"
+    CorporateActionsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CorporateActionsData"
+    DividendData:
+      type: object
+      required:
+        - symbol
+        - events
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        events:
+          type: array
+          description: Dividend events matching the filters.
+          items:
+            $ref: "#/components/schemas/DividendEvent"
+      additionalProperties: true
+    DividendEvent:
+      type: object
+      required:
+        - event_id
+        - type
+        - distribution_kind
+        - description
+        - amount
+        - stock_distribution_ratio
+        - currency
+        - declaration_date
+        - record_date
+        - ex_date
+        - payment_date
+        - detail_level
+      properties:
+        event_id:
+          type: string
+          description: Event ID.
+        type:
+          type: string
+          enum:
+            - normal
+            - special
+            - non_cash
+            - unknown
+          description: Dividend type.
+        distribution_kind:
+          type: string
+          enum:
+            - cash
+            - stock
+            - other_non_cash
+            - unknown
+          description: Distribution form.
+        description:
+          type:
+            - string
+            - "null"
+          description: Event description.
+        amount:
+          type:
+            - string
+            - "null"
+          description: Per-share cash amount; may be `null` for non-cash distributions.
+        stock_distribution_ratio:
+          type:
+            - string
+            - "null"
+          description: Bonus-share or capitalization ratio per share; for example, `0.7` means 0.7 additional shares per share, or 7 per 10 shares.
+        currency:
+          type:
+            - string
+            - "null"
+          description: Currency.
+        declaration_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Declaration date in `YYYY-MM-DD` format; may be `null`.
+        record_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Record date in `YYYY-MM-DD` format; may be `null`.
+        ex_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Ex-dividend date in `YYYY-MM-DD` format; may be `null`.
+        payment_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Payment date in `YYYY-MM-DD` format; may be `null`.
+        detail_level:
+          type: string
+          enum:
+            - summary
+            - detail
+          description: Detail level.
+      additionalProperties: true
+    DividendTTMData:
+      type: object
+      required:
+        - symbol
+        - as_of_date
+        - window_start_exclusive
+        - currencies
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        as_of_date:
+          type: string
+          format: date
+          description: TTM as-of date in `YYYY-MM-DD` format.
+        window_start_exclusive:
+          type: string
+          format: date
+          description: Exclusive start of the latest-12-month window in `YYYY-MM-DD` format.
+        currencies:
+          type: array
+          description: Cash dividends aggregated separately by currency.
+          items:
+            $ref: "#/components/schemas/DividendTTMCurrency"
+      additionalProperties: true
+    DividendTTMCurrency:
+      type: object
+      required:
+        - currency
+        - normal_cash_dps_ttm
+        - special_cash_dps_ttm
+        - total_cash_dps_ttm
+        - normal_event_count
+        - special_event_count
+      properties:
+        currency:
+          type: string
+        normal_cash_dps_ttm:
+          type: string
+        special_cash_dps_ttm:
+          type: string
+        total_cash_dps_ttm:
+          type: string
+        normal_event_count:
+          type: integer
+          minimum: 0
+        special_event_count:
+          type: integer
+          minimum: 0
+      additionalProperties: true
+    BuybackData:
+      type: object
+      required:
+        - symbol
+        - currency
+        - ttm
+        - history
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        currency:
+          type: string
+          description: Buyback amount currency.
+        ttm:
+          $ref: "#/components/schemas/BuybackTTM"
+        history:
+          type: array
+          description: Historical annual buyback records.
+          items:
+            $ref: "#/components/schemas/BuybackHistoryItem"
+      additionalProperties: true
+    BuybackTTM:
+      type: object
+      required:
+        - net_buyback
+        - net_buyback_yield
+        - buyback_payout_ratio
+        - buyback_to_cashflow_ratio
+      properties:
+        net_buyback:
+          type:
+            - string
+            - number
+            - "null"
+          description: Net buyback amount.
+        net_buyback_yield:
+          type:
+            - string
+            - number
+            - "null"
+          description: Net buyback yield; may be `null`.
+        buyback_payout_ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: Buyback payout ratio; may be `null`.
+        buyback_to_cashflow_ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: Buyback-to-cash-flow ratio; may be `null`.
+      additionalProperties: true
+    BuybackHistoryItem:
+      type: object
+      required:
+        - currency
+        - fiscal_year
+        - fiscal_year_range
+        - net_buyback
+        - net_buyback_yield
+        - net_buyback_growth_rate
+      properties:
+        currency:
+          type: string
+          description: Buyback amount currency.
+        fiscal_year:
+          type: string
+          description: Fiscal year.
+        fiscal_year_range:
+          type: string
+          description: Fiscal-year date range text, for example `2024/01/01 - 2024/12/31`.
+        net_buyback:
+          type:
+            - string
+            - number
+            - "null"
+          description: Net buyback amount.
+        net_buyback_yield:
+          type:
+            - string
+            - number
+            - "null"
+          description: Net buyback yield; may be `null`.
+        net_buyback_growth_rate:
+          type:
+            - string
+            - number
+            - "null"
+          description: Net buyback growth rate; may be `null`.
+      additionalProperties: false
+    CorporateActionsData:
+      type: object
+      required:
+        - symbol
+        - events
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        events:
+          type: array
+          description: Corporate-action events.
+          items:
+            $ref: "#/components/schemas/CorporateActionItem"
+      additionalProperties: true
+    CorporateActionItem:
+      type: object
+      required:
+        - event_id
+        - event_date
+        - date_type
+        - date_zone
+        - act_type
+        - act_desc
+        - action_code
+        - is_recent
+      properties:
+        event_id:
+          type: string
+          description: Event ID.
+        event_date:
+          type: string
+          format: date
+          description: Event date in `YYYY-MM-DD` format.
+        date_type:
+          type: string
+          description: Date type.
+        date_zone:
+          type: string
+          description: Time zone.
+        act_type:
+          type: string
+          description: Action type.
+        act_desc:
+          type: string
+          description: Action description.
+        action_code:
+          type: string
+          description: Action code.
+        is_recent:
+          type: boolean
+          description: Whether this is a recent event.
+      additionalProperties: true
+    LatestShareholdersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/LatestShareholdersData"
+    LatestShareholdersData:
+      type: object
+      required:
+        - symbol
+        - report_date
+        - total
+        - members
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        report_date:
+          type: string
+          format: date
+          description: Report date in `YYYY-MM-DD` format.
+        total:
+          type: integer
+          description: Total number of shareholder records.
+        members:
+          type: array
+          description: Shareholder record list.
+          items:
+            $ref: "#/components/schemas/LatestShareholderMember"
+      additionalProperties: false
+    LatestShareholderMember:
+      type: object
+      required:
+        - shareholder_name
+        - percent_of_shares
+        - shares_changed
+        - report_date
+      properties:
+        shareholder_name:
+          type: string
+          description: Shareholder name.
+        percent_of_shares:
+          type: string
+          description: Shareholding percentage value without the percent sign.
+        shares_changed:
+          type: string
+          description: Change in shares from the previous reporting period.
+        report_date:
+          type: string
+          format: date
+          description: Report date in `YYYY-MM-DD` format.
+      additionalProperties: false
+    TopShareholdersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/TopShareholdersData"
+    TopShareholdersData:
+      type: object
+      required:
+        - symbol
+        - total
+        - periods
+        - info
+        - members
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        total:
+          type: integer
+          description: Total number of summarized records.
+        periods:
+          type: array
+          items:
+            type: string
+          description: Available reporting periods.
+        info:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopShareholderPeriod"
+          description: Shareholder holdings grouped by reporting period.
+        members:
+          type: array
+          description: Normalized shareholder records.
+          items:
+            $ref: "#/components/schemas/TopShareholderMember"
+      additionalProperties: false
+    TopShareholderPeriod:
+      type: object
+      required:
+        - period
+        - share_holders
+      properties:
+        period:
+          type: string
+          description: Reporting period.
+        share_holders:
+          type: array
+          description: Shareholder list for the reporting period.
+          items:
+            $ref: "#/components/schemas/TopShareholderPeriodMember"
+      additionalProperties: false
+    TopShareholderPeriodMember:
+      type: object
+      required:
+        - filing_date
+        - name
+        - object_id
+        - percent_shares_changed
+        - percent_shares_held
+        - period
+        - shares_changed
+        - shares_held
+      properties:
+        filing_date:
+          type: string
+          description: Original filing-date text, for example `2026/05/07`.
+        name:
+          type: string
+          description: Shareholder name.
+        object_id:
+          type: string
+          description: Shareholder object ID.
+        percent_shares_changed:
+          type: string
+          description: Change in ownership percentage, including the percent sign.
+        percent_shares_held:
+          type: string
+          description: Ownership percentage, including the percent sign.
+        period:
+          type: string
+          description: Reporting period.
+        shares_changed:
+          type: string
+          description: Change in shares.
+        shares_held:
+          type: string
+          description: Number of shares held, returned as a string.
+      additionalProperties: false
+    TopShareholderMember:
+      type: object
+      required:
+        - object_id
+        - shareholder_name
+        - shareholder_type
+        - shares_held
+        - percent_shares_held
+        - percent_shares_held_raw
+        - percent_shares_changed
+        - filing_date
+        - report_date
+        - detail_available
+      properties:
+        object_id:
+          type: string
+          description: Shareholder object ID.
+        shareholder_name:
+          type: string
+          description: Shareholder name.
+        shareholder_type:
+          type:
+            - string
+            - "null"
+          description: Shareholder type.
+        shares_held:
+          type: string
+          description: Number of shares held, returned as a string.
+        percent_shares_held:
+          type:
+            - string
+            - "null"
+          description: Ownership percentage as a number without the percent sign; `null` if it cannot be converted.
+        percent_shares_held_raw:
+          type: string
+          description: Original ownership percentage text, including the percent sign and representations such as `<0.01%`.
+        percent_shares_changed:
+          type:
+            - string
+            - "null"
+          description: Ownership percentage change as a number without the percent sign; `null` if it cannot be converted.
+        filing_date:
+          type: string
+          format: date
+          description: Original filing-date text, for example `2026/05/07`.
+        report_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: Report date in `YYYY-MM-DD` format; may be `null`.
+        detail_available:
+          type: boolean
+          description: Whether shareholder details can be queried.
+      additionalProperties: false
+    ShareholderDetailEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ShareholderDetailData"
+    ShareholderDetailData:
+      type: object
+      required:
+        - symbol
+        - object_id
+        - name
+        - holding_summary
+        - holding_periods
+        - holding_details
+        - trading_periods
+        - tradings
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        object_id:
+          type: string
+          description: Shareholder object ID.
+        name:
+          type: string
+          description: Shareholder name.
+        title:
+          type:
+            - string
+            - "null"
+          description: Shareholder or institution title.
+        holding_summary:
+          type: array
+          description: Holdings summary by reporting period.
+          items:
+            $ref: "#/components/schemas/ShareholderHoldingSummary"
+        holding_periods:
+          type: array
+          description: Available holding reporting periods.
+          items:
+            type: string
+        holding_details:
+          type: array
+          description: Holding details by reporting period.
+          items:
+            $ref: "#/components/schemas/ShareholderHoldingDetail"
+        trading_periods:
+          type: array
+          description: Available trading-statistics periods.
+          items:
+            type: string
+        tradings:
+          type: array
+          description: Trading summary by period.
+          items:
+            $ref: "#/components/schemas/ShareholderTradingSummary"
+      additionalProperties: false
+    ShareholderHoldingSummary:
+      type: object
+      required:
+        - accum_buy
+        - accum_sell
+        - percent_stock_price_changed
+        - period
+        - stock_price
+      properties:
+        accum_buy:
+          type: string
+          description: Cumulative number of shares purchased during the period.
+        accum_sell:
+          type: string
+          description: Cumulative number of shares sold during the period.
+        percent_stock_price_changed:
+          type: string
+          description: Stock-price percentage change during the period, including the percent sign.
+        period:
+          type: string
+          description: Reporting period.
+        stock_price:
+          type: string
+          description: Stock price associated with the reporting period.
+      additionalProperties: false
+    ShareholderHoldingDetail:
+      type: object
+      required:
+        - filing_date
+        - name
+        - object_id
+        - percent_shares_changed
+        - percent_shares_held
+        - period
+        - shares_changed
+        - shares_held
+      properties:
+        filing_date:
+          type: string
+          description: Original filing-date text, for example `2026/05/07`.
+        name:
+          type: string
+          description: Shareholder name.
+        object_id:
+          type: string
+          description: Shareholder object ID.
+        percent_shares_changed:
+          type: string
+          description: Change in ownership percentage, including the percent sign.
+        percent_shares_held:
+          type: string
+          description: Ownership percentage, including the percent sign.
+        period:
+          type: string
+          description: Reporting period.
+        shares_changed:
+          type: string
+          description: Change in shares.
+        shares_held:
+          type: string
+          description: Number of shares held.
+      additionalProperties: false
+    ShareholderTradingSummary:
+      type: object
+      required:
+        - accum_buy
+        - accum_sell
+        - net_buy
+        - period
+        - trading_details
+      properties:
+        accum_buy:
+          type: string
+          description: Cumulative number of shares purchased during the period.
+        accum_sell:
+          type: string
+          description: Cumulative number of shares sold during the period.
+        net_buy:
+          type: string
+          description: Net number of shares purchased during the period.
+        period:
+          type: string
+          description: Trading-statistics period.
+        trading_details:
+          type: array
+          description: Trading detail list for the period.
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: false
+    FundHoldingsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required:
+            - page
+          properties:
+            data:
+              $ref: "#/components/schemas/FundHoldingsData"
+            page:
+              $ref: "#/components/schemas/PageInfo"
+    PageInfo:
+      type: object
+      required:
+        - next_cursor
+        - limit
+      properties:
+        next_cursor:
+          type:
+            - string
+            - "null"
+          description: Cursor for the next page; pass a non-empty value unchanged as the next request’s `cursor` parameter. `null` on the final page.
+        limit:
+          type: integer
+          minimum: 1
+          description: Current page limit.
+      additionalProperties: true
+    FundHoldingsData:
+      type: object
+      required:
+        - symbol
+        - total
+        - members
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        total:
+          type: integer
+          description: Total number of fund records holding the stock.
+        members:
+          type: array
+          description: Funds that disclose holdings in the stock.
+          items:
+            $ref: "#/components/schemas/FundHoldingMember"
+      additionalProperties: true
+    FundHoldingMember:
+      type: object
+      required:
+        - fund_code
+        - fund_symbol
+        - fund_name
+        - currency
+        - position_ratio
+        - report_date
+      properties:
+        fund_code:
+          type: string
+          description: Fund code.
+        fund_symbol:
+          type: string
+          description: Standardized fund symbol.
+        fund_name:
+          type: string
+          description: Fund name.
+        currency:
+          type: string
+          description: Currency.
+        position_ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: Weight of the stock in the fund's holdings.
+        report_date:
+          type: string
+          format: date
+          description: Report date in `YYYY-MM-DD` format.
+      additionalProperties: true
+    NewsEnvelope:
+      type: object
+      required:
+        - code
+        - data
+      properties:
+        code:
+          type: integer
+          const: 0
+        data:
+          $ref: "#/components/schemas/NewsData"
+      additionalProperties: false
+    NewsData:
+      type: object
+      required:
+        - symbol
+        - limit
+        - news
+      properties:
+        symbol:
+          type: string
+          description: Stock symbol.
+        limit:
+          type: integer
+          description: Maximum number of records for this request.
+        news:
+          type: array
+          description: News list.
+          items:
+            $ref: "#/components/schemas/NewsItem"
+      additionalProperties: false
+    NewsItem:
+      type: object
+      required:
+        - news_id
+        - title
+        - description
+        - published_at
+        - has_body
+      properties:
+        news_id:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          description: News ID, which can be used to query details.
+        title:
+          type: string
+          description: News title.
+        description:
+          type:
+            - string
+            - "null"
+          description: News summary.
+        published_at:
+          type: string
+          format: date-time
+          description: Publication time as an RFC 3339 date-time string in UTC.
+        has_body:
+          type: boolean
+          description: Whether an article body is available.
+      additionalProperties: false
+    NewsDetailEnvelope:
+      type: object
+      required:
+        - code
+        - data
+      properties:
+        code:
+          type: integer
+          const: 0
+        data:
+          $ref: "#/components/schemas/NewsDetailItem"
+      additionalProperties: false
+    NewsDetailItem:
+      type: object
+      required:
+        - news_id
+        - title
+        - description
+        - published_at
+        - detail_status
+        - content_scope
+        - body_text
+        - body_html
+      properties:
+        news_id:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          description: News ID.
+        title:
+          type: string
+          description: News title.
+        description:
+          type:
+            - string
+            - "null"
+          description: News summary.
+        published_at:
+          type: string
+          format: date-time
+          description: Publication time as an RFC 3339 date-time string in UTC.
+        detail_status:
+          type: string
+          enum:
+            - pending
+            - succeeded
+            - blocked
+            - failed
+        content_scope:
+          type: string
+          enum:
+            - full
+            - excerpt
+            - unknown
+            - none
+        body_text:
+          type:
+            - string
+            - "null"
+          description: Plain-text body; may be `null` when unavailable.
+        body_html:
+          type:
+            - string
+            - "null"
+          description: HTML body; may be `null` when unavailable.
+      additionalProperties: false
+    NewsErrorEnvelope:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          description: TickDB API business error code; may be an integer or string.
+          oneOf:
+            - type: integer
+            - type: string
+        message:
+          type: string
+          description: Error description.
+        error:
+          type: string
+          description: Compatibility error identifier; present only in some error responses.
+        data:
+          description: Optional error context.
+          oneOf:
+            - type: "null"
+            - type: object
+              additionalProperties: true
+            - type: array
+              items: {}
+      additionalProperties: true
+    CalendarEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required:
+            - page
+          properties:
+            data:
+              $ref: "#/components/schemas/CalendarData"
+            page:
+              $ref: "#/components/schemas/CalendarPage"
+    CalendarPage:
+      type: object
+      required:
+        - next_cursor
+        - limit
+      properties:
+        next_cursor:
+          type:
+            - string
+            - "null"
+          description: Next-page cursor; `null` on the final page.
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 500
+          description: Current page limit.
+      additionalProperties: false
+    CalendarData:
+      type: object
+      required:
+        - from
+        - to
+        - events
+      properties:
+        from:
+          type: string
+          format: date
+          description: Query start date, `YYYY-MM-DD`.
+        to:
+          type: string
+          format: date
+          description: Query end date, `YYYY-MM-DD`.
+        events:
+          type: array
+          description: Events on this page; an empty array if none match.
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/FullCalendarEvent"
+      additionalProperties: false
+    FullCalendarEvent:
+      type: object
+      required:
+        - category
+        - content
+        - counter_name
+        - currency
+        - date_type
+        - event_datetime
+        - event_type
+        - market
+        - star
+        - symbol
+      properties:
+        category:
+          type: string
+          description: Detailed event category; may be more specific than the request category.
+        event_datetime:
+          type: string
+          format: date-time
+          description: Event time as a UTC date-time string.
+        symbol:
+          type: string
+          description: Associated product symbol; may be empty when not applicable.
+        market:
+          type: string
+          enum:
+            - US
+            - HK
+            - CN
+          description: Associated market.
+        event_type:
+          type: string
+          description: Event type.
+        content:
+          type: string
+          description: Event description.
+        counter_name:
+          type:
+            - string
+            - "null"
+          description: Associated name; may be `null`.
+        date_type:
+          type:
+            - string
+            - "null"
+          description: Event date type; may be `null`.
+        star:
+          type: integer
+          description: Importance level.
+        currency:
+          type:
+            - string
+            - "null"
+          description: Currency; may be `null`.
+        issue_price:
+          type:
+            - string
+            - "null"
+          description: IPO issue price; returned for applicable events and `null` when unavailable.
+        data:
+          type: array
+          description: Additional event data; omitted when unavailable.
+          items:
+            $ref: "#/components/schemas/CalendarEventData"
+      additionalProperties: false
+    CalendarEventData:
+      type: object
+      required:
+        - key
+        - value_type
+        - value_text
+        - value_raw
+      properties:
+        key:
+          type: string
+          description: Additional-data key.
+        value_type:
+          type: string
+          description: Value type.
+        value_text:
+          type:
+            - string
+            - "null"
+          description: Display value; may be `null`.
+        value_raw:
+          type:
+            - string
+            - "null"
+          description: Raw value; may be `null`.
+      additionalProperties: false
+    FullMarketTicker:
+      type: object
+      required:
+        - symbol
+        - last_price
+        - timestamp
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          description: Trading product symbol.
+        name:
+          type: string
+          description: Product name.
+        type:
+          type: string
+          enum:
+            - stock
+            - indices
+          description: "Product type: `stock` for equity-like products or `indices` for indices."
+        category:
+          type: string
+          enum:
+            - sh_stock
+            - sz_stock
+            - bj_stock
+            - etf
+            - cn_index
+            - cn_bond
+          description: A-share product subcategory; returned only in the A-share full-market feed.
+        last_price:
+          type: string
+          description: Latest traded price.
+        open:
+          type: string
+          description: Current-day open; omitted when unavailable.
+        prev_close:
+          type: string
+          description: Previous trading day's close; omitted when unavailable.
+        volume_24h:
+          type: string
+          description: Current-day cumulative volume.
+        quote_volume_24h:
+          type: string
+          description: Current-day cumulative traded value.
+        high_24h:
+          type: string
+          description: Current-day high.
+        low_24h:
+          type: string
+          description: Current-day low.
+        price_change_24h:
+          type: string
+          description: Price change from the previous close.
+        price_change_percent_24h:
+          type: string
+          description: Percentage price change from the previous close.
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds.
+    FullMarketTickerResponse:
+      type: object
+      required:
+        - code
+        - message
+        - data
+      additionalProperties: false
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FullMarketTicker"
+x-user-api-scope:
+  primary_user_api_count: 25
+  authentication: X-API-Key
+x-fundamentals-product-scope:
+  supported_stock_categories:
+    - market: US
+      exchanges:
+        - NASDAQ
+        - NYSE
+        - AMEX
+      category: stock
+    - market: HK
+      exchanges:
+        - HKEX
+      category: stock
+    - market: CN
+      exchanges:
+        - SH
+        - SZ
+      category: stock
+  unsupported_upstream_categories:
+    - US_ARCA
+    - US_BATS
+    - CN_BJ_STOCK
+    - CN_SH_ETF
+    - CN_SZ_ETF
+  unsupported_behavior: 不承诺 fundamentals 数据可用性；当前接口行为包括结构化 404 或格式正确的成功空响应。
+paths:
+  /v1/apikeys/subscriptions:
+    get:
+      tags:
+        - account
+      summary: API Key Management
+      description: Check when your API keys expire and set up alerts without signing in to the website.
+      operationId: getAPIKeyStatus
+      responses:
+        "200":
+          $ref: "#/components/responses/APIKeyStatusResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/market/ticker:
+    get:
+      summary: Ticker Snapshot
+      description: Retrieve real-time market ticker data for one or more trading symbols.
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Trading symbol codes, comma-separated, max 50
+          schema:
+            type: string
+            default: 700.HK,AAPL.US
+            example: 700.HK,AAPL.US
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                  - message
+                  - data
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - symbol
+                        - last_price
+                        - timestamp
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          description: Trading Symbol
+                        name:
+                          type: string
+                          description: Product name; returned when name information is available
+                        type:
+                          type: string
+                          enum:
+                            - stock
+                            - indices
+                            - crypto
+                            - forex
+                            - futures
+                          description: Product type; returned when the type can be resolved
+                        category:
+                          type: string
+                          description: A-share product category, such as `sh_stock`, `sz_stock`, `bj_stock`, `etf`, `cn_bond`, or `cn_index`; returned only for A-share products when category information is available
+                        last_price:
+                          type: string
+                          description: Last traded price
+                        open:
+                          type: string
+                          description: Open price; returned when the statistic is available. It normally represents the current trading day or session for traditional markets and the applicable statistics window for crypto
+                        prev_close:
+                          type: string
+                          description: Previous close or reference price; returned when available. It normally represents the previous trading day or session for traditional markets and the applicable statistics window for crypto
+                        bid_price:
+                          type: string
+                          description: Best bid price; returned when order-book quotes are available
+                        ask_price:
+                          type: string
+                          description: Best ask price; returned when order-book quotes are available
+                        volume_24h:
+                          type: string
+                          description: Cumulative traded volume; returned when available. Crypto normally uses a rolling 24-hour window, while traditional markets normally use the current trading day or session
+                        quote_volume_24h:
+                          type: string
+                          description: Traded value for the same window as `volume_24h`; returned when traded-value data is available
+                        high_24h:
+                          type: string
+                          description: High price; returned when available, using the same statistics window as `volume_24h`
+                        low_24h:
+                          type: string
+                          description: Low price; returned when available, using the same statistics window as `volume_24h`
+                        price_change_24h:
+                          type: string
+                          description: Price change; returned when available, using the same statistics window as `volume_24h`
+                        price_change_percent_24h:
+                          type: string
+                          description: Percentage price change; returned when available. Non-empty numeric values are formatted to two decimal places
+                        timestamp:
+                          type: integer
+                          format: int64
+                          description: Unix timestamp in milliseconds
+                        pre_market_quote:
+                          type: object
+                          description: Pre-market quote object; returned for products with extended-hours trading, such as US stocks, when pre-market data is available
+                          required:
+                            - last_done
+                            - timestamp
+                            - volume
+                            - high
+                            - low
+                            - prev_close
+                          additionalProperties: false
+                          properties:
+                            last_done:
+                              type: string
+                              description: Last Price
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: Unix timestamp in milliseconds
+                            volume:
+                              type: integer
+                              format: int64
+                              description: Trading volume
+                            quote_volume:
+                              type: string
+                              description: Trading amount; normally omitted for futures
+                            high:
+                              type: string
+                              description: Highest price
+                            low:
+                              type: string
+                              description: Lowest price
+                            prev_close:
+                              type: string
+                              description: Previous close or reference price; returned when available. It normally represents the previous trading day or session for traditional markets and the applicable statistics window for crypto
+                        post_market_quote:
+                          type: object
+                          description: Post-market quote object; returned for products with extended-hours trading, such as US stocks, when post-market data is available
+                          required:
+                            - last_done
+                            - timestamp
+                            - volume
+                            - high
+                            - low
+                            - prev_close
+                          additionalProperties: false
+                          properties:
+                            last_done:
+                              type: string
+                              description: Last Price
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: Unix timestamp in milliseconds
+                            volume:
+                              type: integer
+                              format: int64
+                              description: Trading volume
+                            quote_volume:
+                              type: string
+                              description: Trading amount; normally omitted for futures
+                            high:
+                              type: string
+                              description: Highest price
+                            low:
+                              type: string
+                              description: Lowest price
+                            prev_close:
+                              type: string
+                              description: Previous close or reference price; returned when available. It normally represents the previous trading day or session for traditional markets and the applicable statistics window for crypto
+                        overnight_quote:
+                          type: object
+                          description: Overnight quote object; returned for products with extended-hours trading, such as US stocks, when overnight data is available
+                          required:
+                            - last_done
+                            - timestamp
+                            - volume
+                            - high
+                            - low
+                            - prev_close
+                          additionalProperties: false
+                          properties:
+                            last_done:
+                              type: string
+                              description: Last Price
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: Unix timestamp in milliseconds
+                            volume:
+                              type: integer
+                              format: int64
+                              description: Trading volume
+                            quote_volume:
+                              type: string
+                              description: Trading amount; normally omitted for futures
+                            high:
+                              type: string
+                              description: Highest price
+                            low:
+                              type: string
+                              description: Lowest price
+                            prev_close:
+                              type: string
+                              description: Previous close or reference price; returned when available. It normally represents the previous trading day or session for traditional markets and the applicable statistics window for crypto
+                    example:
+                      - symbol: 700.HK
+                        last_price: "543"
+                        volume_24h: "11205874"
+                        high_24h: "557"
+                        low_24h: "543"
+                        price_change_24h: "-9"
+                        price_change_percent_24h: "-1.63"
+                        timestamp: 1773292807000
+                      - symbol: AAPL.US
+                        last_price: "260.81"
+                        volume_24h: "26218927"
+                        high_24h: "262.13"
+                        low_24h: "259.55"
+                        price_change_24h: "-0.02"
+                        price_change_percent_24h: "-0.01"
+                        timestamp: 1773259201000
+  /v1/market/ticker/cn-stock:
+    get:
+      summary: Full A-Share Market Tickers
+      description: Retrieve the current full-market ticker snapshot for A-shares.
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        "406":
+          description: Successful response.
+        "503":
+          description: Successful response.
+  /v1/market/ticker/hk-stock:
+    get:
+      summary: Full HK Stock Market Tickers
+      description: Retrieve the current full-market ticker snapshot for the Hong Kong market.
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        "406":
+          description: Successful response.
+        "503":
+          description: Successful response.
+  /v1/market/ticker/us-stock:
+    get:
+      summary: Full US Stock Market Tickers
+      description: Retrieve the current full-market ticker snapshot for the US market.
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        "406":
+          description: Successful response.
+        "503":
+          description: Successful response.
+  /v1/market/kline:
+    get:
+      summary: Candlestick Data
+      description: Query candlestick data (OHLC bars) by interval and time range.
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Trading symbol code
+          schema:
+            type: string
+            default: 700.HK
+            example: 700.HK
+        - name: interval
+          in: query
+          required: true
+          description: "K-line period, options: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M"
+          schema:
+            type: string
+            enum:
+              - 1m
+              - 3m
+              - 5m
+              - 15m
+              - 30m
+              - 1h
+              - 2h
+              - 4h
+              - 1d
+              - 1w
+              - 1M
+            default: 1h
+            example: 1h
+        - name: limit
+          in: query
+          required: false
+          description: Number of records; defaults to 100. Values above 1000 are capped at 1000, and non-positive values use the default of 100
+          schema:
+            type: integer
+            example: 100
+        - name: start_time
+          in: query
+          required: false
+          description: Start timestamp (milliseconds)
+          schema:
+            type: integer
+            example: 1703123456789
+        - name: end_time
+          in: query
+          required: false
+          description: End timestamp (milliseconds)
+          schema:
+            type: integer
+            example: 1703209856789
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+        - name: adjust
+          in: query
+          required: false
+          description: "Price adjustment for A-shares, HK stocks, and US stocks: `none` (unadjusted), `forward`, or `backward`. If omitted, prices are unadjusted (`none`)"
+          schema:
+            type: string
+            enum:
+              - none
+              - forward
+              - backward
+            default: none
+            example: forward
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: 700.HK
+                      type:
+                        type: string
+                        enum:
+                          - stock
+                          - indices
+                          - crypto
+                          - forex
+                          - futures
+                      interval:
+                        type: string
+                        example: 1h
+                      adjust:
+                        type: string
+                        enum:
+                          - none
+                          - forward
+                          - backward
+                        description: "Applied price adjustment mode: `none`, `forward`, or `backward`"
+                        example: none
+                      klines:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            time:
+                              type: integer
+                            open:
+                              type: string
+                            high:
+                              type: string
+                            low:
+                              type: string
+                            close:
+                              type: string
+                            volume:
+                              type: string
+                            quote_volume:
+                              type: string
+                              description: Trading amount; normally omitted for futures
+                            open_interest:
+                              type: string
+                              description: Open interest; returned for futures
+                        example:
+                          - time: 1773291600000
+                            open: "545.5"
+                            high: "546.5"
+                            low: "541.5"
+                            close: "543.5"
+                            volume: "1549300"
+                            quote_volume: "842560983.33"
+  /v1/market/depth:
+    get:
+      summary: Order Book
+      description: Retrieve real-time order book depth (bids & asks) for a trading symbol.
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Trading symbol code
+          schema:
+            type: string
+            default: 700.HK
+            example: 700.HK
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: 700.HK
+                      type:
+                        type: string
+                        enum:
+                          - stock
+                          - indices
+                          - crypto
+                          - forex
+                          - futures
+                      timestamp:
+                        type: integer
+                        example: 1768274016162
+                      bids:
+                        type: array
+                        description: Bid array, each element is [price, quantity]
+                        items:
+                          type: array
+                          items:
+                            type: string
+                        example:
+                          - - "626"
+                            - "19700"
+                          - - "625.5"
+                            - "40800"
+                      asks:
+                        type: array
+                        description: Ask array, each element is [price, quantity]
+                        items:
+                          type: array
+                          items:
+                            type: string
+                        example:
+                          - - "626.5"
+                            - "36100"
+                          - - "627"
+                            - "50700"
+  /v1/market/trades:
+    get:
+      summary: Tick-by-Tick Trades
+      description: Retrieve tick-by-tick trade executions for a trading symbol.
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Trading symbol code
+          schema:
+            type: string
+            default: 700.HK
+            example: 700.HK
+        - name: limit
+          in: query
+          required: false
+          description: Number of trades, default 100, max 1000
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            example: 100
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: BU2609
+                      type:
+                        type: string
+                        enum:
+                          - stock
+                          - indices
+                          - crypto
+                          - forex
+                          - futures
+                        example: futures
+                      trades:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: 1703123456789_0
+                            price:
+                              type: string
+                              example: "4315.00"
+                            quantity:
+                              type: string
+                              example: "2"
+                            side:
+                              type: string
+                              enum:
+                                - buy
+                                - sell
+                                - neutral
+                              example: sell
+                            timestamp:
+                              type: integer
+                              example: 1703123456789
+                            open_interest_change:
+                              type:
+                                - integer
+                                - "null"
+                              description: Change in open interest; futures only
+                              example: 0
+                            position_effect:
+                              type: string
+                              description: Position effect; futures only; see values below
+                              enum:
+                                - long_open
+                                - short_open
+                                - both_open
+                                - long_close
+                                - short_close
+                                - both_close
+                                - long_transfer
+                                - short_transfer
+                              example: short_transfer
+  /v1/symbols/available:
+    get:
+      summary: Symbol Query
+      description: Query products supported by TickDB, covering forex, indices, US stocks, HK stocks, A-shares, China futures, Hong Kong futures, and crypto markets, with the product list continuously growing.
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: "Product type filter: stock, crypto, forex, indices, futures"
+          schema:
+            type: string
+            enum:
+              - stock
+              - crypto
+              - forex
+              - indices
+              - futures
+            example: stock
+        - name: market
+          in: query
+          required: false
+          description: "Market filter: GLOBAL, US, HK, CN"
+          schema:
+            type: string
+            enum:
+              - GLOBAL
+              - US
+              - HK
+              - CN
+            example: CN
+        - name: limit
+          in: query
+          required: false
+          description: Number of results per page, default 100, max 1000
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+            example: 50
+        - name: offset
+          in: query
+          required: false
+          description: Pagination offset, default 0
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      products:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            symbol:
+                              type: string
+                              example: 000001.SZ
+                            name:
+                              type: string
+                              example: 平安银行
+                            market:
+                              type: string
+                              example: CN
+                            type:
+                              type: string
+                              example: stock
+                            currency:
+                              type: string
+                              example: CNY
+                            is_active:
+                              type: boolean
+                              example: true
+                            updated_at:
+                              type: string
+                              format: date-time
+                              description: Last updated time as an RFC 3339 date-time string with a time-zone offset
+                              example: 2026-03-15T20:27:58Z
+                      summary:
+                        type: object
+                        properties:
+                          total_products:
+                            type: integer
+                            example: 32492
+                          by_market:
+                            type: object
+                            additionalProperties:
+                              type: integer
+                            example:
+                              CN: 6643
+                              GLOBAL: 14833
+                              HK: 2909
+                              US: 8107
+                          by_type:
+                            type: object
+                            additionalProperties:
+                              type: integer
+                            example:
+                              crypto: 877
+                              stock: 17658
+                              forex: 1207
+                              indices: 12750
+                          last_updated:
+                            type: string
+                            format: date-time
+                            description: Last updated time as an RFC 3339 date-time string with a time-zone offset
+                            example: 2026-03-27T11:09:44+08:00
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: integer
+                            example: 10
+                          offset:
+                            type: integer
+                            example: 0
+                          total:
+                            type: integer
+                            example: 6642
+                          count:
+                            type: integer
+                            example: 10
+  /v1/market/kline/latest:
+    get:
+      summary: Latest Candlesticks
+      description: Get the latest candlestick data (OHLC bars) for multiple symbols; the current bar may still be forming.
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Trading symbol codes, comma-separated, up to 50, e.g., AAPL.US,00700.HK
+          schema:
+            type: string
+            default: AAPL.US,00700.HK
+            example: AAPL.US,00700.HK
+        - name: interval
+          in: query
+          required: true
+          description: "K-line period, options: 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M"
+          schema:
+            type: string
+            enum:
+              - 1m
+              - 3m
+              - 5m
+              - 15m
+              - 30m
+              - 1h
+              - 2h
+              - 4h
+              - 1d
+              - 1w
+              - 1M
+            default: 3m
+            example: 3m
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`, `futures`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+        - name: adjust
+          in: query
+          required: false
+          description: "Price adjustment for A-shares, Hong Kong stocks, and US stocks: `none` (unadjusted), `forward`, or `backward`. If omitted, prices are unadjusted (`none`)"
+          schema:
+            type: string
+            enum:
+              - none
+              - forward
+              - backward
+            default: none
+            example: forward
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        type:
+                          type: string
+                          enum:
+                            - stock
+                            - indices
+                            - crypto
+                            - forex
+                            - futures
+                        interval:
+                          type: string
+                        adjust:
+                          type: string
+                          enum:
+                            - none
+                            - forward
+                            - backward
+                          description: "Applied price adjustment: `none`, `forward`, or `backward`"
+                          example: none
+                        klines:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              time:
+                                type: integer
+                              open:
+                                type: string
+                              high:
+                                type: string
+                              low:
+                                type: string
+                              close:
+                                type: string
+                              volume:
+                                type: string
+                              quote_volume:
+                                type: string
+                                description: Trading amount; normally omitted for futures
+                              open_interest:
+                                type: string
+                                description: Open interest; returned for futures
+                    example:
+                      - symbol: AAPL.US
+                        interval: 3m
+                        adjust: none
+                        klines:
+                          - time: 1773259020000
+                            open: "260.86"
+                            high: "261.05"
+                            low: "260.7"
+                            close: "260.81"
+                            volume: "963419"
+                            quote_volume: "251311057.55"
+                      - symbol: 00700.HK
+                        interval: 3m
+                        adjust: none
+                        klines:
+                          - time: 1773293400000
+                            open: "542.5"
+                            high: "544.5"
+                            low: "542"
+                            close: "544.5"
+                            volume: "80300"
+                            quote_volume: "43656433.33"
+        "400":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Invalid parameters
+        "401":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: Unauthorized
+  /v1/market/kline/ex-factors:
+    get:
+      summary: Adjustment Factors
+      description: Get forward and backward price adjustment factors for A-shares, HK stocks, and US stocks.
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Stock symbols, comma-separated
+          schema:
+            type: string
+            default: 600519.SH
+            example: 600519.SH,700.HK,AAPL.US
+        - name: type
+          in: query
+          required: false
+          description: Product type. Only `stock` is supported; omit it when the symbol is unambiguous
+          schema:
+            type: string
+            enum:
+              - stock
+            example: stock
+        - name: start_time
+          in: query
+          required: false
+          description: Start timestamp in milliseconds, inclusive
+          schema:
+            type: integer
+            format: int64
+        - name: end_time
+          in: query
+          required: false
+          description: End timestamp in milliseconds, inclusive
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                  - message
+                  - data
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        description: Adjustment factors grouped by stock symbol
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - timestamp
+                              - adjust
+                              - factor_a
+                              - factor_b
+                            properties:
+                              timestamp:
+                                type: integer
+                                format: int64
+                                description: Factor effective timestamp in milliseconds
+                              adjust:
+                                type: string
+                                enum:
+                                  - forward
+                                  - backward
+                                description: "Adjustment direction: `forward` or `backward`"
+                              factor_a:
+                                type: number
+                                description: Multiplicative factor in the adjustment formula
+                              factor_b:
+                                type: number
+                                description: Additive factor in the adjustment formula
+        "400":
+          description: Successful response.
+        "503":
+          description: Successful response.
+  /v1/market/intraday:
+    get:
+      summary: Intraday Data
+      description: Get intraday time-series data for stocks, including minute-by-minute price, volume, and turnover information.
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Stock symbol codes, comma-separated, max 50
+          schema:
+            type: string
+            default: 700.HK,9988.HK
+            example: 700.HK,9988.HK
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+            example: stock
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - symbol
+                        - type
+                        - lines
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          example: 700.HK
+                        type:
+                          type: string
+                          enum:
+                            - stock
+                          example: stock
+                        lines:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - timestamp
+                              - price
+                              - volume
+                              - turnover
+                              - avg_price
+                            additionalProperties: false
+                            properties:
+                              timestamp:
+                                type: integer
+                                example: 1773192600000
+                                description: Start time of the current minute as a Unix timestamp in milliseconds
+                              price:
+                                type: string
+                                example: "568"
+                                description: Closing Price of Current Minute
+                              volume:
+                                type: integer
+                                example: 7294905
+                                description: Trading Volume
+                              turnover:
+                                type: string
+                                example: "4181560679.96"
+                                description: Trading Turnover
+                              avg_price:
+                                type: string
+                                example: "573.216605"
+                                description: Average Price
+              examples:
+                single_symbol:
+                  summary: Single symbol response
+                  value:
+                    code: 0
+                    message: success
+                    data:
+                      - symbol: 700.HK
+                        type: stock
+                        lines:
+                          - timestamp: 1773192600000
+                            price: "568"
+                            volume: 7294905
+                            turnover: "4181560679.96"
+                            avg_price: "573.216605"
+  /v1/market/trading-sessions:
+    get:
+      summary: Trading Sessions
+      description: Query trading session information for one or all supported markets, including opening and closing times.
+      parameters:
+        - name: market
+          in: query
+          required: false
+          description: "Market code: `US`, `HK`, or `CN`. Omit it to return all supported markets"
+          schema:
+            type: string
+            enum:
+              - US
+              - HK
+              - CN
+            example: US
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        market:
+                          type: string
+                          enum:
+                            - US
+                            - HK
+                            - CN
+                        trading_sessions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              begin_time:
+                                type: integer
+                              end_time:
+                                type: integer
+                              trade_session:
+                                type: integer
+                    example:
+                      - market: US
+                        trading_sessions:
+                          - begin_time: 400
+                            end_time: 930
+                            trade_session: 1
+                          - begin_time: 930
+                            end_time: 1600
+                          - begin_time: 1600
+                            end_time: 2000
+                            trade_session: 2
+  /v1/market/trade-days:
+    get:
+      summary: Trading Calendar
+      description: Query the list of trading days for a specified market within a specific time range, used to determine if a particular day is a trading day.
+      parameters:
+        - name: market
+          in: query
+          required: true
+          description: "Market code: `US`, `HK`, or `CN`"
+          schema:
+            type: string
+            enum:
+              - US
+              - HK
+              - CN
+            default: US
+            example: US
+        - name: beg_day
+          in: query
+          required: true
+          description: Start date in YYYYMMDD format; must be within the most recent year
+          schema:
+            type: string
+            pattern: ^[0-9]{8}$
+            default: "20260201"
+            example: "20260201"
+        - name: end_day
+          in: query
+          required: true
+          description: End date in YYYYMMDD format; the range from the start date cannot exceed 31 days
+          schema:
+            type: string
+            pattern: ^[0-9]{8}$
+            default: "20260228"
+            example: "20260228"
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                  - data
+                additionalProperties: false
+                properties:
+                  code:
+                    type: integer
+                    const: 0
+                    example: 0
+                  data:
+                    type: object
+                    required:
+                      - market
+                      - trade_days
+                      - half_trade_days
+                    additionalProperties: false
+                    properties:
+                      market:
+                        type: string
+                        enum:
+                          - US
+                          - HK
+                          - CN
+                      trade_days:
+                        type: array
+                        items:
+                          type: string
+                      half_trade_days:
+                        type: array
+                        items:
+                          type: string
+                    example:
+                      market: US
+                      trade_days:
+                        - "20260202"
+                        - "20260203"
+                        - "20260204"
+                        - "20260205"
+                        - "20260206"
+                        - "20260209"
+                        - "20260210"
+                        - "20260211"
+                        - "20260212"
+                        - "20260213"
+                        - "20260217"
+                        - "20260218"
+                        - "20260219"
+                        - "20260220"
+                        - "20260223"
+                        - "20260224"
+                        - "20260225"
+                        - "20260226"
+                        - "20260227"
+                      half_trade_days: []
+  /v1/market/stock-info:
+    get:
+      summary: Stock Information
+      description: Retrieve stock names, exchanges, currencies, share capital, and per-share metrics.
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Stock symbol codes, comma-separated, maximum 500
+          schema:
+            type: string
+            default: 700.HK,AAPL.US,000001.SZ
+            example: 700.HK,AAPL.US,000001.SZ
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+            example: stock
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - symbol
+                        - name_cn
+                        - exchange
+                        - currency
+                        - lot_size
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          description: Trading Symbol
+                        name_cn:
+                          type: string
+                          description: Chinese simplified name
+                        name_en:
+                          type: string
+                          description: English name; returned for HK and US stocks
+                        name_hk:
+                          type: string
+                          description: Traditional Chinese name; returned for HK and US stocks
+                        exchange:
+                          type: string
+                          description: Exchange where the symbol is traded
+                        currency:
+                          type: string
+                          description: Trading currency (CNY/USD/HKD)
+                        lot_size:
+                          type: integer
+                          description: Shares per lot
+                        total_shares:
+                          type: integer
+                          description: Total shares outstanding; returned when available
+                        circulating_shares:
+                          type: integer
+                          description: Circulating shares; returned when available
+                        hk_shares:
+                          type: integer
+                          description: H-share capital; returned for HK stocks and A-share companies that also issue H shares
+                        eps:
+                          type: string
+                          description: Earnings per share; returned when available
+                        eps_ttm:
+                          type: string
+                          description: Earnings per share for the trailing twelve months; returned for HK and US stocks when available
+                        bps:
+                          type: string
+                          description: Book value per share; returned when available
+                        dividend_yield:
+                          type: string
+                          description: Dividend yield; returned for HK and US stocks when available
+                        stock_derivatives:
+                          type: array
+                          description: Available derivative types; `1` means options and `2` means warrants. Returned for HK and US stocks when available
+                          items:
+                            type: integer
+                            enum:
+                              - 1
+                              - 2
+                        board:
+                          type: string
+                          description: A-share board or security classification code; returned for A-shares
+                    example:
+                      - symbol: 700.HK
+                        name_cn: 腾讯控股
+                        name_en: TENCENT
+                        name_hk: 騰訊控股
+                        exchange: SEHK
+                        currency: HKD
+                        lot_size: 100
+                        total_shares: 9095085993
+                        circulating_shares: 9095085993
+                        hk_shares: 9095085993
+                        eps: "27.3701441378468889"
+                        eps_ttm: "29.8128867314657505"
+                        bps: "143.787288892927458"
+                        dividend_yield: "5.3133478570728672"
+                        stock_derivatives:
+                          - 2
+                      - symbol: AAPL.US
+                        name_cn: 苹果
+                        name_en: Apple
+                        name_hk: 蘋果
+                        exchange: NASD
+                        currency: USD
+                        lot_size: 1
+                        total_shares: 14594180000
+                        circulating_shares: 14569121909
+                        eps: "7.6749772854658501"
+                        eps_ttm: "8.8343435533890907"
+                        bps: "7.3673203975831462"
+                        dividend_yield: "1.06"
+                        stock_derivatives:
+                          - 1
+                      - symbol: 000001.SZ
+                        name_cn: 平安银行
+                        exchange: SZ
+                        currency: CNY
+                        lot_size: 100
+                        total_shares: 19405918198
+                        circulating_shares: 19405684991
+                        eps: "1.24"
+                        bps: "24.13"
+                        board: sz_stock
+  /v1/market/calc-index:
+    get:
+      summary: Market Metrics
+      description: Retrieve comprehensive market metrics for stocks, including market statistics, valuation indicators, capital flow, and derivatives-related indicators.
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Stock symbol codes, comma-separated, max 50
+          schema:
+            type: string
+            default: 700.HK
+            example: 700.HK,AAPL.US
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+            example: stock
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        last_done:
+                          type: string
+                        change_val:
+                          type: string
+                        change_rate:
+                          type: string
+                        volume:
+                          type: string
+                        turnover:
+                          type: string
+                        ytd_change_rate:
+                          type: string
+                        turnover_rate:
+                          type: string
+                        total_market_value:
+                          type: string
+                        capital_flow:
+                          type: string
+                        amplitude:
+                          type: string
+                        volume_ratio:
+                          type: string
+                        pe_ttm_ratio:
+                          type: string
+                        pb_ratio:
+                          type: string
+                        dividend_ratio_ttm:
+                          type: string
+                        five_day_change_rate:
+                          type: string
+                        ten_day_change_rate:
+                          type: string
+                        half_year_change_rate:
+                          type: string
+                        five_minutes_change_rate:
+                          type: string
+                    example:
+                      - symbol: 700.HK
+                        last_done: "547.5"
+                        change_val: "-4.5"
+                        change_rate: "-0.0082"
+                        volume: "16521084"
+                        turnover: "0.0018"
+                        ytd_change_rate: "-0.086"
+                        turnover_rate: "0.18"
+                        total_market_value: "4985729978437.5"
+                        capital_flow: "-277985600"
+                        amplitude: "0.0281"
+                        volume_ratio: "0.47"
+                        pe_ttm_ratio: "20.89"
+                        pb_ratio: "3.88"
+                        dividend_ratio_ttm: "0.83"
+                        five_day_change_rate: "0.0906"
+                        ten_day_change_rate: "0.0693"
+                        half_year_change_rate: "-0.1492"
+                        five_minutes_change_rate: "0"
+  /v1/market/capital-flow:
+    get:
+      summary: Capital Flow
+      description: Retrieve capital flow data for stocks, including inflow and outflow of main funds, large orders, medium orders, and small orders.
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Stock symbol code
+          schema:
+            type: string
+            example: 700.HK
+            default: 700.HK
+        - name: type
+          in: query
+          required: false
+          description: "Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex`"
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+            example: stock
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                      timestamp:
+                        type: integer
+                        format: int64
+                        description: Data update time as a Unix timestamp in seconds
+                      intraday_flow:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: Data update time as a Unix timestamp in seconds
+                            inflow:
+                              type: string
+                      distribution:
+                        type: object
+                        properties:
+                          timestamp:
+                            type: integer
+                            format: int64
+                            description: Data update time as a Unix timestamp in seconds
+                          capital_in:
+                            type: object
+                            properties:
+                              large:
+                                type: string
+                              medium:
+                                type: string
+                              small:
+                                type: string
+                          capital_out:
+                            type: object
+                            properties:
+                              large:
+                                type: string
+                              medium:
+                                type: string
+                              small:
+                                type: string
+                    example:
+                      symbol: 700.HK
+                      timestamp: 1773306211
+                      intraday_flow:
+                        - timestamp: 1773279000
+                          inflow: "-12199.34"
+                        - timestamp: 1773279060
+                          inflow: "-15137.59"
+                      distribution:
+                        timestamp: 1773303000
+                        capital_in:
+                          large: "173056.31"
+                          medium: "164958.55"
+                          small: "83945.69"
+                        capital_out:
+                          large: "179434.39"
+                          medium: "176045.91"
+                          small: "92979.74"
+  /v1/fundamentals/profile:
+    get:
+      tags:
+        - fundamentals-company
+      summary: Company Profile
+      description: Retrieve basic company information, market, industry, and listing details.
+      operationId: getFundamentalsProfile
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ProfileResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/executives:
+    get:
+      tags:
+        - fundamentals-company
+      summary: Executives and Directors
+      description: Retrieve the company's current executives, directors, and key personnel.
+      operationId: getFundamentalsExecutives
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ExecutivesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/financials/latest:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: Recent Financial Statements
+      description: Retrieve metrics from the income statement, balance sheet, or cash flow statement for the most recent periods.
+      operationId: getFundamentalsFinancialsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/KindQuery"
+        - $ref: "#/components/parameters/NQuery"
+        - $ref: "#/components/parameters/PeriodTypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/FinancialRowsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/financials/annual:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: Annual Financial Statements
+      description: Retrieve annual income statement, balance sheet, or cash flow statement metrics for recent fiscal years.
+      operationId: getFundamentalsFinancialsAnnual
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/KindQuery"
+        - $ref: "#/components/parameters/NQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/FinancialRowsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/financials/ttm:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: TTM Financial Data
+      description: Retrieve trailing-12-month income statement or cash flow metrics aggregated from the latest four valid quarters.
+      operationId: getFundamentalsFinancialsTTM
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/TTMKindQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/FinancialRowsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/segments/latest:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: Revenue Breakdown
+      description: Show the latest revenue amounts and percentages by business or region.
+      operationId: getFundamentalsSegmentsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/SegmentCategoryQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/SegmentsLatestResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/segments/history:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: Historical Revenue Breakdown
+      description: Show historical revenue amounts and percentages by business or region.
+      operationId: getFundamentalsSegmentsHistory
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/SegmentCategoryQuery"
+        - $ref: "#/components/parameters/ReportQuery"
+        - $ref: "#/components/parameters/SegmentLimitQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/SegmentsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/valuation/latest:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: Latest Valuation
+      description: Retrieve the current price-to-earnings ratio and one-year range statistics.
+      operationId: getFundamentalsValuationLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ValuationLatestResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/valuation/ts:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: Historical Valuation
+      description: Retrieve daily or monthly historical price-to-earnings (`PE`) values.
+      operationId: getFundamentalsValuationTimeSeries
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/GranularityQuery"
+        - $ref: "#/components/parameters/ValuationFromQuery"
+        - $ref: "#/components/parameters/ValuationToQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ValuationTimeSeriesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/industry/peers:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: Peer Valuation Comparison
+      description: Retrieve peer companies and comparable valuation, earnings-per-share, and related metrics.
+      operationId: getFundamentalsIndustryPeers
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/IndustryPeersResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/industry/dist:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: Industry Valuation Distribution
+      description: Retrieve valuation distributions and sample statistics for the stock's industry.
+      operationId: getFundamentalsIndustryDistribution
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/IndustryDistributionResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/industries/rank:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: Industry Metric Rankings
+      description: Retrieve industries ranked by a market-wide industry metric.
+      operationId: getFundamentalsIndustriesRank
+      parameters:
+        - $ref: "#/components/parameters/RequiredMarketQuery"
+        - $ref: "#/components/parameters/IndustryRankLimitQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/IndustriesRankResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/industries/tree:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: Industry Hierarchy
+      description: Retrieve an industry's top-level classification and lower-level industry categories.
+      operationId: getFundamentalsIndustriesTree
+      parameters:
+        - $ref: "#/components/parameters/RequiredMarketQuery"
+        - $ref: "#/components/parameters/IndustryCounterIDQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/IndustriesTreeResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/dividends:
+    get:
+      tags:
+        - fundamentals-capital-actions
+      summary: Dividend Records
+      description: Retrieve historical and known future dividend events with date, type, and pagination filters.
+      operationId: getFundamentalsDividends
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/DividendTypeQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+        - $ref: "#/components/parameters/DividendLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/DividendsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/dividends/ttm:
+    get:
+      tags:
+        - fundamentals-capital-actions
+      summary: Dividend TTM
+      description: TTM means the latest 12 months through the as-of date; retrieve per-share cash dividends aggregated by currency over that period.
+      operationId: getFundamentalsDividendsTTM
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/DividendAsOfQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/DividendsTTMResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/buyback:
+    get:
+      tags:
+        - fundamentals-capital-actions
+      summary: Share Buybacks
+      description: Retrieve company buyback programs, execution information, and historical metrics.
+      operationId: getFundamentalsBuyback
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/BuybackResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/shareholders/latest:
+    get:
+      tags:
+        - fundamentals-holders
+      summary: Latest Shareholder Structure
+      description: Retrieve the latest disclosed shareholder structure snapshot.
+      operationId: getFundamentalsShareholdersLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/LatestShareholdersResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/shareholders/top:
+    get:
+      tags:
+        - fundamentals-holders
+      summary: Shareholder Holdings
+      description: Query major shareholders' holdings, position changes, and detail availability across reporting periods.
+      operationId: getFundamentalsShareholdersTop
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/TopShareholdersResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/shareholders/detail:
+    get:
+      tags:
+        - fundamentals-holders
+      summary: Shareholder Holding Details
+      description: Query the holdings and trading details of a shareholder by shareholder object ID.
+      operationId: getFundamentalsShareholderDetail
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/ObjectIDQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ShareholderDetailResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/fund-holdings/latest:
+    get:
+      tags:
+        - fundamentals-holders
+      summary: Funds Holding a Stock
+      description: Query funds that disclose holdings in a specified stock and the stock's weight in each fund; supports pagination.
+      operationId: getFundamentalsFundHoldingsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/FundHoldingsLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/FundHoldingsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/corp-actions:
+    get:
+      tags:
+        - fundamentals-capital-actions
+      summary: Corporate Actions
+      description: Retrieve stock splits, reverse splits, rights issues, symbol changes, and other corporate-action events.
+      operationId: getFundamentalsCorporateActions
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CorporateActionsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/news:
+    get:
+      tags:
+        - fundamentals-events
+      summary: Stock News
+      description: Retrieve a stock's news list, publication times, and body-availability status.
+      operationId: getFundamentalsNews
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/NewsLimitQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/NewsResponse"
+        default:
+          $ref: "#/components/responses/NewsErrorResponse"
+  /v1/fundamentals/news/{news_id}:
+    get:
+      tags:
+        - fundamentals-events
+      summary: News Details
+      description: Query an article body or available excerpt by news ID.
+      operationId: getFundamentalsNewsDetail
+      parameters:
+        - $ref: "#/components/parameters/NewsIDPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/NewsDetailResponse"
+        "400":
+          $ref: "#/components/responses/NewsErrorResponse"
+        "404":
+          $ref: "#/components/responses/NewsErrorResponse"
+        default:
+          $ref: "#/components/responses/NewsErrorResponse"
+  /v1/fundamentals/calendar/report:
+    get:
+      tags:
+        - fundamentals-events
+      summary: Earnings Calendar
+      description: Query earnings reports and results announcements.
+      operationId: getFundamentalsCalendarReport
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/calendar/dividend:
+    get:
+      tags:
+        - fundamentals-events
+      summary: Dividend Calendar
+      description: Query dividend distribution events.
+      operationId: getFundamentalsCalendarDividend
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/calendar/split:
+    get:
+      tags:
+        - fundamentals-events
+      summary: Stock Split Calendar
+      description: Query stock splits, reverse splits, and related events.
+      operationId: getFundamentalsCalendarSplit
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/calendar/ipo:
+    get:
+      tags:
+        - fundamentals-events
+      summary: IPO Calendar
+      description: Query new share offerings and listings.
+      operationId: getFundamentalsCalendarIPO
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/calendar/other:
+    get:
+      tags:
+        - fundamentals-events
+      summary: Other Calendar Events
+      description: Query other financial events such as macroeconomic releases and market closures by category.
+      operationId: getFundamentalsCalendarOther
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarOtherCategoryQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/market/status:
+    get:
+      tags:
+        - fundamentals-events
+      summary: Market Status
+      description: Query the current trading phase and market time for each market.
+      operationId: getFundamentalsMarketStatus
+      responses:
+        "200":
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - markets
+                        properties:
+                          markets:
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - market
+                                - market_time
+                                - trade_status
+                              properties:
+                                market:
+                                  type: string
+                                  example: US
+                                market_time:
+                                  type: string
+                                  format: date-time
+                                trade_status:
+                                  type: integer
+        default:
+          $ref: "#/components/responses/ErrorResponse"

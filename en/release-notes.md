@@ -3,6 +3,17 @@ title: Changelog
 description: TickDB API documentation version history
 ---
 
+## v1.0.3 (2026-09-21)
+
+### New Features
+
+- Added financial and fundamental API documentation covering company overviews, revenue breakdowns, financial statements, valuation and industries, dividends and corporate actions, shareholder and institutional holdings, and market information and calendars.
+- Added full-market data for A-shares, Hong Kong stocks, and US stocks: one REST API request retrieves a complete market snapshot, while one WebSocket subscription continuously receives real-time updates for every symbol in that market.
+- Added the K-line adjustment factors endpoint with a JavaScript calculation example for dynamically producing forward- or backward-adjusted data from unadjusted K-lines.
+- Added support for Hong Kong stock futures and financial futures.
+
+---
+
 ## v1.0.2 (2026-07-16)
 
 ### New Features
@@ -50,7 +61,7 @@ Provided core REST API and WebSocket real-time subscriptions, covering Forex, Me
 - **REST API Endpoints**
   - Available symbols
   - Ticker snapshot
-  - Historical klines
+  - K-line queries
   - Latest klines
   - Order book
   - Recent trades

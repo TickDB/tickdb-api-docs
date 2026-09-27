@@ -1,21 +1,34 @@
 ---
 title: Intraday Data
 description: Get intraday time-series data for stocks, including minute-by-minute price, volume, and turnover information.
-openapi: GET /v1/market/intraday
+openapi: "openapi.en.yaml GET /v1/market/intraday"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ✅ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
 
 ## Notes
 - Data covers from market open to current time of the trading day
-- Returns empty array during non-trading hours
+- Outside trading hours, available intraday data may still be returned; the array may also be empty.
 
 ## Supported Markets
 
-**US Stocks**, **HK Stocks**, **A-Shares**
-
-Examples:
-- US Stocks: AAPL.US, TSLA.US, MSFT.US
-- HK Stocks: 700.HK, 9988.HK, 3690.HK
-- A-Shares: 000001.SH, 000001.SZ
+| Market | Examples |
+|---|---|
+| US Stocks | AAPL.US, TSLA.US, MSFT.US |
+| HK Stocks | 700.HK, 9988.HK, 3690.HK |
+| A-Shares | 600519.SH, 000001.SZ |
 
 ## Request Parameters
 
@@ -29,8 +42,9 @@ Examples:
 | Field Name | Description |
 |------------|-------------|
 | symbol | Trading Symbol |
+| type | Product type, currently `stock` |
 | lines | Intraday Data |
-| └─ timestamp | Start Time of Current Minute |
+| └─ timestamp | Start time of the current minute as a Unix timestamp in milliseconds |
 | └─ price | Closing Price of Current Minute |
 | └─ volume | Trading Volume |
 | └─ turnover | Trading Turnover |

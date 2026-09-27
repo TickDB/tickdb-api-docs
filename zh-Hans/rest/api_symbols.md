@@ -1,14 +1,25 @@
 ---
 title: 产品查询
-description: 查询 TickDB 支持的产品，覆盖外汇、指数、美股、港股、A股、中国期货、加密货币等市场，产品列表持续增加中。
-openapi: GET /v1/symbols/available
+description: 查询 TickDB 支持的产品，覆盖外汇、指数、美股、港股、A股、中国期货、香港期货、加密货币等市场，产品列表持续增加中。
+openapi: "openapi.yaml GET /v1/symbols/available"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## 套餐权限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免费版 | ✅ |
+| 基础版 | ✅ |
+| 专业版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企业版 | ✅ |
 
 ## 注意事项
 - 市场代码不区分大小写
-- 产品命名规则请参阅数据规范文档
-- 仅返回状态为活跃且已确认可用的产品
-- 使用 `market=CN&type=futures` 查询可用的中国期货
 - 除 API 查询外，您也可以登录 [TickDB 官网](https://tickdb.ai) 用户中心，在产品管理页面直接浏览和搜索所有支持的产品
 
 <Frame>
@@ -22,16 +33,18 @@ openapi: GET /v1/symbols/available
 | market | type | 说明 | 产品量级 |
 |--------|------|------|----------|
 | GLOBAL | forex | 外汇货币对、贵金属 | 1,200+ |
-| GLOBAL | indices | 市场指数 | 12,900+ |
+| GLOBAL | indices | 市场指数 | 13,300+ |
 | GLOBAL | crypto | 加密货币交易对 | 800+ |
-| US | stock | 美国股票 | 12,400+ |
-| HK | stock | 香港股票 | 4,300+ |
-| CN | stock | A股 | 6,000+ |
-| CN | futures | 中国期货 | 持续更新 |
+| US | stock | 美国股票 | 14,300+ |
+| HK | stock | 香港股票 | 3,300+ |
+| CN | stock | A股 | 7,500+ |
+| CN | futures | 中国期货 | 1,000+ |
+| HK | futures | 香港期货 | 200+ |
 
 - `market` 按具体市场过滤，如 `market=CN` 返回A股和中国期货
 - `type` 按产品大类过滤，如 `type=stock` 返回 US + HK + CN 全部股票
 - 组合使用：`market=HK&type=stock` 仅返回港股
+- 组合使用：`market=HK&type=futures` 仅返回香港期货
 
 ## 请求参数
 
@@ -53,12 +66,12 @@ openapi: GET /v1/symbols/available
 | └─ type | 产品类型（stock/crypto/forex/indices/futures） |
 | └─ currency | 交易币种（CNY/USD/HKD/USDT） |
 | └─ is_active | 是否活跃 |
-| └─ updated_at | 更新时间 |
+| └─ updated_at | 更新时间，RFC 3339 日期时间字符串，包含时区信息 |
 | summary | 汇总信息 |
 | └─ total_products | 产品总数 |
 | └─ by_market | 按市场统计数量 |
 | └─ by_type | 按类型统计数量 |
-| └─ last_updated | 最后更新时间 |
+| └─ last_updated | 最后更新时间，RFC 3339 日期时间字符串，包含时区信息 |
 | pagination | 分页信息 |
 | └─ limit | 每页数量 |
 | └─ offset | 偏移量 |

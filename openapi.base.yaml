@@ -1,0 +1,3182 @@
+# Canonical API contract. Edit structural changes here, then run `npm run openapi:localize`.
+# The generated openapi.yaml, openapi.zh-Hant.yaml and openapi.en.yaml power localized Try it pages.
+openapi: 3.1.0
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info:
+  title: TickDB API
+  description: Unified real-time market data API — one connection for Forex, indices,
+    US stocks, HK stocks, A-shares, China futures, and Crypto via REST and WebSocket.
+  version: 1.0.3
+  contact:
+    email: support@tickdb.ai
+servers:
+  - url: https://api.tickdb.ai
+    description: Production server
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  parameters:
+    SymbolQuery:
+      name: symbol
+      in: query
+      required: true
+      schema:
+        type: string
+        examples: [AAPL, "700", "600519", AAPL.US, 700.HK, 600519.SH]
+      description: 股票代码。
+    TypeQuery:
+      name: type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [stock]
+      description: 股票类型消歧参数。
+    RequiredMarketQuery:
+      name: market
+      in: query
+      required: true
+      schema:
+        type: string
+        enum: [US, HK, CN]
+      description: 市场代码：US（美股）、HK（港股）、CN（A股）；不区分大小写，文档统一使用大写形式。
+    FromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+        examples: ["2024-01-01"]
+      description: 起始日期，闭区间，格式 `YYYY-MM-DD`。
+    ToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+        examples: ["2026-12-31"]
+      description: 结束日期，闭区间，格式 `YYYY-MM-DD`。
+    DividendTypeQuery:
+      name: dividend_type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [normal, special, non_cash, unknown]
+      description: 分红分类筛选。
+    DividendLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+      description: 单页分红记录数。
+    DividendAsOfQuery:
+      name: as_of
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: TTM 统计截止日，默认当前日期。
+    KindQuery:
+      name: kind
+      in: query
+      required: true
+      schema:
+        type: string
+        enum: [IS, BS, CF]
+      description: 报表类型，IS=利润表，BS=资产负债表，CF=现金流量表；一次请求只接受一个值。
+    TTMKindQuery:
+      name: kind
+      in: query
+      required: true
+      schema:
+        type: string
+        enum: [IS, CF]
+      description: TTM 只对 IS（利润表）和 CF（现金流量表）定义；BS（资产负债表）会返回参数错误。
+    PeriodTypeQuery:
+      name: period_type
+      in: query
+      required: false
+      schema:
+        type: string
+        default: "q1,q2,q3,q4"
+        pattern: "^(q1|q2|q3|q4|saf|af)(,(q1|q2|q3|q4|saf|af))*$"
+        examples: [q1, saf, af, "q1,q2,q3,q4"]
+      description: 财务周期类型，可用逗号分隔多个值。`q1` 第一季度、`q2` 第二季度、`q3` 第三季度、`q4` 第四季度、`saf` 半年度、`af` 年度；不支持 `qf`。
+    NQuery:
+      name: n
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+      description: 返回期数。
+    SegmentLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 200
+      description: 历史分部返回条数上限。
+    IndustryRankLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+      description: 行业指标排行返回条数上限。
+    FundHoldingsLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 200
+      description: 单页持股基金记录数上限。
+    NewsLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+      description: 新闻返回条数上限。
+    NewsIDPath:
+      name: news_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: "^[1-9][0-9]*$"
+      description: 新闻列表返回的不透明文章 ID，按字符串传递。
+    CursorQuery:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      description: 分页游标。第一页不传；后续请求将上一页响应顶层的 `page.next_cursor` 非空值原样传入，并保持其他查询参数不变。
+    SegmentCategoryQuery:
+      name: category
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [business, regional]
+      description: 营收构成维度，business=按业务，regional=按地区；不传时返回全部可用维度。
+    ReportQuery:
+      name: report
+      in: query
+      required: false
+      schema:
+        type: string
+        examples: [qf, saf, af]
+      description: 按报告周期筛选，例如 `qf` 季度报告、`saf` 半年度报告、`af` 年度报告；当前不限制为固定取值。
+    GranularityQuery:
+      name: granularity
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [daily, monthly]
+        default: daily
+      description: 历史估值记录的时间粒度，可选 daily（日度）或 monthly（月度）。
+    ValuationFromQuery:
+      name: from
+      in: query
+      required: false
+      schema: { type: string, format: date }
+      description: 查询起始日期，格式 `YYYY-MM-DD`。不传日期范围时，日度默认最近一年、月度默认最近五年。
+    ValuationToQuery:
+      name: to
+      in: query
+      required: false
+      schema: { type: string, format: date }
+      description: 查询结束日期，格式 `YYYY-MM-DD`。不传日期范围时，默认到当前 UTC 日期。
+    IndustryCounterIDQuery:
+      name: industry_counter_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 行业 ID，来自 `/fundamentals/industries/rank` 响应。
+    ObjectIDQuery:
+      name: object_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 股东对象 ID，来自 `/fundamentals/shareholders/top?symbol={symbol}` 响应成员。
+    CalendarOtherCategoryQuery:
+      name: category
+      in: query
+      required: true
+      schema:
+        type: string
+        enum: [macrodata, closed, meeting, merge, halt_resume, special_treatment, special_treatment_start, special_treatment_end, listing_status, listing_suspension, listing_resumption, delisting, lockup_expiry]
+      description: 其他日历事件类别，每次选择一种；不接受 report、dividend、split 或 ipo。
+    CalendarMarketQuery:
+      name: market
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [US, HK, CN]
+      description: 市场过滤。API Key 有 fundamentals 市场限制时必填，且必须在允许列表内。
+    FullMarketCompressionHeader:
+      name: Accept-Encoding
+      in: header
+      required: true
+      description: 全量行情响应必须启用压缩，支持 gzip、br 和 zstd，至少选择一种；默认使用兼容性较好的 gzip。
+      schema:
+        type: string
+        enum: [gzip, br, zstd]
+        default: gzip
+    CalendarFromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 起始日期，闭区间，格式 `YYYY-MM-DD`；省略时默认为当前 UTC 日期。
+    CalendarToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 结束日期，闭区间，格式 `YYYY-MM-DD`；省略时默认为 `from` 后 7 天。
+    CalendarSymbolsQuery:
+      name: symbols
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        examples: [AAPL.US, "AAPL.US,700.HK,600519.SH"]
+      description: 股票代码，多个代码使用英文逗号分隔，最多 50 个；与 market、category 条件同时生效。
+    CalendarLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+      description: 每页返回的事件数量，范围 1–500。
+  responses:
+    APIKeyStatusResponse:
+      description: 当前账户名下 API Key 的状态和到期信息。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/APIKeyStatusEnvelope" }
+    ProfileResponse:
+      description: 公司资料响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ProfileEnvelope" }
+    ExecutivesResponse:
+      description: 当前高管/董事列表响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ExecutivesEnvelope" }
+    FinancialRowsResponse:
+      description: 财务数据行响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/FinancialRowsEnvelope" }
+    SegmentsResponse:
+      description: 业务/地区分部响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/SegmentsEnvelope" }
+    SegmentsLatestResponse:
+      description: 最近一期业务/地区营收构成响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/SegmentsLatestEnvelope" }
+    ValuationLatestResponse:
+      description: 当前估值快照响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ValuationLatestEnvelope" }
+    ValuationTimeSeriesResponse:
+      description: 历史估值响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ValuationTimeSeriesEnvelope" }
+    IndustryPeersResponse:
+      description: 同行估值对比响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/IndustryPeersEnvelope" }
+    IndustryDistributionResponse:
+      description: 行业估值分布响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/IndustryDistributionEnvelope" }
+    IndustriesRankResponse:
+      description: 行业指标排行响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/IndustriesRankEnvelope" }
+    IndustriesTreeResponse:
+      description: 行业分类层级响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/IndustriesTreeEnvelope" }
+    DividendsResponse:
+      description: 分红记录响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/DividendsEnvelope" }
+    DividendsTTMResponse:
+      description: 按币种拆分的近十二个月现金 DPS 响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/DividendsTTMEnvelope" }
+    BuybackResponse:
+      description: 回购事件响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/BuybackEnvelope" }
+    LatestShareholdersResponse:
+      description: 最新股东结构响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/LatestShareholdersEnvelope" }
+    TopShareholdersResponse:
+      description: 股东持仓响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/TopShareholdersEnvelope" }
+    ShareholderDetailResponse:
+      description: 单个股东持仓明细响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ShareholderDetailEnvelope" }
+    FundHoldingsResponse:
+      description: 持股基金响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/FundHoldingsEnvelope" }
+    CorporateActionsResponse:
+      description: 公司行动响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/CorporateActionsEnvelope" }
+    NewsResponse:
+      description: 新闻资讯响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/NewsEnvelope" }
+    NewsDetailResponse:
+      description: 新闻正文详情响应；pending、blocked 和 failed 均为正常业务状态。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/NewsDetailEnvelope" }
+    NewsErrorResponse:
+      description: 资讯接口错误响应，包含错误代码和说明。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/NewsErrorEnvelope" }
+    CalendarResponse:
+      description: 财经日历响应。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/CalendarEnvelope" }
+    ErrorResponse:
+      description: |
+        错误响应。常见 HTTP 状态包括 400（参数错误）、401（鉴权失败）、403（接口、市场或配额限制）、
+        404（交易产品或业务数据不存在）、429（请求频率超限）和 503（数据暂不可用）。
+        `code` 可能是整数或字符串；响应至少包含 `code` 和 `message`，并可能包含 `error` 或 `data`。
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ErrorEnvelope" }
+          examples:
+            missingAPIKey:
+              summary: 缺少 API Key
+              value: { code: "1002", message: "API key is required. Provide via X-API-Key header", error: "1002" }
+            missingKind:
+              summary: 缺少必填参数
+              value: { code: 40001, message: "kind is required", data: null }
+            endpointForbidden:
+              summary: API Key 无权访问该接口
+              value: { code: 3009, message: "This endpoint is not allowed for your API key", data: null }
+            marketForbidden:
+              summary: API Key 未开放该市场
+              value: { code: 3010, message: "Fundamentals market not allowed for your API key", data: { market: US } }
+            noAvailableSource:
+              summary: 数据暂不可用
+              value: { code: 5003, message: "Data is temporarily unavailable", data: null }
+            notFound:
+              summary: 无匹配数据
+              value: { code: 40404, message: "shareholder detail not found", data: null }
+            businessNoData:
+              summary: 查询条件无有效业务数据
+              value: { code: 40405, message: "valuation time series not found", data: null }
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required: [code, data]
+      properties:
+        code:
+          type: integer
+          const: 0
+          description: 业务状态码，成功为 0。
+    APIKeyStatusEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required: [data]
+          properties:
+            message: { type: string, description: 请求结果说明。 }
+            data: { $ref: "#/components/schemas/APIKeyStatusData" }
+    APIKeyStatusData:
+      type: object
+      required: [server_time, total, api_keys]
+      properties:
+        server_time: { type: string, format: date-time, description: 本次查询的服务器时间。 }
+        total: { type: integer, minimum: 0, description: 返回的 API Key 数量。 }
+        api_keys:
+          type: array
+          description: 当前账户名下的 API Key 列表。
+          items: { $ref: "#/components/schemas/APIKeyStatusItem" }
+      additionalProperties: false
+    APIKeyStatusItem:
+      type: object
+      required: [key_prefix, name, plan, status, expires_at, remaining_seconds, created_at]
+      properties:
+        key_prefix: { type: string, description: 用于辨认 Key 的前缀，不是完整密钥。 }
+        name: { type: string, description: API Key 名称。 }
+        plan: { type: string, description: 套餐标识。 }
+        status:
+          type: string
+          enum: [active, expired, suspended, revoked]
+          description: API Key 状态。
+        expires_at: { type: [string, "null"], format: date-time, description: 到期时间；未设置时为 null。 }
+        remaining_seconds: { type: [integer, "null"], minimum: 0, description: 剩余秒数；已到期为 0，未设置到期时间时为 null。 }
+        created_at: { type: string, format: date-time, description: API Key 创建时间。 }
+      additionalProperties: false
+    ErrorEnvelope:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          description: TickDB API 业务错误码；可能为整数或字符串，客户端应归一化为字符串后比较。
+          oneOf:
+            - type: integer
+            - type: string
+        message: { type: string, description: 错误说明。 }
+        error: { type: string, description: 兼容错误标识；仅部分错误响应返回。 }
+        data:
+          description: 可选的错误上下文；可能为 null、对象或数组。
+          oneOf:
+            - type: "null"
+            - type: object
+              additionalProperties: true
+            - type: array
+              items: {}
+    ProfileEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/ProfileData" }
+    ProfileData:
+      type: object
+      description: 公司资料数据。
+      required: [symbol, market, name]
+      properties:
+        symbol: { type: string, description: 标准化股票代码，例如 AAPL.US、700.HK、600519.SH。 }
+        name: { type: string, description: 公司名称。 }
+        company_name: { type: string, description: 公司法定或英文名称。 }
+        market: { type: string, description: 市场代码。 }
+        region: { type: string, description: 国家或地区代码。 }
+        founded: { type: [string, "null"], description: 成立年份或日期；无数据时为 null。 }
+        listing_date: { type: [string, "null"], format: date, description: 上市日期；无数据时为 null。 }
+        year_end: { type: [string, "null"], description: 财年结束信息。 }
+        address: { type: string, description: 地址。 }
+        office_address: { type: string, description: 办公地址。 }
+        phone: { type: string, description: 联系电话。 }
+        email: { type: string, description: 电子邮箱。 }
+        website: { type: string, description: 公司网站；返回值可能不带 URL 协议前缀。 }
+        employees: { type: integer, description: 员工数。 }
+        chairman: { type: string, description: 董事长。 }
+        manager: { type: string, description: 主要管理人员。 }
+        secretary: { type: string, description: 公司秘书。 }
+        legal_repr: { type: string, description: 法定代表人。 }
+        accounting_firm: { type: string, description: 会计师事务所。 }
+        legal_counsel: { type: string, description: 法律顾问。 }
+        category: { type: string, description: 公司类别。 }
+        profile: { type: string, description: 公司业务简介。 }
+      additionalProperties: false
+    ExecutivesEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/ExecutivesData" }
+    ExecutivesData:
+      type: object
+      description: 高管/董事数据。
+      required: [symbol, total, members]
+      properties:
+        symbol: { type: string, description: 规范化后的标的代码。 }
+        total: { type: integer, minimum: 0, description: 成员总数。 }
+        members:
+          type: array
+          description: 高管/董事成员列表。
+          items: { $ref: "#/components/schemas/Executive" }
+      additionalProperties: true
+    Executive:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, description: 姓名。 }
+        title: { type: string, description: 职务。 }
+        biography: { type: string, description: 简历。 }
+      additionalProperties: true
+    FinancialRowsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/FinancialRowsData" }
+    FinancialRowsData:
+      type: object
+      description: 财务报表数据。实测数值字段会以字符串返回以避免 JSON 浮点精度问题。
+      required: [symbol, kind, rows]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        kind: { type: string, enum: [IS, BS, CF], description: 报表类型：IS 利润表、BS 资产负债表、CF 现金流量表。 }
+        rows:
+          type: array
+          description: 所选报表类型的指标记录列表；同一报告期通常包含多条记录。
+          items: { $ref: "#/components/schemas/FinancialRow" }
+      additionalProperties: true
+    FinancialRow:
+      type: object
+      required: [kind, period_type, fiscal_year, fiscal_period, period_end, field_name, indicator_title, value]
+      properties:
+        kind: { type: string, enum: [IS, BS, CF], description: 报表类型：IS 利润表、BS 资产负债表、CF 现金流量表。 }
+        field_name: { type: string, description: 财务指标字段代码，取值见对应财务报表页面的财务字段字典。 }
+        indicator_title: { type: string, description: 指标标题。 }
+        field_display: { type: string, description: 带单位的展示名称。 }
+        value:
+          oneOf: [{ type: string }, { type: number }, { type: "null" }]
+          description: 字段值。
+        fiscal_year: { type: integer, description: 财年。 }
+        fiscal_period: { type: string, description: 财务周期。 }
+        period_type: { type: string, description: 财务周期类型，常见值包括 q1（第一季度）、q2（第二季度）、q3（第三季度）、q4（第四季度）、saf（半年度）、af（年度）、ttm（滚动近12个月）。 }
+        period_end: { type: string, format: date, description: 报告期结束日期。 }
+        currency: { type: [string, "null"], description: 币种。 }
+        is_percent: { type: boolean, description: 是否为百分比指标。 }
+        yoy: { type: [string, number, "null"], description: 同比值。 }
+        ratio: { type: [string, number, "null"], description: 比率值。 }
+      additionalProperties: true
+    SegmentsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/SegmentsData" }
+    SegmentsLatestEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/SegmentsLatestData" }
+    SegmentsLatestData:
+      type: object
+      description: 最近一期营收构成数据。
+      required: [symbol, segments]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        segments:
+          type: array
+          description: 最近一期营收构成明细列表；没有可用明细时为空数组。
+          items: { $ref: "#/components/schemas/SegmentItem" }
+      additionalProperties: false
+    SegmentsData:
+      type: object
+      required: [symbol, segments]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        report: { type: [string, "null"], description: history 请求回显的报告周期，常见值为 qf（季度报告）、saf（半年度报告）、af（年度报告）。 }
+        segments:
+          type: array
+          description: 营收构成明细列表。
+          items: { $ref: "#/components/schemas/SegmentItem" }
+      additionalProperties: true
+    SegmentItem:
+      type: object
+      required: [report, category, segment_name, period_start, period_end, value]
+      properties:
+        report: { type: string, description: 报告周期，常见值为 qf（季度报告）、saf（半年度报告）、af（年度报告）。 }
+        category: { type: string, description: 该记录所属维度，business=按业务，regional=按地区。 }
+        segment_name: { type: string, description: 业务类别或地区名称。 }
+        period_start: { type: string, format: date, description: 周期开始日期。 }
+        period_end: { type: string, format: date, description: 周期结束日期。 }
+        total_revenue: { type: [string, number, "null"], description: 该报告期总收入。 }
+        currency: { type: [string, "null"], description: 币种。 }
+        percent: { type: [string, number, "null"], description: 该业务类别或地区收入占当期总收入的百分比，例如 79.74 表示 79.74%。 }
+        value: { type: [string, number, "null"], description: 该业务类别或地区的收入金额。 }
+      additionalProperties: true
+    ValuationLatestEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/ValuationLatestData" }
+    ValuationLatestData:
+      type: object
+      required: [symbol, metrics]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        metrics:
+          type: object
+          required: [PE]
+          properties:
+            PE: { $ref: "#/components/schemas/ValuationMetricSnapshot" }
+          additionalProperties: false
+      additionalProperties: true
+    ValuationMetricSnapshot:
+      type: object
+      required: [value, high_1y, low_1y, median_1y, desc]
+      properties:
+        value: { type: [string, number, "null"], description: 当前值。 }
+        high_1y: { type: [string, number, "null"], description: 一年高位。 }
+        low_1y: { type: [string, number, "null"], description: 一年低位。 }
+        median_1y: { type: [string, number, "null"], description: 一年中位数。 }
+        desc: { type: [string, "null"], description: 说明文本；内容可能包含 HTML。 }
+      additionalProperties: true
+    ValuationTimeSeriesEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/ValuationTimeSeriesData" }
+    ValuationTimeSeriesData:
+      type: object
+      required: [symbol, metric, granularity, from, to, points]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        metric: { type: string, enum: [PE], description: 估值指标，当前固定为 PE（市盈率）。 }
+        granularity: { type: string, enum: [daily, monthly], description: 历史估值记录的时间粒度。 }
+        from: { type: string, format: date, description: 查询范围的起始日期，格式 YYYY-MM-DD。 }
+        to: { type: string, format: date, description: 查询范围的结束日期，格式 YYYY-MM-DD。 }
+        points:
+          type: array
+          description: 历史估值记录，每项为 [RFC 3339 日期时间字符串, 指标值]。
+          items: { $ref: "#/components/schemas/MetricPoint" }
+      additionalProperties: true
+    MetricPoint:
+      type: array
+      minItems: 2
+      maxItems: 2
+      prefixItems:
+        - { type: string, format: date-time, description: RFC 3339 日期时间字符串，包含时区信息。 }
+        - { type: [string, number, "null"], description: 指标值。 }
+      items: false
+    IndustryPeersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/IndustryPeersData" }
+    IndustryPeersData:
+      type: object
+      required: [parent_symbol, peers]
+      properties:
+        parent_symbol: { type: string, description: 被查询公司的标准化股票代码。 }
+        peers:
+          type: array
+          description: 同行公司及可比较指标列表。
+          items: { $ref: "#/components/schemas/PeerItem" }
+      additionalProperties: true
+    PeerItem:
+      type: object
+      required: [peer_symbol, peer_name]
+      properties:
+        peer_symbol: { type: string, description: 同行公司股票代码。 }
+        peer_name: { type: string, description: 同行公司名称。 }
+        currency: { type: [string, "null"], description: 币种。 }
+        assets: { type: [string, number, "null"], description: 资产值。 }
+        bps: { type: [string, number, "null"], description: 每股净资产。 }
+        eps: { type: [string, number, "null"], description: 每股收益。 }
+        dps: { type: [string, number, "null"], description: 每股股息。 }
+        div_yield: { type: [string, number, "null"], description: 股息率。 }
+        div_payout_ratio: { type: [string, number, "null"], description: 股息支付率。 }
+        five_y_avg_dps: { type: [string, number, "null"], description: 五年平均每股股息。 }
+        pe: { type: [string, number, "null"], description: 市盈率。 }
+      additionalProperties: true
+    IndustryDistributionEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/IndustryDistributionData" }
+    IndustryDistributionData:
+      type: object
+      required: [symbol, distributions]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        distributions:
+          type: array
+          description: 各估值指标在行业内的分布与排名。
+          items: { $ref: "#/components/schemas/IndustryDistributionItem" }
+      additionalProperties: true
+    IndustryDistributionItem:
+      type: object
+      required: [metric, low, high, median, value, ranking, rank_index, rank_total]
+      properties:
+        metric: { type: string, description: 估值指标。 }
+        low: { type: [string, number, "null"], description: 行业低位。 }
+        high: { type: [string, number, "null"], description: 行业高位。 }
+        median: { type: [string, number, "null"], description: 行业中位数。 }
+        value: { type: [string, number, "null"], description: 当前公司值。 }
+        ranking: { type: [string, number, "null"], description: 排名展示值。 }
+        rank_index: { type: integer, minimum: 0, description: 排名序号。 }
+        rank_total: { type: integer, minimum: 0, description: 排名样本总数。 }
+      additionalProperties: true
+    IndustriesRankEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/IndustriesRankData" }
+    IndustriesRankData:
+      type: object
+      required: [market, indicator, sort_type, items]
+      properties:
+        market: { type: string, description: 市场。 }
+        indicator: { type: string, description: 排行指标。 }
+        sort_type: { type: string, description: 排序方向。 }
+        items:
+          type: array
+          description: 行业指标排行列表。
+          items: { $ref: "#/components/schemas/IndustryRankItem" }
+      additionalProperties: true
+    IndustryRankItem:
+      type: object
+      required: [industry_counter_id, industry_name, rank, value, change_percent]
+      properties:
+        industry_counter_id: { type: string, description: 行业 ID，可用于 industries/tree。 }
+        industry_name: { type: string, description: 行业名称。 }
+        rank: { type: integer, description: 排名。 }
+        value: { type: [string, number], description: 行业总市值。 }
+        change_percent: { type: [string, number, "null"], description: 变动比例。 }
+      additionalProperties: true
+    IndustriesTreeEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/IndustriesTreeData" }
+    IndustriesTreeData:
+      type: object
+      required: [market, industry_counter_id, top, chain]
+      properties:
+        market: { type: string, description: 市场。 }
+        industry_counter_id: { type: string, description: 行业 ID。 }
+        top: { $ref: "#/components/schemas/IndustryTop" }
+        chain: { $ref: "#/components/schemas/IndustryChainNode" }
+      additionalProperties: true
+    IndustryTop:
+      type: object
+      required: [name, market]
+      properties:
+        name: { type: string, description: 节点名称。 }
+        market: { type: string, description: 市场。 }
+      additionalProperties: false
+    IndustryChainNode:
+      type: object
+      required: [name, level, market, counter_id, next]
+      properties:
+        name: { type: string, description: 行业名称。 }
+        level: { type: integer, description: 层级。 }
+        market: { type: string, description: 市场。 }
+        counter_id: { type: string, description: 行业 counter ID。 }
+        parent_code: { type: string, description: 父行业代码。 }
+        sharelist_id: { type: string, description: 股票列表 ID。 }
+        symbol: { type: string, description: 节点关联代码。 }
+        stock_num: { type: integer, minimum: 0, description: 股票数量。 }
+        chg: { type: [string, number, "null"], description: 变动值。 }
+        ytd_chg: { type: [string, number, "null"], description: 年初至今变动值。 }
+        next:
+          type: array
+          description: 下一级行业分类节点。
+          items: { $ref: "#/components/schemas/IndustryChainNode" }
+      additionalProperties: false
+    DividendsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required: [page]
+          properties:
+            data: { $ref: "#/components/schemas/DividendData" }
+            page: { $ref: "#/components/schemas/PageInfo" }
+    DividendsTTMEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/DividendTTMData" }
+    BuybackEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/BuybackData" }
+    CorporateActionsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/CorporateActionsData" }
+    DividendData:
+      type: object
+      required: [symbol, events]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        events:
+          type: array
+          description: 符合筛选条件的分红记录列表，可能包含已知的未来事件。
+          items: { $ref: "#/components/schemas/DividendEvent" }
+      additionalProperties: true
+    DividendEvent:
+      type: object
+      required: [event_id, type, distribution_kind, description, amount, stock_distribution_ratio, currency, declaration_date, record_date, ex_date, payment_date, detail_level]
+      properties:
+        event_id: { type: string, description: 事件 ID。 }
+        type: { type: string, enum: [normal, special, non_cash, unknown], description: 对外分红分类。 }
+        distribution_kind: { type: string, enum: [cash, stock, other_non_cash, unknown], description: 分派形式。 }
+        description: { type: [string, "null"], description: 事件说明。 }
+        amount: { type: [string, "null"], description: 每股现金金额的十进制字符串；纯非现金事件为 null。 }
+        stock_distribution_ratio: { type: [string, "null"], description: 每股送股或转增比例；例如 0.7 表示每 1 股送转 0.7 股（每 10 股送转 7 股）。 }
+        currency: { type: [string, "null"], description: 币种。 }
+        declaration_date: { type: [string, "null"], format: date, description: 公告日。 }
+        record_date: { type: [string, "null"], format: date, description: 股权登记日。 }
+        ex_date: { type: [string, "null"], format: date, description: 除权除息日。 }
+        payment_date: { type: [string, "null"], format: date, description: 派息日。 }
+        detail_level: { type: string, enum: [summary, detail], description: 详情级别。 }
+      additionalProperties: true
+    DividendTTMData:
+      type: object
+      required: [symbol, as_of_date, window_start_exclusive, currencies]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        as_of_date: { type: string, format: date, description: TTM 截止日。 }
+        window_start_exclusive: { type: string, format: date, description: 十二个月窗口的排他起点。 }
+        currencies:
+          type: array
+          description: 按币种汇总；窗口内没有符合条件的现金分红时为空数组。
+          items: { $ref: "#/components/schemas/DividendTTMCurrency" }
+      additionalProperties: true
+    DividendTTMCurrency:
+      type: object
+      required: [currency, normal_cash_dps_ttm, special_cash_dps_ttm, total_cash_dps_ttm, normal_event_count, special_event_count]
+      properties:
+        currency: { type: string }
+        normal_cash_dps_ttm: { type: string }
+        special_cash_dps_ttm: { type: string }
+        total_cash_dps_ttm: { type: string }
+        normal_event_count: { type: integer, minimum: 0 }
+        special_event_count: { type: integer, minimum: 0 }
+      additionalProperties: true
+    BuybackData:
+      type: object
+      required: [symbol, currency, ttm, history]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        currency: { type: string, description: 币种。 }
+        ttm: { $ref: "#/components/schemas/BuybackTTM" }
+        history:
+          type: array
+          description: 历史年度回购指标。
+          items: { $ref: "#/components/schemas/BuybackHistoryItem" }
+      additionalProperties: true
+    BuybackTTM:
+      type: object
+      required: [net_buyback, net_buyback_yield, buyback_payout_ratio, buyback_to_cashflow_ratio]
+      properties:
+        net_buyback: { type: [string, number, "null"], description: 净回购额。 }
+        net_buyback_yield: { type: [string, number, "null"], description: 净回购收益率。 }
+        buyback_payout_ratio: { type: [string, number, "null"], description: 回购支付率。 }
+        buyback_to_cashflow_ratio: { type: [string, number, "null"], description: 回购与现金流比率。 }
+      additionalProperties: true
+    BuybackHistoryItem:
+      type: object
+      required: [currency, fiscal_year, fiscal_year_range, net_buyback, net_buyback_yield, net_buyback_growth_rate]
+      properties:
+        currency: { type: string, description: 币种。 }
+        fiscal_year: { type: string, description: 财年。 }
+        fiscal_year_range: { type: string, description: 财年日期范围。 }
+        net_buyback: { type: [string, number, "null"], description: 净回购额。 }
+        net_buyback_yield: { type: [string, number, "null"], description: 净回购收益率。 }
+        net_buyback_growth_rate: { type: [string, number, "null"], description: 净回购增长率。 }
+      additionalProperties: false
+    CorporateActionsData:
+      type: object
+      required: [symbol, events]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        events:
+          type: array
+          description: 公司行动列表。
+          items: { $ref: "#/components/schemas/CorporateActionItem" }
+      additionalProperties: true
+    CorporateActionItem:
+      type: object
+      required: [event_id, event_date, date_type, date_zone, act_type, act_desc, action_code, is_recent]
+      properties:
+        event_id: { type: string, description: 事件 ID。 }
+        event_date: { type: string, format: date, description: 事件日期。 }
+        date_type: { type: string, description: 日期类型。 }
+        date_zone: { type: string, description: 日期时区。 }
+        act_type: { type: string, description: 行动类型。 }
+        act_desc: { type: string, description: 行动说明。 }
+        action_code: { type: string, description: 行动代码。 }
+        is_recent: { type: boolean, description: 是否近期事件。 }
+      additionalProperties: true
+    LatestShareholdersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/LatestShareholdersData" }
+    LatestShareholdersData:
+      type: object
+      required: [symbol, report_date, total, members]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        report_date: { type: string, format: date, description: 报告日期。 }
+        total: { type: integer, description: 股东记录数量。 }
+        members:
+          type: array
+          description: 最新一期股东记录列表。
+          items: { $ref: "#/components/schemas/LatestShareholderMember" }
+      additionalProperties: false
+    LatestShareholderMember:
+      type: object
+      required: [shareholder_name, percent_of_shares, shares_changed, report_date]
+      properties:
+        shareholder_name: { type: string, description: 股东名称。 }
+        percent_of_shares: { type: string, description: 持股比例数值，不含百分号。 }
+        shares_changed: { type: string, description: 较上一报告期的股份变动数量。 }
+        report_date: { type: string, format: date, description: 该条记录的报告日期。 }
+      additionalProperties: false
+    TopShareholdersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/TopShareholdersData" }
+    TopShareholdersData:
+      type: object
+      required: [symbol, total, periods, info, members]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        total: { type: integer, description: 整理后的股东记录数量。 }
+        periods:
+          type: array
+          items: { type: string }
+          description: 可用报告期列表。
+        info:
+          type: array
+          items: { $ref: "#/components/schemas/TopShareholderPeriod" }
+          description: 按报告期分组的股东持仓数据。
+        members:
+          type: array
+          description: 整理后的股东记录。
+          items: { $ref: "#/components/schemas/TopShareholderMember" }
+      additionalProperties: false
+    TopShareholderPeriod:
+      type: object
+      required: [period, share_holders]
+      properties:
+        period: { type: string, description: 报告期。 }
+        share_holders:
+          type: array
+          description: 该报告期的股东持仓列表。
+          items: { $ref: "#/components/schemas/TopShareholderPeriodMember" }
+      additionalProperties: false
+    TopShareholderPeriodMember:
+      type: object
+      required: [filing_date, name, object_id, percent_shares_changed, percent_shares_held, period, shares_changed, shares_held]
+      properties:
+        filing_date: { type: string, description: 申报日期。 }
+        name: { type: string, description: 股东名称。 }
+        object_id: { type: string, description: 股东对象 ID。 }
+        percent_shares_changed: { type: string, description: 持股比例变化，包含百分号。 }
+        percent_shares_held: { type: string, description: 持股比例，包含百分号。 }
+        period: { type: string, description: 该条记录所属报告期。 }
+        shares_changed: { type: string, description: 股份变动数量。 }
+        shares_held: { type: string, description: 持股数量。 }
+      additionalProperties: false
+    TopShareholderMember:
+      type: object
+      required: [object_id, shareholder_name, shareholder_type, shares_held, percent_shares_held, percent_shares_held_raw, percent_shares_changed, filing_date, report_date, detail_available]
+      properties:
+        object_id: { type: string, description: 股东对象 ID。 }
+        shareholder_name: { type: string, description: 股东名称。 }
+        shareholder_type: { type: [string, "null"], description: 股东类型。 }
+        shares_held: { type: string, description: 持股数量。 }
+        percent_shares_held: { type: [string, "null"], description: 持股比例数值，不含百分号；无法转换时为 null。 }
+        percent_shares_held_raw: { type: string, description: 原始持股比例文本，包含百分号并可保留 `<0.01%` 等表示。 }
+        percent_shares_changed: { type: [string, "null"], description: 持股比例变化数值，不含百分号；无法转换时为 null。 }
+        filing_date: { type: string, format: date, description: 申报日期。 }
+        report_date: { type: [string, "null"], format: date, description: 报告日期。 }
+        detail_available: { type: boolean, description: 该 object_id 是否存在可用股东详情。 }
+      additionalProperties: false
+    ShareholderDetailEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/ShareholderDetailData" }
+    ShareholderDetailData:
+      type: object
+      required: [symbol, object_id, name, holding_summary, holding_periods, holding_details, trading_periods, tradings]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        object_id: { type: string, description: 股东对象 ID。 }
+        name: { type: string, description: 股东名称。 }
+        title: { type: [string, "null"], description: 股东或机构标题。 }
+        holding_summary:
+          type: array
+          description: 分报告期的持仓汇总。
+          items: { $ref: "#/components/schemas/ShareholderHoldingSummary" }
+        holding_periods:
+          type: array
+          description: 可用持仓报告期。
+          items: { type: string }
+        holding_details:
+          type: array
+          description: 逐报告期持仓明细。
+          items: { $ref: "#/components/schemas/ShareholderHoldingDetail" }
+        trading_periods:
+          type: array
+          description: 可用交易统计期间。
+          items: { type: string }
+        tradings:
+          type: array
+          description: 分期间交易汇总。
+          items: { $ref: "#/components/schemas/ShareholderTradingSummary" }
+      additionalProperties: false
+    ShareholderHoldingSummary:
+      type: object
+      required: [accum_buy, accum_sell, percent_stock_price_changed, period, stock_price]
+      properties:
+        accum_buy: { type: string, description: 该报告期累计买入数量。 }
+        accum_sell: { type: string, description: 该报告期累计卖出数量。 }
+        percent_stock_price_changed: { type: string, description: 该报告期股价变化比例，包含百分号。 }
+        period: { type: string, description: 报告期。 }
+        stock_price: { type: string, description: 该报告期对应股价。 }
+      additionalProperties: false
+    ShareholderHoldingDetail:
+      type: object
+      required: [filing_date, name, object_id, percent_shares_changed, percent_shares_held, period, shares_changed, shares_held]
+      properties:
+        filing_date: { type: string, description: 申报日期。 }
+        name: { type: string, description: 股东名称。 }
+        object_id: { type: string, description: 股东对象 ID。 }
+        percent_shares_changed: { type: string, description: 持股比例变化，包含百分号。 }
+        percent_shares_held: { type: string, description: 持股比例，包含百分号。 }
+        period: { type: string, description: 报告期。 }
+        shares_changed: { type: string, description: 股份变动数量。 }
+        shares_held: { type: string, description: 持股数量。 }
+      additionalProperties: false
+    ShareholderTradingSummary:
+      type: object
+      required: [accum_buy, accum_sell, net_buy, period, trading_details]
+      properties:
+        accum_buy: { type: string, description: 该期间累计买入数量。 }
+        accum_sell: { type: string, description: 该期间累计卖出数量。 }
+        net_buy: { type: string, description: 该期间净买入数量。 }
+        period: { type: string, description: 交易统计期间。 }
+        trading_details:
+          type: array
+          description: 该期间的交易明细列表。
+          items: { type: object, additionalProperties: true }
+      additionalProperties: false
+    FundHoldingsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required: [page]
+          properties:
+            data: { $ref: "#/components/schemas/FundHoldingsData" }
+            page: { $ref: "#/components/schemas/PageInfo" }
+    PageInfo:
+      type: object
+      required: [next_cursor, limit]
+      properties:
+        next_cursor: { type: [string, "null"], description: 下一页游标；非空时原样作为下一次请求的 cursor 参数，末页为 null。 }
+        limit: { type: integer, minimum: 1, description: 当前分页上限。 }
+      additionalProperties: true
+    FundHoldingsData:
+      type: object
+      required: [symbol, total, members]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        total: { type: integer, description: 持有该股票的基金记录总数。 }
+        members:
+          type: array
+          description: 披露持有该股票的基金列表。
+          items: { $ref: "#/components/schemas/FundHoldingMember" }
+      additionalProperties: true
+    FundHoldingMember:
+      type: object
+      required: [fund_code, fund_symbol, fund_name, currency, position_ratio, report_date]
+      properties:
+        fund_code: { type: string, description: 基金代码。 }
+        fund_symbol: { type: string, description: 基金代码。 }
+        fund_name: { type: string, description: 基金名称。 }
+        currency: { type: string, description: 币种。 }
+        position_ratio: { type: [string, number, "null"], description: 该股票在对应基金持仓中的比例。 }
+        report_date: { type: string, format: date, description: 基金持有该股票的信息披露日期。 }
+      additionalProperties: true
+    NewsEnvelope:
+      type: object
+      required: [code, data]
+      properties:
+        code: { type: integer, const: 0 }
+        data: { $ref: "#/components/schemas/NewsData" }
+      additionalProperties: false
+    NewsData:
+      type: object
+      required: [symbol, limit, news]
+      properties:
+        symbol: { type: string, description: 标准化股票代码。 }
+        limit: { type: integer, description: 返回条数上限。 }
+        news:
+          type: array
+          description: 新闻列表。
+          items: { $ref: "#/components/schemas/NewsItem" }
+      additionalProperties: false
+    NewsItem:
+      type: object
+      required: [news_id, title, description, published_at, has_body]
+      properties:
+        news_id: { type: string, pattern: "^[1-9][0-9]*$", description: 不透明新闻 ID。 }
+        title: { type: string, description: 新闻标题；个别记录可能为空字符串。 }
+        description: { type: ["string", "null"], description: 摘要。 }
+        published_at: { type: string, format: date-time, description: 发布时间。 }
+        has_body: { type: boolean, description: 当前是否存在可展示正文。 }
+      additionalProperties: false
+    NewsDetailEnvelope:
+      type: object
+      required: [code, data]
+      properties:
+        code: { type: integer, const: 0 }
+        data: { $ref: "#/components/schemas/NewsDetailItem" }
+      additionalProperties: false
+    NewsDetailItem:
+      type: object
+      required: [news_id, title, description, published_at, detail_status, content_scope, body_text, body_html]
+      properties:
+        news_id: { type: string, pattern: "^[1-9][0-9]*$", description: 不透明新闻 ID。 }
+        title: { type: string, description: 新闻标题。 }
+        description: { type: ["string", "null"], description: 列表摘要。 }
+        published_at: { type: string, format: date-time, description: 发布时间。 }
+        detail_status:
+          type: string
+          enum: [pending, succeeded, blocked, failed]
+        content_scope:
+          type: string
+          enum: [full, excerpt, unknown, none]
+        body_text: { type: [string, "null"], description: 规范化 UTF-8 正文纯文本。 }
+        body_html: { type: [string, "null"], description: 白名单消毒后的语义 HTML。 }
+      additionalProperties: false
+    NewsErrorEnvelope:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          description: TickDB API 业务错误码；可能为整数或字符串。
+          oneOf:
+            - type: integer
+            - type: string
+        message: { type: string, description: 面向调用方的错误说明。 }
+        error: { type: string, description: 兼容错误标识；仅部分错误响应返回。 }
+        data:
+          description: 可选的错误上下文。
+          oneOf:
+            - type: "null"
+            - type: object
+              additionalProperties: true
+            - type: array
+              items: {}
+      additionalProperties: true
+    CalendarEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required: [page]
+          properties:
+            data: { $ref: "#/components/schemas/CalendarData" }
+            page: { $ref: "#/components/schemas/CalendarPage" }
+    CalendarPage:
+      type: object
+      required: [next_cursor, limit]
+      properties:
+        next_cursor: { type: [string, "null"], description: 下一页游标；末页为 null。 }
+        limit: { type: integer, minimum: 1, maximum: 500, description: 当前分页上限。 }
+      additionalProperties: false
+    CalendarData:
+      type: object
+      required: [from, to, events]
+      properties:
+        from: { type: string, format: date, description: 查询起始日期，闭区间。 }
+        to: { type: string, format: date, description: 查询结束日期，闭区间。 }
+        events:
+          type: array
+          description: 按 event_datetime 升序排列的财经事件，最多 500 条。
+          maxItems: 500
+          items: { $ref: "#/components/schemas/FullCalendarEvent" }
+      additionalProperties: false
+    FullCalendarEvent:
+      type: object
+      required: [category, content, counter_name, currency, date_type, event_datetime, event_type, market, star, symbol]
+      properties:
+        category:
+          type: string
+          description: 事件细分类别，例如 ipo_offering、ipo_listing；请求参数 category 使用上层筛选类别。
+        event_datetime: { type: string, format: date-time, description: 事件时间，UTC RFC3339。 }
+        symbol: { type: string, description: 标准化股票代码；全局事件可为空字符串。 }
+        market: { type: string, enum: [US, HK, CN], description: 事件所属市场。 }
+        event_type: { type: string, description: 事件类型。 }
+        content: { type: string, description: 事件内容。 }
+        counter_name: { type: [string, "null"], description: 相关标的名称。 }
+        date_type: { type: [string, "null"], description: 日期类型。 }
+        star: { type: integer, description: 事件重要性。 }
+        currency: { type: [string, "null"], description: 币种。 }
+        issue_price: { type: [string, "null"], description: IPO 发行价格；仅 IPO 事件返回，无可用价格时为 null。 }
+        data:
+          type: array
+          description: 事件附加数据；没有附加数据时省略。
+          items: { $ref: "#/components/schemas/CalendarEventData" }
+      additionalProperties: false
+    CalendarEventData:
+      type: object
+      required: [key, value_type, value_text, value_raw]
+      properties:
+        key: { type: string, description: 附加数据键名，部分记录可能为空字符串。 }
+        value_type: { type: string, description: 附加数据类型。 }
+        value_text: { type: [string, "null"], description: 展示值。 }
+        value_raw: { type: [string, "null"], description: 原始值。 }
+      additionalProperties: false
+    FullMarketTicker:
+      type: object
+      required: [symbol, last_price, timestamp]
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          description: 交易产品代码。
+        name:
+          type: string
+          description: 产品名称；名称信息可用时返回。
+        type:
+          type: string
+          enum: [stock, indices]
+          description: 产品类型。
+        category:
+          type: string
+          enum: [sh_stock, sz_stock, bj_stock, etf, cn_index, cn_bond]
+          description: A股产品细分类别；仅A股全量行情返回。
+        last_price:
+          type: string
+          description: 最新成交价。
+        open:
+          type: string
+          description: 当日开盘价；数据不可用时不返回。
+        prev_close:
+          type: string
+          description: 上一交易日收盘价；数据不可用时不返回。
+        volume_24h:
+          type: string
+          description: 当日累计成交量；数据不可用时不返回。
+        quote_volume_24h:
+          type: string
+          description: 当日累计成交额；数据不可用时不返回。
+        high_24h:
+          type: string
+          description: 当日最高价；数据不可用时不返回。
+        low_24h:
+          type: string
+          description: 当日最低价；数据不可用时不返回。
+        price_change_24h:
+          type: string
+          description: 相对昨收的价格变化；数据不可用时不返回。
+        price_change_percent_24h:
+          type: string
+          description: 相对昨收的价格变化百分比；数据不可用时不返回。
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix 时间戳，单位为毫秒。
+    FullMarketTickerResponse:
+      type: object
+      required: [code, message, data]
+      additionalProperties: false
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FullMarketTicker"
+x-user-api-scope:
+  primary_user_api_count: 25
+  authentication: X-API-Key
+x-fundamentals-product-scope:
+  supported_stock_categories:
+    - { market: US, exchanges: [NASDAQ, NYSE, AMEX], category: stock }
+    - { market: HK, exchanges: [HKEX], category: stock }
+    - { market: CN, exchanges: [SH, SZ], category: stock }
+  unsupported_upstream_categories: [US_ARCA, US_BATS, CN_BJ_STOCK, CN_SH_ETF, CN_SZ_ETF]
+  unsupported_behavior: 不承诺 fundamentals 数据可用性；当前接口行为包括结构化 404 或格式正确的成功空响应。
+paths:
+  /v1/apikeys/subscriptions:
+    get:
+      tags: [account]
+      summary: APIKey管理
+      description: 无需登录官网，查询账户名下 API Key 的到期时间和剩余秒数，便于定时检查和设置提醒。
+      operationId: getAPIKeyStatus
+      responses:
+        "200": { $ref: "#/components/responses/APIKeyStatusResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/market/ticker:
+    get:
+      summary: Market Ticker
+      description: Get real-time ticker snapshots for one or more symbols
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated symbols (max 50)
+          schema:
+            type: string
+            default: "700.HK,AAPL.US"
+            example: "700.HK,AAPL.US"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
+            example: "stock"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [code, message, data]
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [symbol, last_price, timestamp]
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          description: 标准化交易产品代码。
+                        name:
+                          type: string
+                          description: 产品名称；名称信息可用时返回。
+                        type:
+                          type: string
+                          enum: ["stock", "indices", "crypto", "forex", "futures"]
+                          description: 产品类型；产品类型成功识别时返回。
+                        category:
+                          type: string
+                          description: A股产品细分类别，例如 sh_stock、sz_stock、bj_stock、etf、cn_bond、cn_index；仅查询A股市场产品且分类信息可用时返回。
+                        last_price:
+                          type: string
+                          description: 最新成交价。
+                        open:
+                          type: string
+                          description: 开盘价；相应行情统计可用时返回。传统市场通常为当日或当前交易时段开盘价，加密货币按对应行情统计窗口返回。
+                        prev_close:
+                          type: string
+                          description: 昨收或参考价；相应行情统计可用时返回。传统市场通常为上一交易日或上一交易时段收盘价，加密货币按对应行情统计窗口返回。
+                        bid_price:
+                          type: string
+                          description: 最优买价；盘口报价可用时返回。
+                        ask_price:
+                          type: string
+                          description: 最优卖价；盘口报价可用时返回。
+                        volume_24h:
+                          type: string
+                          description: 累计成交量；相应行情统计可用时返回。加密货币通常为滚动24小时成交量，传统市场通常为当日或当前交易时段成交量。
+                        quote_volume_24h:
+                          type: string
+                          description: 与 volume_24h 相同统计窗口的成交额；成交额数据可用时返回。
+                        high_24h:
+                          type: string
+                          description: 最高价；相应行情统计可用时返回。统计窗口与 volume_24h 一致。
+                        low_24h:
+                          type: string
+                          description: 最低价；相应行情统计可用时返回。统计窗口与 volume_24h 一致。
+                        price_change_24h:
+                          type: string
+                          description: 价格变化；相应行情统计可用时返回。统计窗口与 volume_24h 一致。
+                        price_change_percent_24h:
+                          type: string
+                          description: 价格变化百分比；相应行情统计可用时返回，非空数值保留两位小数。
+                        timestamp:
+                          type: integer
+                          format: int64
+                          description: Unix 时间戳，单位为毫秒。
+                        pre_market_quote:
+                          type: object
+                          description: 盘前行情；仅支持扩展交易时段的产品（如美股）且盘前行情数据可用时返回。
+                          required: [last_done, timestamp, volume, high, low, prev_close]
+                          additionalProperties: false
+                          properties:
+                            last_done: { type: string, description: 盘前最新成交价。 }
+                            timestamp: { type: integer, format: int64, description: 盘前行情时间戳，Unix 毫秒（UTC）。 }
+                            volume: { type: integer, format: int64, description: 盘前成交量。 }
+                            quote_volume: { type: string, description: 盘前成交额；数据可用时返回。 }
+                            high: { type: string, description: 盘前最高价。 }
+                            low: { type: string, description: 盘前最低价。 }
+                            prev_close: { type: string, description: 盘前参考昨收价。 }
+                        post_market_quote:
+                          type: object
+                          description: 盘后行情；仅支持扩展交易时段的产品（如美股）且盘后行情数据可用时返回。
+                          required: [last_done, timestamp, volume, high, low, prev_close]
+                          additionalProperties: false
+                          properties:
+                            last_done: { type: string, description: 盘后最新成交价。 }
+                            timestamp: { type: integer, format: int64, description: 盘后行情时间戳，Unix 毫秒（UTC）。 }
+                            volume: { type: integer, format: int64, description: 盘后成交量。 }
+                            quote_volume: { type: string, description: 盘后成交额；数据可用时返回。 }
+                            high: { type: string, description: 盘后最高价。 }
+                            low: { type: string, description: 盘后最低价。 }
+                            prev_close: { type: string, description: 盘后参考昨收价。 }
+                        overnight_quote:
+                          type: object
+                          description: 夜盘行情；仅支持扩展交易时段的产品（如美股）且夜盘行情数据可用时返回。
+                          required: [last_done, timestamp, volume, high, low, prev_close]
+                          additionalProperties: false
+                          properties:
+                            last_done: { type: string, description: 夜盘最新成交价。 }
+                            timestamp: { type: integer, format: int64, description: 夜盘行情时间戳，Unix 毫秒（UTC）。 }
+                            volume: { type: integer, format: int64, description: 夜盘成交量。 }
+                            quote_volume: { type: string, description: 夜盘成交额；数据可用时返回。 }
+                            high: { type: string, description: 夜盘最高价。 }
+                            low: { type: string, description: 夜盘最低价。 }
+                            prev_close: { type: string, description: 夜盘参考昨收价。 }
+                    example:
+                      - symbol: "700.HK"
+                        last_price: "543"
+                        volume_24h: "11205874"
+                        high_24h: "557"
+                        low_24h: "543"
+                        price_change_24h: "-9"
+                        price_change_percent_24h: "-1.63"
+                        timestamp: 1773292807000
+                      - symbol: "AAPL.US"
+                        last_price: "260.81"
+                        volume_24h: "26218927"
+                        high_24h: "262.13"
+                        low_24h: "259.55"
+                        price_change_24h: "-0.02"
+                        price_change_percent_24h: "-0.01"
+                        timestamp: 1773259201000
+  /v1/market/ticker/cn-stock:
+    get:
+      summary: A股全量行情
+      description: 获取A股市场当前全量行情快照，无需请求参数。客户端必须启用 HTTP 响应压缩，并声明支持 gzip、br 或 zstd 中的至少一种格式；未启用压缩时可能返回 406。
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        '406':
+          description: 客户端不支持服务要求的响应压缩格式。
+        '503':
+          description: 全量行情快照暂不可用，请稍后重试。
+  /v1/market/ticker/hk-stock:
+    get:
+      summary: 港股全量行情
+      description: 获取港股市场当前全量行情快照，无需请求参数。客户端必须启用 HTTP 响应压缩，并声明支持 gzip、br 或 zstd 中的至少一种格式；未启用压缩时可能返回 406。
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        '406':
+          description: 客户端不支持服务要求的响应压缩格式。
+        '503':
+          description: 全量行情快照暂不可用，请稍后重试。
+  /v1/market/ticker/us-stock:
+    get:
+      summary: 美股全量行情
+      description: 获取美股市场当前全量行情快照，无需请求参数。客户端必须启用 HTTP 响应压缩，并声明支持 gzip、br 或 zstd 中的至少一种格式；未启用压缩时可能返回 406。
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        '406':
+          description: 客户端不支持服务要求的响应压缩格式。
+        '503':
+          description: 全量行情快照暂不可用，请稍后重试。
+  /v1/market/kline:
+    get:
+      summary: Candlestick Data
+      description: Query candlesticks for a symbol by interval and time range. The last candlestick may still be forming.
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Trading symbol
+          schema:
+            type: string
+            default: "700.HK"
+            example: "700.HK"
+        - name: interval
+          in: query
+          required: true
+          description: K-line interval
+          schema:
+            type: string
+            enum: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1w", "1M"]
+            default: "1h"
+            example: "1h"
+        - name: limit
+          in: query
+          required: false
+          description: Number of records (default 100). Values above 1000 are capped at 1000; non-positive values use the default.
+          schema:
+            type: integer
+            example: 100
+        - name: start_time
+          in: query
+          required: false
+          description: Start timestamp in milliseconds
+          schema:
+            type: integer
+            example: 1703123456789
+        - name: end_time
+          in: query
+          required: false
+          description: End timestamp in milliseconds
+          schema:
+            type: integer
+            example: 1703209856789
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
+            example: "stock"
+        - name: adjust
+          in: query
+          required: false
+          description: Price adjustment mode for A-shares, HK stocks, and US stocks. If omitted, prices are unadjusted (none).
+          schema:
+            type: string
+            enum: ["none", "forward", "backward"]
+            default: "none"
+            example: "forward"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: "700.HK"
+                      type:
+                        type: string
+                        enum: ["stock", "indices", "crypto", "forex", "futures"]
+                      interval:
+                        type: string
+                        example: "1h"
+                      adjust:
+                        type: string
+                        enum: ["none", "forward", "backward"]
+                        description: Applied price adjustment mode
+                        example: "none"
+                      klines:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            time:
+                              type: integer
+                            open:
+                              type: string
+                            high:
+                              type: string
+                            low:
+                              type: string
+                            close:
+                              type: string
+                            volume:
+                              type: string
+                            quote_volume:
+                              type: string
+                              description: Trading amount; normally omitted for futures
+                            open_interest:
+                              type: string
+                              description: Open interest; returned for futures
+                        example:
+                          - time: 1773291600000
+                            open: "545.5"
+                            high: "546.5"
+                            low: "541.5"
+                            close: "543.5"
+                            volume: "1549300"
+                            quote_volume: "842560983.33"
+  /v1/market/depth:
+    get:
+      summary: Order Book
+      description: |
+        Get real-time order book bids and asks, including China and Hong Kong futures.
+        Typical levels per side: US stocks 1, HK stocks 10, A-shares 5, China futures 1, Hong Kong futures 10, and crypto 20.
+        The actual number of levels may be lower when the market is closed, liquidity is limited, or some levels have no quotes.
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Trading symbol
+          schema:
+            type: string
+            default: "700.HK"
+            example: "700.HK"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
+            example: "stock"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: "700.HK"
+                      type:
+                        type: string
+                        enum: ["stock", "indices", "crypto", "forex", "futures"]
+                      timestamp:
+                        type: integer
+                        example: 1768274016162
+                      bids:
+                        type: array
+                        description: Buy orders sorted by price descending
+                        items:
+                          type: array
+                          items:
+                            type: string
+                        example: [["626", "19700"], ["625.5", "40800"]]
+                      asks:
+                        type: array
+                        description: Sell orders sorted by price ascending
+                        items:
+                          type: array
+                          items:
+                            type: string
+                        example: [["626.5", "36100"], ["627", "50700"]]
+  /v1/market/trades:
+    get:
+      summary: Tick-by-Tick Trades
+      description: Get tick-by-tick trade prints for a symbol, including A-shares, China futures, and Hong Kong futures.
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Trading symbol
+          schema:
+            type: string
+            default: "700.HK"
+            example: "700.HK"
+        - name: limit
+          in: query
+          required: false
+          description: Number of trades (default 100, max 1000)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            example: 100
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
+            example: "stock"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: "BU2609"
+                      type:
+                        type: string
+                        enum: ["stock", "indices", "crypto", "forex", "futures"]
+                        example: "futures"
+                      trades:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: "1703123456789_0"
+                            price:
+                              type: string
+                              example: "4315.00"
+                            quantity:
+                              type: string
+                              example: "2"
+                            side:
+                              type: string
+                              enum: ["buy", "sell", "neutral"]
+                              example: "sell"
+                            timestamp:
+                              type: integer
+                              example: 1703123456789
+                            open_interest_change:
+                              type: [integer, "null"]
+                              description: Change in open interest caused by this trade; futures only
+                              example: 0
+                            position_effect:
+                              type: string
+                              description: Effect of the trade on positions; futures only
+                              enum: ["long_open", "short_open", "both_open", "long_close", "short_close", "both_close", "long_transfer", "short_transfer"]
+                              example: "short_transfer"
+  /v1/symbols/available:
+    get:
+      summary: Available Symbols
+      description: List tradable instruments and supported markets
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: Product type filter
+          schema:
+            type: string
+            enum: ["stock", "crypto", "forex", "indices", "futures"]
+            example: "stock"
+        - name: market
+          in: query
+          required: false
+          description: Market filter
+          schema:
+            type: string
+            enum: ["GLOBAL", "US", "HK", "CN"]
+            example: "CN"
+        - name: limit
+          in: query
+          required: false
+          description: Number of symbols per page (default 100, max 1000)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+            example: 50
+        - name: offset
+          in: query
+          required: false
+          description: Offset for pagination (default 0)
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      products:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            symbol:
+                              type: string
+                              example: "000001.SZ"
+                            name:
+                              type: string
+                              example: "平安银行"
+                            market:
+                              type: string
+                              example: "CN"
+                            type:
+                              type: string
+                              example: "stock"
+                            currency:
+                              type: string
+                              example: "CNY"
+                            is_active:
+                              type: boolean
+                              example: true
+                            updated_at:
+                              type: string
+                              format: date-time
+                              description: 更新时间，RFC 3339 日期时间字符串，包含时区信息。
+                              example: "2026-03-15T20:27:58Z"
+                      summary:
+                        type: object
+                        properties:
+                          total_products:
+                            type: integer
+                            example: 32492
+                          by_market:
+                            type: object
+                            additionalProperties:
+                              type: integer
+                            example:
+                              CN: 6643
+                              GLOBAL: 14833
+                              HK: 2909
+                              US: 8107
+                          by_type:
+                            type: object
+                            additionalProperties:
+                              type: integer
+                            example:
+                              crypto: 877
+                              stock: 17658
+                              forex: 1207
+                              indices: 12750
+                          last_updated:
+                            type: string
+                            format: date-time
+                            description: 最后更新时间，RFC 3339 日期时间字符串，包含时区信息。
+                            example: "2026-03-27T11:09:44+08:00"
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: integer
+                            example: 10
+                          offset:
+                            type: integer
+                            example: 0
+                          total:
+                            type: integer
+                            example: 6642
+                          count:
+                            type: integer
+                            example: 10
+  /v1/market/kline/latest:
+    get:
+      summary: Latest Candlesticks
+      description: Get the latest candlestick data for one or more symbols
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated symbols, up to 50 (e.g., AAPL.US,00700.HK)
+          schema:
+            type: string
+            default: "AAPL.US,00700.HK"
+            example: "AAPL.US,00700.HK"
+        - name: interval
+          in: query
+          required: true
+          description: K-line interval
+          schema:
+            type: string
+            enum: ["1m", "3m", "5m", "15m", "30m", "1h", "2h", "4h", "1d", "1w", "1M"]
+            default: "3m"
+            example: "3m"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex", "futures"]
+            example: "stock"
+        - name: adjust
+          in: query
+          required: false
+          description: Price adjustment mode for A-shares, HK stocks, and US stocks. If omitted, prices are unadjusted (none).
+          schema:
+            type: string
+            enum: ["none", "forward", "backward"]
+            default: "none"
+            example: "forward"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        type:
+                          type: string
+                          enum: ["stock", "indices", "crypto", "forex", "futures"]
+                        interval:
+                          type: string
+                        adjust:
+                          type: string
+                          enum: ["none", "forward", "backward"]
+                          description: Applied price adjustment mode
+                          example: "none"
+                        klines:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              time:
+                                type: integer
+                              open:
+                                type: string
+                              high:
+                                type: string
+                              low:
+                                type: string
+                              close:
+                                type: string
+                              volume:
+                                type: string
+                              quote_volume:
+                                type: string
+                                description: Trading amount; normally omitted for futures
+                              open_interest:
+                                type: string
+                                description: Open interest; returned for futures
+                    example:
+                      - symbol: "AAPL.US"
+                        interval: "3m"
+                        adjust: "none"
+                        klines:
+                          - time: 1773259020000
+                            open: "260.86"
+                            high: "261.05"
+                            low: "260.7"
+                            close: "260.81"
+                            volume: "963419"
+                            quote_volume: "251311057.55"
+                      - symbol: "00700.HK"
+                        interval: "3m"
+                        adjust: "none"
+                        klines:
+                          - time: 1773293400000
+                            open: "542.5"
+                            high: "544.5"
+                            low: "542"
+                            close: "544.5"
+                            volume: "80300"
+                            quote_volume: "43656433.33"
+        '400':
+          description: Bad Request - Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: "Invalid parameters"
+        '401':
+          description: Unauthorized - Invalid or missing API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: "Unauthorized"
+  /v1/market/kline/ex-factors:
+    get:
+      summary: Adjustment Factors
+      description: Get forward and backward price adjustment factors for A-shares, HK stocks, and US stocks
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated stock symbols
+          schema:
+            type: string
+            default: "600519.SH"
+            example: "600519.SH,700.HK,AAPL.US"
+        - name: type
+          in: query
+          required: false
+          description: Product type. Only stock is supported; omit it when the symbol is unambiguous
+          schema:
+            type: string
+            enum: ["stock"]
+            example: "stock"
+        - name: start_time
+          in: query
+          required: false
+          description: Inclusive start timestamp in milliseconds
+          schema:
+            type: integer
+            format: int64
+        - name: end_time
+          in: query
+          required: false
+          description: Inclusive end timestamp in milliseconds
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [code, message, data]
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    required: [data]
+                    properties:
+                      data:
+                        type: object
+                        description: Adjustment factors grouped by stock symbol
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: object
+                            required: [timestamp, adjust, factor_a, factor_b]
+                            properties:
+                              timestamp:
+                                type: integer
+                                format: int64
+                                description: Factor effective timestamp in milliseconds
+                              adjust:
+                                type: string
+                                enum: ["forward", "backward"]
+                                description: Adjustment direction
+                              factor_a:
+                                type: number
+                                description: Multiplicative factor in the adjustment formula
+                              factor_b:
+                                type: number
+                                description: Additive factor in the adjustment formula
+        '400':
+          description: Missing, invalid, ambiguous, or conflicting query parameters
+        '503':
+          description: Adjustment factors are temporarily unavailable
+  /v1/market/intraday:
+    get:
+      summary: Intraday Data
+      description: Get intraday time-series data for stocks
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated stock symbols (max 50)
+          schema:
+            type: string
+            default: "700.HK,9988.HK"
+            example: "700.HK,9988.HK"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [symbol, type, lines]
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          example: "700.HK"
+                        type:
+                          type: string
+                          enum: ["stock"]
+                          example: "stock"
+                        lines:
+                          type: array
+                          items:
+                            type: object
+                            required: [timestamp, price, volume, turnover, avg_price]
+                            additionalProperties: false
+                            properties:
+                              timestamp:
+                                type: integer
+                                example: 1773192600000
+                                description: "Timestamp in milliseconds"
+                              price:
+                                type: string
+                                example: "568"
+                                description: "Current price"
+                              volume:
+                                type: integer
+                                example: 7294905
+                                description: "Cumulative volume"
+                              turnover:
+                                type: string
+                                example: "4181560679.96"
+                                description: "Cumulative turnover"
+                              avg_price:
+                                type: string
+                                example: "573.216605"
+                                description: "Average price"
+              examples:
+                single_symbol:
+                  summary: Single symbol response
+                  value:
+                    code: 0
+                    message: "success"
+                    data:
+                      - symbol: "700.HK"
+                        type: "stock"
+                        lines:
+                          - timestamp: 1773192600000
+                            price: "568"
+                            volume: 7294905
+                            turnover: "4181560679.96"
+                            avg_price: "573.216605"
+  /v1/market/trading-sessions:
+    get:
+      summary: Trading Sessions
+      description: Get trading session information for one or all supported markets
+      parameters:
+        - name: market
+          in: query
+          required: false
+          description: Optional uppercase market code. Omit to return all supported markets
+          schema:
+            type: string
+            enum: ["US", "HK", "CN"]
+            example: "US"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        market:
+                          type: string
+                          enum: ["US", "HK", "CN"]
+                        trading_sessions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              begin_time:
+                                type: integer
+                              end_time:
+                                type: integer
+                              trade_session:
+                                type: integer
+                    example:
+                      - market: "US"
+                        trading_sessions:
+                          - begin_time: 400
+                            end_time: 930
+                            trade_session: 1
+                          - begin_time: 930
+                            end_time: 1600
+                          - begin_time: 1600
+                            end_time: 2000
+                            trade_session: 2
+  /v1/market/trade-days:
+    get:
+      summary: Trading Days
+      description: Get trading days for a specific market within a date range
+      parameters:
+        - name: market
+          in: query
+          required: true
+          description: Market code (US, HK, CN)
+          schema:
+            type: string
+            enum: ["US", "HK", "CN"]
+            default: "US"
+            example: "US"
+        - name: beg_day
+          in: query
+          required: true
+          description: Start date in YYYYMMDD format. Must be within the most recent year
+          schema:
+            type: string
+            pattern: "^[0-9]{8}$"
+            default: "20260201"
+            example: "20260201"
+        - name: end_day
+          in: query
+          required: true
+          description: End date in YYYYMMDD format. The requested date range cannot exceed 31 days
+          schema:
+            type: string
+            pattern: "^[0-9]{8}$"
+            default: "20260228"
+            example: "20260228"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [code, data]
+                additionalProperties: false
+                properties:
+                  code:
+                    type: integer
+                    const: 0
+                    example: 0
+                  data:
+                    type: object
+                    required: [market, trade_days, half_trade_days]
+                    additionalProperties: false
+                    properties:
+                      market:
+                        type: string
+                        enum: ["US", "HK", "CN"]
+                      trade_days:
+                        type: array
+                        items:
+                          type: string
+                      half_trade_days:
+                        type: array
+                        items:
+                          type: string
+                    example:
+                      market: "US"
+                      trade_days: ["20260202", "20260203", "20260204", "20260205", "20260206", "20260209", "20260210", "20260211", "20260212", "20260213", "20260217", "20260218", "20260219", "20260220", "20260223", "20260224", "20260225", "20260226", "20260227"]
+                      half_trade_days: []
+  /v1/market/stock-info:
+    get:
+      summary: Stock Information
+      description: Get detailed information for stocks
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated stock symbols (max 500)
+          schema:
+            type: string
+            default: "700.HK,AAPL.US,000001.SZ"
+            example: "700.HK,AAPL.US,000001.SZ"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [symbol, name_cn, exchange, currency, lot_size]
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          description: Trading symbol
+                        name_cn:
+                          type: string
+                          description: Simplified Chinese name
+                        name_en:
+                          type: string
+                          description: English name; returned for HK and US stocks
+                        name_hk:
+                          type: string
+                          description: Traditional Chinese name; returned for HK and US stocks
+                        exchange:
+                          type: string
+                          description: Exchange code
+                        currency:
+                          type: string
+                          description: Trading currency
+                        lot_size:
+                          type: integer
+                          description: Shares per lot
+                        total_shares:
+                          type: integer
+                          description: Total shares outstanding; returned when available
+                        circulating_shares:
+                          type: integer
+                          description: Circulating shares; returned when available
+                        hk_shares:
+                          type: integer
+                          description: H-share capital; returned for HK stocks and A-share companies that also issue H shares
+                        eps:
+                          type: string
+                          description: Earnings per share; returned when available
+                        eps_ttm:
+                          type: string
+                          description: Earnings per share for the trailing twelve months; returned for HK and US stocks when available
+                        bps:
+                          type: string
+                          description: Book value per share; returned when available
+                        dividend_yield:
+                          type: string
+                          description: Dividend yield; returned for HK and US stocks when available
+                        stock_derivatives:
+                          type: array
+                          description: Available derivative types; 1 means options and 2 means warrants. Returned for HK and US stocks when available
+                          items:
+                            type: integer
+                            enum: [1, 2]
+                        board:
+                          type: string
+                          description: A-share board or security classification code; returned for A-shares
+                    example:
+                      - symbol: "700.HK"
+                        name_cn: "腾讯控股"
+                        name_en: "TENCENT"
+                        name_hk: "騰訊控股"
+                        exchange: "SEHK"
+                        currency: "HKD"
+                        lot_size: 100
+                        total_shares: 9095085993
+                        circulating_shares: 9095085993
+                        hk_shares: 9095085993
+                        eps: "27.3701441378468889"
+                        eps_ttm: "29.8128867314657505"
+                        bps: "143.787288892927458"
+                        dividend_yield: "5.3133478570728672"
+                        stock_derivatives: [2]
+                      - symbol: "AAPL.US"
+                        name_cn: "苹果"
+                        name_en: "Apple"
+                        name_hk: "蘋果"
+                        exchange: "NASD"
+                        currency: "USD"
+                        lot_size: 1
+                        total_shares: 14594180000
+                        circulating_shares: 14569121909
+                        eps: "7.6749772854658501"
+                        eps_ttm: "8.8343435533890907"
+                        bps: "7.3673203975831462"
+                        dividend_yield: "1.06"
+                        stock_derivatives: [1]
+                      - symbol: "000001.SZ"
+                        name_cn: "平安银行"
+                        exchange: "SZ"
+                        currency: "CNY"
+                        lot_size: 100
+                        total_shares: 19405918198
+                        circulating_shares: 19405684991
+                        eps: "1.24"
+                        bps: "24.13"
+                        board: "sz_stock"
+  /v1/market/calc-index:
+    get:
+      summary: Comprehensive Metrics
+      description: Retrieve stock metrics including price changes, trading activity, capital flow, and valuation indicators
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: Comma-separated stock symbols (max 50)
+          schema:
+            type: string
+            default: "700.HK"
+            example: "700.HK,AAPL.US"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        last_done:
+                          type: string
+                        change_val:
+                          type: string
+                        change_rate:
+                          type: string
+                        volume:
+                          type: string
+                        turnover:
+                          type: string
+                        ytd_change_rate:
+                          type: string
+                        turnover_rate:
+                          type: string
+                        total_market_value:
+                          type: string
+                        capital_flow:
+                          type: string
+                        amplitude:
+                          type: string
+                        volume_ratio:
+                          type: string
+                        pe_ttm_ratio:
+                          type: string
+                        pb_ratio:
+                          type: string
+                        dividend_ratio_ttm:
+                          type: string
+                        five_day_change_rate:
+                          type: string
+                        ten_day_change_rate:
+                          type: string
+                        half_year_change_rate:
+                          type: string
+                        five_minutes_change_rate:
+                          type: string
+                    example:
+                      - symbol: "700.HK"
+                        last_done: "547.5"
+                        change_val: "-4.5"
+                        change_rate: "-0.0082"
+                        volume: "16521084"
+                        turnover: "0.0018"
+                        ytd_change_rate: "-0.086"
+                        turnover_rate: "0.18"
+                        total_market_value: "4985729978437.5"
+                        capital_flow: "-277985600"
+                        amplitude: "0.0281"
+                        volume_ratio: "0.47"
+                        pe_ttm_ratio: "20.89"
+                        pb_ratio: "3.88"
+                        dividend_ratio_ttm: "0.83"
+                        five_day_change_rate: "0.0906"
+                        ten_day_change_rate: "0.0693"
+                        half_year_change_rate: "-0.1492"
+                        five_minutes_change_rate: "0"
+
+  /v1/market/capital-flow:
+    get:
+      summary: Capital Flow
+      description: Get capital flow data for a stock
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: Stock symbol
+          schema:
+            type: string
+            example: "700.HK"
+            default: "700.HK"
+        - name: type
+          in: query
+          required: false
+          description: Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an AMBIGUOUS_SYMBOL error, pass the value as indicated
+          schema:
+            type: string
+            enum: ["stock", "indices", "crypto", "forex"]
+            example: "stock"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                      timestamp:
+                        type: integer
+                        format: int64
+                        description: 数据更新时间，Unix 时间戳，单位为秒。
+                      intraday_flow:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: 分钟开始时间，Unix 时间戳，单位为秒。
+                            inflow:
+                              type: string
+                      distribution:
+                        type: object
+                        properties:
+                          timestamp:
+                            type: integer
+                            format: int64
+                            description: 数据更新时间，Unix 时间戳，单位为秒。
+                          capital_in:
+                            type: object
+                            properties:
+                              large:
+                                type: string
+                              medium:
+                                type: string
+                              small:
+                                type: string
+                          capital_out:
+                            type: object
+                            properties:
+                              large:
+                                type: string
+                              medium:
+                                type: string
+                              small:
+                                type: string
+                    example:
+                      symbol: "700.HK"
+                      timestamp: 1773306211
+                      intraday_flow:
+                        - timestamp: 1773279000
+                          inflow: "-12199.34"
+                        - timestamp: 1773279060
+                          inflow: "-15137.59"
+                      distribution:
+                        timestamp: 1773303000
+                        capital_in:
+                          large: "173056.31"
+                          medium: "164958.55"
+                          small: "83945.69"
+                        capital_out:
+                          large: "179434.39"
+                          medium: "176045.91"
+                          small: "92979.74"
+  /v1/fundamentals/profile:
+    get:
+      tags: [fundamentals-company]
+      summary: 公司资料
+      description: 返回公司名称、所属市场、行业、上市信息、员工数等公司基础资料。
+      operationId: getFundamentalsProfile
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/ProfileResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/executives:
+    get:
+      tags: [fundamentals-company]
+      summary: 当前高管/董事列表
+      description: 返回公司当前高管、董事或关键人员列表，用于治理结构和管理层研究。
+      operationId: getFundamentalsExecutives
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/ExecutivesResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/financials/latest:
+    get:
+      tags: [fundamentals-financials]
+      summary: 近期财务报表
+      description: 查询最近若干期利润表、资产负债表或现金流量表的指标数据；`n` 控制报告期数，每期通常有多条指标记录。
+      operationId: getFundamentalsFinancialsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/KindQuery"
+        - $ref: "#/components/parameters/NQuery"
+        - $ref: "#/components/parameters/PeriodTypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/FinancialRowsResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/financials/annual:
+    get:
+      tags: [fundamentals-financials]
+      summary: 年度财务报表
+      description: 查询最近若干年的利润表、资产负债表或现金流量表指标数据；`n` 控制年度数。
+      operationId: getFundamentalsFinancialsAnnual
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/KindQuery"
+        - $ref: "#/components/parameters/NQuery"
+      responses:
+        "200": { $ref: "#/components/responses/FinancialRowsResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/financials/ttm:
+    get:
+      tags: [fundamentals-financials]
+      summary: 财务数据 TTM
+      description: 返回最近四个有效单季汇总的滚动近12个月利润表或现金流量表指标。
+      operationId: getFundamentalsFinancialsTTM
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/TTMKindQuery"
+      responses:
+        "200": { $ref: "#/components/responses/FinancialRowsResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/segments/latest:
+    get:
+      tags: [fundamentals-financials]
+      summary: 营收构成
+      description: 返回最近一期按业务或地区划分的收入金额和占比。
+      operationId: getFundamentalsSegmentsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/SegmentCategoryQuery"
+      responses:
+        "200": { $ref: "#/components/responses/SegmentsLatestResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/segments/history:
+    get:
+      tags: [fundamentals-financials]
+      summary: 历史营收构成
+      description: 返回历史报告期按业务或地区划分的收入金额和占比；筛选条件无匹配记录时返回 HTTP 404、业务码 40405，而不是成功空数组。
+      operationId: getFundamentalsSegmentsHistory
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/SegmentCategoryQuery"
+        - $ref: "#/components/parameters/ReportQuery"
+        - $ref: "#/components/parameters/SegmentLimitQuery"
+      responses:
+        "200": { $ref: "#/components/responses/SegmentsResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/valuation/latest:
+    get:
+      tags: [fundamentals-valuation-industry]
+      summary: 当前估值快照
+      description: 返回当前市盈率（PE）及其近一年区间统计。
+      operationId: getFundamentalsValuationLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/ValuationLatestResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/valuation/ts:
+    get:
+      tags: [fundamentals-valuation-industry]
+      summary: 历史估值
+      description: 返回市盈率（PE）按日或按月的历史数值；粒度无匹配记录时返回 HTTP 404、业务码 40405，而不是成功空数组。
+      operationId: getFundamentalsValuationTimeSeries
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/GranularityQuery"
+        - $ref: "#/components/parameters/ValuationFromQuery"
+        - $ref: "#/components/parameters/ValuationToQuery"
+      responses:
+        "200": { $ref: "#/components/responses/ValuationTimeSeriesResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/industry/peers:
+    get:
+      tags: [fundamentals-valuation-industry]
+      summary: 同行估值对比
+      description: 返回同行公司列表及其估值、每股收益等可比指标。
+      operationId: getFundamentalsIndustryPeers
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/IndustryPeersResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/industry/dist:
+    get:
+      tags: [fundamentals-valuation-industry]
+      summary: 所属行业估值分布
+      description: 返回所属行业估值分布和样本统计。
+      operationId: getFundamentalsIndustryDistribution
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/IndustryDistributionResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/industries/rank:
+    get:
+      tags: [fundamentals-valuation-industry]
+      summary: 行业指标排行
+      description: 返回指定市场按行业指标排序的结果，其中的 `industry_counter_id` 可用于查询行业分类层级。
+      operationId: getFundamentalsIndustriesRank
+      parameters:
+        - $ref: "#/components/parameters/RequiredMarketQuery"
+        - $ref: "#/components/parameters/IndustryRankLimitQuery"
+      responses:
+        "200": { $ref: "#/components/responses/IndustriesRankResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/industries/tree:
+    get:
+      tags: [fundamentals-valuation-industry]
+      summary: 行业分类层级
+      description: 根据 `industry_counter_id` 返回行业所属的顶层分类及下级行业分类。
+      operationId: getFundamentalsIndustriesTree
+      parameters:
+        - $ref: "#/components/parameters/RequiredMarketQuery"
+        - $ref: "#/components/parameters/IndustryCounterIDQuery"
+      responses:
+        "200": { $ref: "#/components/responses/IndustriesTreeResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/dividends:
+    get:
+      tags: [fundamentals-capital-actions]
+      summary: 分红记录
+      description: |
+        按 `ex_date` 倒序返回历史及已知的未来分红事件。`from`、`to` 均可省略或独立使用，
+        日期边界为闭区间。受历史深度限制的 API Key 未传 `from` 时，系统会自动应用其
+        最早允许日期。结果使用 `limit + cursor` 分页，后续请求必须重复原筛选条件。
+      operationId: getFundamentalsDividends
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/DividendTypeQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+        - $ref: "#/components/parameters/DividendLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200": { $ref: "#/components/responses/DividendsResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/dividends/ttm:
+    get:
+      tags: [fundamentals-capital-actions]
+      summary: 股息TTM
+      description: |
+        TTM 指截至统计日的最近 12 个月。返回这段时间内的现金每股股息汇总。统计窗口为
+        `ex_date > as_of-12个月` 且 `ex_date <= as_of`，按币种分别返回普通、特殊和合计现金 DPS；
+        接口不重新计算或合并不同币种。历史深度权限按该真实十二个月窗口检查。
+      operationId: getFundamentalsDividendsTTM
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/DividendAsOfQuery"
+      responses:
+        "200": { $ref: "#/components/responses/DividendsTTMResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/buyback:
+    get:
+      tags: [fundamentals-capital-actions]
+      summary: 股票回购
+      description: 返回最近十二个月的回购指标及历史年度记录。
+      operationId: getFundamentalsBuyback
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/BuybackResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/shareholders/latest:
+    get:
+      tags: [fundamentals-holders]
+      summary: 当前股东结构快照
+      description: 返回当前股东结构快照，包括股东成员列表、报告日期和生效区间等信息。
+      operationId: getFundamentalsShareholdersLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/LatestShareholdersResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/shareholders/top:
+    get:
+      tags: [fundamentals-holders]
+      summary: 股东持仓
+      description: 返回不同报告期的主要股东持股情况及持仓变动。仅当成员的 `detail_available=true` 时，其 `object_id` 可用于查询股东明细接口。
+      operationId: getFundamentalsShareholdersTop
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200": { $ref: "#/components/responses/TopShareholdersResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/shareholders/detail:
+    get:
+      tags: [fundamentals-holders]
+      summary: 单个股东持仓明细
+      description: |
+        使用 `shareholders/top` 中 `detail_available=true` 成员的 `object_id` 查询单个股东持仓明细。
+        详情返回持仓汇总、持仓期间、持仓明细、交易期间和交易汇总；无可用详情时返回 40404 或 40405。
+      operationId: getFundamentalsShareholderDetail
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/ObjectIDQuery"
+      responses:
+        "200": { $ref: "#/components/responses/ShareholderDetailResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/fund-holdings/latest:
+    get:
+      tags: [fundamentals-holders]
+      summary: 持股基金
+      description: |
+        查询披露持有指定股票的基金，以及该股票在各基金持仓中的比例。第一页不传 `cursor`；
+        查询下一页时，保持其他参数不变，将上一页响应顶层的非空 `page.next_cursor` 原样传入 `cursor`。
+        `page.next_cursor` 为 null 表示已到末页。股票没有持股基金记录时
+        返回 HTTP 404、业务码 40405，而不是成功空数组。
+      operationId: getFundamentalsFundHoldingsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/FundHoldingsLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200": { $ref: "#/components/responses/FundHoldingsResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/corp-actions:
+    get:
+      tags: [fundamentals-capital-actions]
+      summary: 公司行动事件
+      description: 返回拆股、并股、配股、代码变更等公司行动事件，支持日期过滤。
+      operationId: getFundamentalsCorporateActions
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+      responses:
+        "200": { $ref: "#/components/responses/CorporateActionsResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/news:
+    get:
+      tags: [fundamentals-events]
+      summary: 个股新闻资讯列表
+      description: |
+        返回个股新闻元数据和正文可用状态，不内嵌正文。
+        `from` 与 `to` 必须同时提供或同时省略；只提供其中一个会返回参数错误。
+      operationId: getFundamentalsNews
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/NewsLimitQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+      responses:
+        "200": { $ref: "#/components/responses/NewsResponse" }
+        default: { $ref: "#/components/responses/NewsErrorResponse" }
+  /v1/fundamentals/news/{news_id}:
+    get:
+      tags: [fundamentals-events]
+      summary: 查询新闻正文详情
+      description: |
+        使用新闻列表返回的不透明 `news_id` 按需查询正文。
+        `body_html` 已经过白名单消毒，但调用方仍应将其视为外部内容。
+        `content_scope=excerpt` 表示摘要或节选，不代表完整全文。
+      operationId: getFundamentalsNewsDetail
+      parameters:
+        - $ref: "#/components/parameters/NewsIDPath"
+      responses:
+        "200": { $ref: "#/components/responses/NewsDetailResponse" }
+        "400": { $ref: "#/components/responses/NewsErrorResponse" }
+        "404": { $ref: "#/components/responses/NewsErrorResponse" }
+        default: { $ref: "#/components/responses/NewsErrorResponse" }
+  /v1/fundamentals/calendar/report:
+    get:
+      tags: [fundamentals-events]
+      summary: 财报日历
+      description: 查询财报和业绩公布事件；事件类别固定为 report，无需传入 category。
+      operationId: getFundamentalsCalendarReport
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200": { $ref: "#/components/responses/CalendarResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/calendar/dividend:
+    get:
+      tags: [fundamentals-events]
+      summary: 股息日历
+      description: 查询分红派息事件；事件类别固定为 dividend，无需传入 category。
+      operationId: getFundamentalsCalendarDividend
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200": { $ref: "#/components/responses/CalendarResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/calendar/split:
+    get:
+      tags: [fundamentals-events]
+      summary: 拆股日历
+      description: 查询拆股、合股等事件；事件类别固定为 split，无需传入 category。
+      operationId: getFundamentalsCalendarSplit
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200": { $ref: "#/components/responses/CalendarResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/calendar/ipo:
+    get:
+      tags: [fundamentals-events]
+      summary: 新股日历
+      description: 查询新股发行和上市事件；事件类别固定为 ipo，无需传入 category。
+      operationId: getFundamentalsCalendarIPO
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200": { $ref: "#/components/responses/CalendarResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/calendar/other:
+    get:
+      tags: [fundamentals-events]
+      summary: 其他日历
+      description: 必须通过 category 选择一种其他财经事件；不包含财报、股息、拆股和新股事件。
+      operationId: getFundamentalsCalendarOther
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarOtherCategoryQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200": { $ref: "#/components/responses/CalendarResponse" }
+        default: { $ref: "#/components/responses/ErrorResponse" }
+  /v1/fundamentals/market/status:
+    get:
+      tags: [fundamentals-events]
+      summary: 市场状态
+      description: 查询不同市场当前的交易阶段和市场时间。
+      operationId: getFundamentalsMarketStatus
+      responses:
+        "200":
+          description: 市场状态响应。
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        required: [markets]
+                        properties:
+                          markets:
+                            type: array
+                            items:
+                              type: object
+                              required: [market, market_time, trade_status]
+                              properties:
+                                market: { type: string, example: US }
+                                market_time: { type: string, format: date-time }
+                                trade_status: { type: integer }
+        default: { $ref: "#/components/responses/ErrorResponse" }

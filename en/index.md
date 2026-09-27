@@ -1,6 +1,6 @@
 ---
 title: TickDB Documentation
-description: Unified real-time market data API for Forex, indices, US stocks, HK stocks, A-shares, China futures, and crypto.
+description: Unified real-time market data API for Forex, indices, US stocks, HK stocks, A-shares, futures, and crypto.
 ---
 
 Welcome to the **TickDB Online Documentation**.
@@ -13,10 +13,9 @@ TickDB is a **developer-first unified real-time market data API** that provides 
 
 TickDB is built for developers who **require reliable, low-latency, and production-grade** market data.
 
-Through **one connection**, you can seamlessly access market data across Forex, precious metals, indices, US stocks, HK stocks, A-shares, China futures, and cryptocurrencies.
+Through **one connection**, you can seamlessly access market data across Forex, precious metals, indices, US stocks, HK stocks, A-shares, futures, and cryptocurrencies.
 
-TickDB supports multiple data types, including **tick-level trades, order book depth, and candlestick (K-line) data**,  
-and can be accessed via **REST APIs and WebSocket streams**, making it suitable for quantitative trading, real-time market systems, trading platforms, and data analytics.
+TickDB supports multiple data types, including **tick-level trades, order book depth, candlestick data, and full-market data**, together with **financial and fundamental data, financial calendars, and market information**. It is accessible through **REST APIs and WebSocket streams** for quantitative trading, real-time market systems, fundamental research, trading platforms, and data analytics.
 
 ---
 
@@ -28,14 +27,26 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 - **Real-time Data**  
   WebSocket-based streaming suitable for real-time market applications
 
+- **Full-Market Data**
+  Covers A-shares, Hong Kong stocks, and US stocks. A single REST request retrieves a complete snapshot of a selected market, while one WebSocket subscription continuously delivers real-time updates for every symbol in that market
+
 - **Multi-Market Support**  
-  Forex, precious metals, indices, US stocks, HK stocks, A-shares, China futures, and crypto
+  Forex, precious metals, indices, US stocks, HK stocks, A-shares, futures, and crypto
+
+- **Financials and Fundamentals**
+  Company profiles, financial statements, valuation, industry, dividends, and shareholder holdings
+
+- **Financial Calendar**
+  Earnings, dividends, splits, IPOs, and other events in dedicated categories
+
+- **Market Information**
+  Market status, trading sessions, trading calendar, and stock news
 
 - **Developer-Friendly**  
   REST APIs and WebSocket with clear interfaces, complete documentation, and practical examples
 
 - **AI-Friendly**  
-  Three tiers of AI integration — Skill, MCP, and CLI — covering everything from chat to deep automation
+  Structured real-time market, financial and fundamental, financial calendar, and market information inputs for company analysis, market monitoring, event tracking, and research assistance, with Skill, MCP, and CLI integration options
 
 ---
 
@@ -43,7 +54,9 @@ and can be accessed via **REST APIs and WebSocket streams**, making it suitable 
 
 TickDB offers three tiers of AI-native access, from zero-config chat to terminal automation.
 
-### Skill — Chat-ready, Zero Config
+### Skill
+
+**Chat-ready, Zero Config**
 
 Install via [ClawHub](https://clawhub.com) and use TickDB market data with any LLM instantly.
 
@@ -55,7 +68,9 @@ npx clawhub@latest install tickdb-market-data
 - 72 core symbols free
 - Works with any LLM
 
-### MCP — Permanent Integration, One-time Setup
+### MCP
+
+**Permanent Integration, One-time Setup**
 
 Connect via Hosted MCP Server, compatible with Claude Code, Cursor, Kiro, Zed, and all MCP clients.
 
@@ -80,13 +95,15 @@ Configuration example (Claude, path: `~/.claude/settings.json`):
 - Compatible with all MCP protocol clients
 - 13 tools available, mapping 1:1 to REST API endpoints
 
-### CLI — Terminal & AI Agent Ready
+### CLI
+
+**Terminal & AI Agent Ready**
 
 Install globally to query market data from the terminal, also suitable for Agent bash-tool invocation.
 
 ```bash
 npm install -g tickdb
-tickdb config set-key <YOUR_KEY>
+tickdb config set-key YOUR_API_KEY
 tickdb ticker BTCUSDT,XAUUSD,AAPL.US
 ```
 
@@ -94,7 +111,9 @@ tickdb ticker BTCUSDT,XAUUSD,AAPL.US
 - 16 native commands
 - Bash-tool friendly, ideal for Agent workflows
 
-### llms.txt — Documentation Context for AI
+### llms.txt
+
+**Documentation Context for AI**
 
 To help an AI assistant understand the TickDB documentation, provide it with the following URL:
 
@@ -126,44 +145,72 @@ For more details, visit [TickDB AI Access](https://tickdb.ai/ai-tools).
 - **Data Analytics & Backtesting**  
   Historical market analysis, research, and strategy backtesting
 
+- **Fundamental Research**
+  Analyze companies using financial statements, valuation, industry data, and shareholder holdings
+
+- **Market Monitoring**
+  Track market changes and important events using full-market data, news, and the financial calendar
+
 - **Financial Services Integration**  
   Integration into existing trading platforms or financial infrastructure
 
 ---
 
-## Documentation Sections
-
-### Getting Started
+## Getting Started
 - **Quick Start** - Get up and running in minutes
 - **Changelog** - Version update history
 
-### REST API
+## REST API
 
-#### Market Data APIs
+### Market Data APIs
 - **Available Symbols** - Query supported trading symbols
 - **Ticker Snapshot** - Real-time market ticker data
-- **Historical K-Line** - Historical candlestick data for completed periods
-- **Real-time K-Line** - Current period K-line data being formed
+- **Candlestick Data** - Query candlesticks by interval and time range
+- **Latest Candlesticks** - Get the latest candlestick for multiple symbols
 - **Order Book** - Real-time order book depth data
-- **Recent Trades** - Latest trade executions
-- **Kline Periods** - Supported K-line period list
+- **Tick-by-Tick Trades** - Individual trade executions
 
-#### Stock Market APIs
-- **Intraday Data** - Intraday time-series data for stocks
-- **Stock Information** - Detailed stock information and fundamentals
-- **Trading Sessions** - Market trading session information
-- **Trading Calendar** - Trading days list query
-- **Market Metrics** - Comprehensive market metrics data
-- **Capital Flow** - Stock capital flow data
+### Stock Market APIs
 
-### WebSocket Docs
-- **Quick Start** - WebSocket connection and subscription guide
-- **Channels & Messages** - Channel subscription and message formats
+#### Full-Market Data
+Complete A-share, Hong Kong stock, and US stock market snapshots
 
-### Reference
+#### Stock Quotes and Metrics
+Stock information, intraday data, comprehensive metrics, and capital flow
+
+#### Company Overview
+Company profiles, executives and directors, and revenue breakdowns
+
+#### Financial Statements
+Recent, annual, and TTM financial data and field dictionary
+
+#### Valuation and Industries
+Latest and historical valuation, peer comparison, and industry data
+
+#### Dividends and Corporate Actions
+Dividends, dividend TTM, share buybacks, and corporate actions
+
+#### Shareholders and Institutional Holdings
+Shareholder structure, shareholder holdings, and funds holding a stock
+
+#### Financial Calendar
+Earnings Calendar, Dividend Calendar, Stock Split Calendar, IPO Calendar, and Other Calendar Events
+
+#### Market Information
+Market status, trading sessions, trading calendar, and stock news
+
+## WebSocket Docs
+
+### Best Practices
+WebSocket connections, compression, heartbeats, and reconnection
+
+### Playground
+View subscription steps and message formats directly on seven channel pages: A-share, Hong Kong stock, and US stock full-market quotes, plus ticker, depth, trade, and ping.
+
+## Reference
 - **Data Specification** - Symbol naming and formats
 - **Error Codes** - Error codes and handling
 
 ---
 
-**Docs Version**: v1.0.2
+**Docs Version**: v1.0.3

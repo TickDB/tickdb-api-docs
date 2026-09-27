@@ -1,20 +1,33 @@
 ---
 title: 市場指標
 description: 獲取股票的綜合市場指標，包括行情統計、估值指標、資金流向以及衍生品相關指標。
-openapi: GET /v1/market/calc-index
+openapi: "openapi.zh-Hant.yaml GET /v1/market/calc-index"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## 套餐權限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免費版 | ❌ |
+| 基礎版 | ✅ |
+| 專業版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企業版 | ✅ |
 
 ## 注意事項
 - 指標數據基於實時行情和歷史數據計算
 
 ## 支持的市場
 
-**美股**、**港股**、**A股**
-
-示例：
-- 美股：AAPL.US、TSLA.US、MSFT.US
-- 港股：700.HK、9988.HK、3690.HK
-- A股：000001.SH、000001.SZ
+| 市場 | 示例 |
+|---|---|
+| 美股 | AAPL.US, TSLA.US, MSFT.US |
+| 港股 | 700.HK, 9988.HK, 3690.HK |
+| A股 | 600519.SH, 000001.SZ |
 
 ## 請求參數
 

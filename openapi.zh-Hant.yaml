@@ -1,0 +1,4735 @@
+openapi: 3.1.0
+jsonSchemaDialect: https://json-schema.org/draft/2020-12/schema
+info:
+  title: TickDB API
+  description: TickDB 統一即時行情數據 API，提供 REST 和 WebSocket 接入。
+  version: 1.0.3
+  contact:
+    email: support@tickdb.ai
+servers:
+  - url: https://api.tickdb.ai
+    description: 正式環境
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  parameters:
+    SymbolQuery:
+      name: symbol
+      in: query
+      required: true
+      schema:
+        type: string
+        examples:
+          - AAPL
+          - "700"
+          - "600519"
+          - AAPL.US
+          - 700.HK
+          - 600519.SH
+      description: 股票代碼
+    TypeQuery:
+      name: type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - stock
+      description: 產品類型，當前支援 `stock`
+    RequiredMarketQuery:
+      name: market
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - US
+          - HK
+          - CN
+      description: 市場代碼：`US` 美股、`HK` 港股、`CN` A股
+    FromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+        examples:
+          - 2024-01-01
+      description: 開始日期，格式 `YYYY-MM-DD`
+    ToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+        examples:
+          - 2026-12-31
+      description: 結束日期，格式 `YYYY-MM-DD`
+    DividendTypeQuery:
+      name: dividend_type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - normal
+          - special
+          - non_cash
+          - unknown
+      description: 分紅類型：`normal`、`special`、`non_cash`、`unknown`。
+    DividendLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+      description: 單頁數量，默認 100，范圍 `1–500`
+    DividendAsOfQuery:
+      name: as_of
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 統計截止日，格式 `YYYY-MM-DD`；默認當前日期
+    KindQuery:
+      name: kind
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - IS
+          - BS
+          - CF
+      description: 報表類型：`IS` 利潤表、`BS` 資產負債表、`CF` 現金流量表
+    TTMKindQuery:
+      name: kind
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - IS
+          - CF
+      description: 報表類型：`IS` 利潤表或 `CF` 現金流量表
+    PeriodTypeQuery:
+      name: period_type
+      in: query
+      required: false
+      schema:
+        type: string
+        default: q1,q2,q3,q4
+        pattern: ^(q1|q2|q3|q4|saf|af)(,(q1|q2|q3|q4|saf|af))*$
+        examples:
+          - q1
+          - saf
+          - af
+          - q1,q2,q3,q4
+      description: 財務周期類型：`q1` 第一季度、`q2` 第二季度、`q3` 第三季度、`q4` 第四季度、`saf` 半年度、`af` 年度；多個值用逗號分隔
+    NQuery:
+      name: n
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 20
+      description: 返回期數，范圍 `1–20`
+    SegmentLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 200
+      description: 返回條數，默認 200，范圍 `1–1000`
+    IndustryRankLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+      description: 返回條數，默認 50，范圍 `1–200`
+    FundHoldingsLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 200
+      description: 單頁數量，默認 200，范圍 `1–500`
+    NewsLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+      description: 返回數量，默認 50，范圍 `1–200`
+    NewsIDPath:
+      name: news_id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: ^[1-9][0-9]*$
+      description: 新聞列表返回的不透明文章 ID，按字符串傳遞
+    CursorQuery:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+      description: 下一頁遊標；第一頁不傳
+    SegmentCategoryQuery:
+      name: category
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - business
+          - regional
+      description: 營收構成維度：`business` 按業務；`regional` 按地區。不傳返回全部可用維度。
+    ReportQuery:
+      name: report
+      in: query
+      required: false
+      schema:
+        type: string
+        examples:
+          - qf
+          - saf
+          - af
+      description: 報告周期：`qf` 季度報告、`saf` 半年度報告、`af` 年度報告
+    GranularityQuery:
+      name: granularity
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - daily
+          - monthly
+        default: daily
+      description: "`daily` 或 `monthly`，默認 `daily`"
+    ValuationFromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 開始日期，格式 `YYYY-MM-DD`
+    ValuationToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 結束日期，格式 `YYYY-MM-DD`
+    IndustryCounterIDQuery:
+      name: industry_counter_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 行業節點 ID，可從行業指標排行介面獲取
+    ObjectIDQuery:
+      name: object_id
+      in: query
+      required: true
+      schema:
+        type: string
+      description: 來自股東持倉介面且 `detail_available=true` 的對象 ID
+    CalendarOtherCategoryQuery:
+      name: category
+      in: query
+      required: true
+      schema:
+        type: string
+        enum:
+          - macrodata
+          - closed
+          - meeting
+          - merge
+          - halt_resume
+          - special_treatment
+          - special_treatment_start
+          - special_treatment_end
+          - listing_status
+          - listing_suspension
+          - listing_resumption
+          - delisting
+          - lockup_expiry
+      description: 其他事件類別，取值見下表
+    CalendarMarketQuery:
+      name: market
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - US
+          - HK
+          - CN
+      description: 市場篩選：`US`、`HK`、`CN`；市場受限的 API Key 必填
+    FullMarketCompressionHeader:
+      name: Accept-Encoding
+      in: header
+      required: true
+      description: 全量行情回應必須啟用壓縮，支援 gzip、br 和 zstd，至少選擇一種；預設使用相容性較好的 gzip。
+      schema:
+        type: string
+        enum:
+          - gzip
+          - br
+          - zstd
+        default: gzip
+    CalendarFromQuery:
+      name: from
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 開始日期，格式 `YYYY-MM-DD`
+    CalendarToQuery:
+      name: to
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+      description: 結束日期，格式 `YYYY-MM-DD`
+    CalendarSymbolsQuery:
+      name: symbols
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        examples:
+          - AAPL.US
+          - AAPL.US,700.HK,600519.SH
+      description: 股票代碼，以英文逗號分隔，最多 50 個
+    CalendarLimitQuery:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
+        default: 100
+      description: 每頁數量，`1–500`，預設 `100`
+  responses:
+    APIKeyStatusResponse:
+      description: APIKey管理回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/APIKeyStatusEnvelope"
+    ProfileResponse:
+      description: 公司資料回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProfileEnvelope"
+    ExecutivesResponse:
+      description: 高管與董事回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ExecutivesEnvelope"
+    FinancialRowsResponse:
+      description: 近期財務報表回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/FinancialRowsEnvelope"
+    SegmentsResponse:
+      description: 歷史營收構成回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SegmentsEnvelope"
+    SegmentsLatestResponse:
+      description: 營收構成回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SegmentsLatestEnvelope"
+    ValuationLatestResponse:
+      description: 最新估值回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValuationLatestEnvelope"
+    ValuationTimeSeriesResponse:
+      description: 歷史估值回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ValuationTimeSeriesEnvelope"
+    IndustryPeersResponse:
+      description: 同行估值對比回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IndustryPeersEnvelope"
+    IndustryDistributionResponse:
+      description: 行業估值分布回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IndustryDistributionEnvelope"
+    IndustriesRankResponse:
+      description: 行業指標排行回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IndustriesRankEnvelope"
+    IndustriesTreeResponse:
+      description: 行業分類層級回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/IndustriesTreeEnvelope"
+    DividendsResponse:
+      description: 分紅記錄回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DividendsEnvelope"
+    DividendsTTMResponse:
+      description: 股息TTM回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/DividendsTTMEnvelope"
+    BuybackResponse:
+      description: 股票回購回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/BuybackEnvelope"
+    LatestShareholdersResponse:
+      description: 最新股東結構回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/LatestShareholdersEnvelope"
+    TopShareholdersResponse:
+      description: 股東持倉回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/TopShareholdersEnvelope"
+    ShareholderDetailResponse:
+      description: 股東持倉詳情回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ShareholderDetailEnvelope"
+    FundHoldingsResponse:
+      description: 持股基金回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/FundHoldingsEnvelope"
+    CorporateActionsResponse:
+      description: 公司行動回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CorporateActionsEnvelope"
+    NewsResponse:
+      description: 個股新聞回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NewsEnvelope"
+    NewsDetailResponse:
+      description: 新聞詳情回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NewsDetailEnvelope"
+    NewsErrorResponse:
+      description: 錯誤回應。常見 HTTP 狀態包括 400（參數錯誤）、401（驗證失敗）、403（權限或配額限制）、404（無符合條件的數據）、429（請求頻率限制）及 503（服務暫不可用）。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/NewsErrorEnvelope"
+    CalendarResponse:
+      description: 財報日曆回應。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CalendarEnvelope"
+    ErrorResponse:
+      description: 錯誤回應。常見 HTTP 狀態包括 400（參數錯誤）、401（驗證失敗）、403（權限或配額限制）、404（無符合條件的數據）、429（請求頻率限制）及 503（服務暫不可用）。
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          examples:
+            missingAPIKey:
+              summary: 缺少 API Key
+              value:
+                code: "1002"
+                message: API key is required. Provide via X-API-Key header
+                error: "1002"
+            missingKind:
+              summary: 缺少必填參數
+              value:
+                code: 40001
+                message: kind is required
+                data: null
+            endpointForbidden:
+              summary: API Key 無權存取此介面
+              value:
+                code: 3009
+                message: This endpoint is not allowed for your API key
+                data: null
+            marketForbidden:
+              summary: API Key 未開放該市場
+              value:
+                code: 3010
+                message: Fundamentals market not allowed for your API key
+                data:
+                  market: US
+            noAvailableSource:
+              summary: 數據暫不可用
+              value:
+                code: 5003
+                message: Data is temporarily unavailable
+                data: null
+            notFound:
+              summary: 無符合條件的數據
+              value:
+                code: 40404
+                message: shareholder detail not found
+                data: null
+            businessNoData:
+              summary: 查詢條件沒有有效業務數據
+              value:
+                code: 40405
+                message: valuation time series not found
+                data: null
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required:
+        - code
+        - data
+      properties:
+        code:
+          type: integer
+          const: 0
+          description: 業務狀態碼，成功為 `0`。
+    APIKeyStatusEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required:
+            - data
+          properties:
+            message:
+              type: string
+              description: 響應消息。
+            data:
+              $ref: "#/components/schemas/APIKeyStatusData"
+    APIKeyStatusData:
+      type: object
+      required:
+        - server_time
+        - total
+        - api_keys
+      properties:
+        server_time:
+          type: string
+          format: date-time
+          description: 本次查詢的伺服器時間，包含時區的日期時間字串。
+        total:
+          type: integer
+          minimum: 0
+          description: 返回的 API Key 數量。
+        api_keys:
+          type: array
+          description: 帳戶名下的 API Key 列表。
+          items:
+            $ref: "#/components/schemas/APIKeyStatusItem"
+      additionalProperties: false
+    APIKeyStatusItem:
+      type: object
+      required:
+        - key_prefix
+        - name
+        - plan
+        - status
+        - expires_at
+        - remaining_seconds
+        - created_at
+      properties:
+        key_prefix:
+          type: string
+          description: API Key 前綴，用於辨認 Key；不是完整密鑰。
+        name:
+          type: string
+          description: API Key 名稱。
+        plan:
+          type: string
+          description: 該 Key 對應的方案識別碼。
+        status:
+          type: string
+          enum:
+            - active
+            - expired
+            - suspended
+            - revoked
+          description: Key 狀態：`active`（有效）、`expired`（已過期）、`suspended`（已暫停）、`revoked`（已撤銷）。
+        expires_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          description: 到期時間；未設定到期時間時為 `null`。
+        remaining_seconds:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          description: 距離到期的剩餘秒數；已到期時為 `0`，未設定到期時間時為 `null`。
+        created_at:
+          type: string
+          format: date-time
+          description: API Key 建立時間。
+      additionalProperties: false
+    ErrorEnvelope:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          description: TickDB API 業務錯誤碼；可能是整數或字串，客戶端應先轉為字串再比較。
+          oneOf:
+            - type: integer
+            - type: string
+        message:
+          type: string
+          description: 錯誤說明。
+        error:
+          type: string
+          description: 相容錯誤標識；僅部分錯誤回應返回。
+        data:
+          description: 可選的錯誤上下文；可能是 null、物件或陣列。
+          oneOf:
+            - type: "null"
+            - type: object
+              additionalProperties: true
+            - type: array
+              items: {}
+    ProfileEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ProfileData"
+    ProfileData:
+      type: object
+      description: 公司資料數據。
+      required:
+        - symbol
+        - market
+        - name
+      properties:
+        symbol:
+          type: string
+          description: 標準化股票代碼。
+        name:
+          type: string
+          description: 展示名稱。
+        company_name:
+          type: string
+          description: 公司全稱。
+        market:
+          type: string
+          description: 所屬市場。
+        region:
+          type: string
+          description: 所屬地區。
+        founded:
+          type:
+            - string
+            - "null"
+          description: 成立年份或日期；無數據時為 null。
+        listing_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: 上市日期，格式 `YYYY-MM-DD`；可能為 `null`。
+        year_end:
+          type:
+            - string
+            - "null"
+          description: 財年結束信息；可能為 null。
+        address:
+          type: string
+          description: 地址。
+        office_address:
+          type: string
+          description: 辦公地址。
+        phone:
+          type: string
+          description: 聯系電話。
+        email:
+          type: string
+          description: 電子郵箱。
+        website:
+          type: string
+          description: 公司網站。
+        employees:
+          type: integer
+          description: 員工人數。
+        chairman:
+          type: string
+          description: 董事長。
+        manager:
+          type: string
+          description: 主要管理人員。
+        secretary:
+          type: string
+          description: 公司秘書。
+        legal_repr:
+          type: string
+          description: 法定代表人。
+        accounting_firm:
+          type: string
+          description: 會計師事務所。
+        legal_counsel:
+          type: string
+          description: 法律顧問。
+        category:
+          type: string
+          description: 公司類別。
+        profile:
+          type: string
+          description: 公司業務簡介。
+      additionalProperties: false
+    ExecutivesEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ExecutivesData"
+    ExecutivesData:
+      type: object
+      description: 高管／董事數據。
+      required:
+        - symbol
+        - total
+        - members
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        total:
+          type: integer
+          minimum: 0
+          description: 人員總數。
+        members:
+          type: array
+          description: 高管、董事及關鍵人員列表。
+          items:
+            $ref: "#/components/schemas/Executive"
+      additionalProperties: true
+    Executive:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: 姓名。
+        title:
+          type: string
+          description: 職務。
+        biography:
+          type: string
+          description: 人物簡介。
+      additionalProperties: true
+    FinancialRowsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/FinancialRowsData"
+    FinancialRowsData:
+      type: object
+      description: 財務報表數據。數值欄位以字串返回，以免產生 JSON 浮點精度問題。
+      required:
+        - symbol
+        - kind
+        - rows
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        kind:
+          type: string
+          enum:
+            - IS
+            - BS
+            - CF
+          description: 報表類型：`IS` 利潤表、`BS` 資產負債表、`CF` 現金流量表。
+        rows:
+          type: array
+          description: 所選報表類型的指標記錄；同一報告期通常包含多條記錄。
+          items:
+            $ref: "#/components/schemas/FinancialRow"
+      additionalProperties: true
+    FinancialRow:
+      type: object
+      required:
+        - kind
+        - period_type
+        - fiscal_year
+        - fiscal_period
+        - period_end
+        - field_name
+        - indicator_title
+        - value
+      properties:
+        kind:
+          type: string
+          enum:
+            - IS
+            - BS
+            - CF
+          description: 報表類型：`IS` 利潤表、`BS` 資產負債表、`CF` 現金流量表。
+        field_name:
+          type: string
+          description: 財務欄位代碼；[查看財務欄位字典](./financial_fields_dictionary)。
+        indicator_title:
+          type: string
+          description: 指標標題。
+        field_display:
+          type: string
+          description: 展示名稱。
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: "null"
+          description: 欄位數值，以字符串返回。
+        fiscal_year:
+          type: integer
+          description: 財年。
+        fiscal_period:
+          type: string
+          description: 報告期。
+        period_type:
+          type: string
+          description: 財務週期類型：q1 至 q4 分別為第一至第四季度，saf 為半年度，af 為年度，ttm 為滾動近 12 個月。
+        period_end:
+          type: string
+          format: date
+          description: 期末日期，格式 `YYYY-MM-DD`。
+        currency:
+          type:
+            - string
+            - "null"
+          description: 幣種。
+        is_percent:
+          type: boolean
+          description: 是否為百分比欄位。
+        yoy:
+          type:
+            - string
+            - number
+            - "null"
+          description: 同比變化；可能為 null。
+        ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: 比率；可能為 null。
+      additionalProperties: true
+    SegmentsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/SegmentsData"
+    SegmentsLatestEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/SegmentsLatestData"
+    SegmentsLatestData:
+      type: object
+      description: 最近一期營收構成數據。
+      required:
+        - symbol
+        - segments
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        segments:
+          type: array
+          description: 最近一期營收構成明細。
+          items:
+            $ref: "#/components/schemas/SegmentItem"
+      additionalProperties: false
+    SegmentsData:
+      type: object
+      required:
+        - symbol
+        - segments
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        report:
+          type:
+            - string
+            - "null"
+          description: 請求指定的報告周期；`qf` 季度報告、`saf` 半年度報告、`af` 年度報告，未指定時可為 null。
+        segments:
+          type: array
+          description: 歷史報告期的營收構成明細。
+          items:
+            $ref: "#/components/schemas/SegmentItem"
+      additionalProperties: true
+    SegmentItem:
+      type: object
+      required:
+        - report
+        - category
+        - segment_name
+        - period_start
+        - period_end
+        - value
+      properties:
+        report:
+          type: string
+          description: 報告周期：`qf` 季度報告、`saf` 半年度報告、`af` 年度報告。
+        category:
+          type: string
+          description: 該記錄所屬維度：`business` 按業務，`regional` 按地區。
+        segment_name:
+          type: string
+          description: 業務類別或地區名稱。
+        period_start:
+          type: string
+          format: date
+          description: 周期開始日期，格式 `YYYY-MM-DD`。
+        period_end:
+          type: string
+          format: date
+          description: 周期結束日期，格式 `YYYY-MM-DD`。
+        total_revenue:
+          type:
+            - string
+            - number
+            - "null"
+          description: 該報告期總收入。
+        currency:
+          type:
+            - string
+            - "null"
+          description: 金額幣種。
+        percent:
+          type:
+            - string
+            - number
+            - "null"
+          description: 該業務類別或地區收入占當期總收入的百分比，例如 `79.74` 表示 79.74%。
+        value:
+          type:
+            - string
+            - number
+            - "null"
+          description: 該業務類別或地區的收入金額。
+      additionalProperties: true
+    ValuationLatestEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ValuationLatestData"
+    ValuationLatestData:
+      type: object
+      required:
+        - symbol
+        - metrics
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        metrics:
+          type: object
+          required:
+            - PE
+          properties:
+            PE:
+              $ref: "#/components/schemas/ValuationMetricSnapshot"
+          additionalProperties: false
+      additionalProperties: true
+    ValuationMetricSnapshot:
+      type: object
+      required:
+        - value
+        - high_1y
+        - low_1y
+        - median_1y
+        - desc
+      properties:
+        value:
+          type:
+            - string
+            - number
+            - "null"
+          description: 目前指標值。
+        high_1y:
+          type:
+            - string
+            - number
+            - "null"
+          description: 近一年高位。
+        low_1y:
+          type:
+            - string
+            - number
+            - "null"
+          description: 近一年低位。
+        median_1y:
+          type:
+            - string
+            - number
+            - "null"
+          description: 近一年中位。
+        desc:
+          type:
+            - string
+            - "null"
+          description: 指標說明；可能為 null。
+      additionalProperties: true
+    ValuationTimeSeriesEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ValuationTimeSeriesData"
+    ValuationTimeSeriesData:
+      type: object
+      required:
+        - symbol
+        - metric
+        - granularity
+        - from
+        - to
+        - points
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        metric:
+          type: string
+          enum:
+            - PE
+          description: 估值指標，當前為 `PE`（市盈率）。
+        granularity:
+          type: string
+          enum:
+            - daily
+            - monthly
+          description: 時間粒度：日度或月度。
+        from:
+          type: string
+          format: date
+          description: 查詢範圍起始日期，格式 `YYYY-MM-DD`。
+        to:
+          type: string
+          format: date
+          description: 查詢範圍結束日期，格式 `YYYY-MM-DD`。
+        points:
+          type: array
+          description: 歷史估值記錄；每個元素是 `[時間, 指標值]`。
+          items:
+            $ref: "#/components/schemas/MetricPoint"
+      additionalProperties: true
+    MetricPoint:
+      type: array
+      minItems: 2
+      maxItems: 2
+      prefixItems:
+        - type: string
+          format: date-time
+          description: RFC 3339 日期時間字串，包含時區資訊。
+        - type:
+            - string
+            - number
+            - "null"
+          description: 指標值。
+      items: false
+    IndustryPeersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/IndustryPeersData"
+    IndustryPeersData:
+      type: object
+      required:
+        - parent_symbol
+        - peers
+      properties:
+        parent_symbol:
+          type: string
+          description: 被查詢股票代碼。
+        peers:
+          type: array
+          description: 可用於橫向比較的同行公司及指標列表。
+          items:
+            $ref: "#/components/schemas/PeerItem"
+      additionalProperties: true
+    PeerItem:
+      type: object
+      required:
+        - peer_symbol
+        - peer_name
+      properties:
+        peer_symbol:
+          type: string
+          description: 同行公司股票代碼。
+        peer_name:
+          type: string
+          description: 同行公司名稱。
+        currency:
+          type:
+            - string
+            - "null"
+          description: 指標幣種。
+        assets:
+          type:
+            - string
+            - number
+            - "null"
+          description: 資產指標。
+        bps:
+          type:
+            - string
+            - number
+            - "null"
+          description: 每股凈資產。
+        eps:
+          type:
+            - string
+            - number
+            - "null"
+          description: 每股收益。
+        dps:
+          type:
+            - string
+            - number
+            - "null"
+          description: 每股股息。
+        div_yield:
+          type:
+            - string
+            - number
+            - "null"
+          description: 股息率。
+        div_payout_ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: 派息率。
+        five_y_avg_dps:
+          type:
+            - string
+            - number
+            - "null"
+          description: 五年平均每股股息。
+        pe:
+          type:
+            - string
+            - number
+            - "null"
+          description: 市盈率。
+      additionalProperties: true
+    IndustryDistributionEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/IndustryDistributionData"
+    IndustryDistributionData:
+      type: object
+      required:
+        - symbol
+        - distributions
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        distributions:
+          type: array
+          description: 行業估值分布列表。
+          items:
+            $ref: "#/components/schemas/IndustryDistributionItem"
+      additionalProperties: true
+    IndustryDistributionItem:
+      type: object
+      required:
+        - metric
+        - low
+        - high
+        - median
+        - value
+        - ranking
+        - rank_index
+        - rank_total
+      properties:
+        metric:
+          type: string
+          description: 估值指標代碼。
+        low:
+          type:
+            - string
+            - number
+            - "null"
+          description: 行業樣本低位。
+        high:
+          type:
+            - string
+            - number
+            - "null"
+          description: 行業樣本高位。
+        median:
+          type:
+            - string
+            - number
+            - "null"
+          description: 行業樣本中位。
+        value:
+          type:
+            - string
+            - number
+            - "null"
+          description: 當前股票的指標值。
+        ranking:
+          type:
+            - string
+            - number
+            - "null"
+          description: 排名顯示值。
+        rank_index:
+          type: integer
+          minimum: 0
+          description: 當前排名。
+        rank_total:
+          type: integer
+          minimum: 0
+          description: 樣本總數。
+      additionalProperties: true
+    IndustriesRankEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/IndustriesRankData"
+    IndustriesRankData:
+      type: object
+      required:
+        - market
+        - indicator
+        - sort_type
+        - items
+      properties:
+        market:
+          type: string
+          description: 查詢市場。
+        indicator:
+          type: string
+          description: 排行指標。
+        sort_type:
+          type: string
+          description: 排序方式。
+        items:
+          type: array
+          description: 行業指標排行列表。
+          items:
+            $ref: "#/components/schemas/IndustryRankItem"
+      additionalProperties: true
+    IndustryRankItem:
+      type: object
+      required:
+        - industry_counter_id
+        - industry_name
+        - rank
+        - value
+        - change_percent
+      properties:
+        industry_counter_id:
+          type: string
+          description: 行業節點 ID。
+        industry_name:
+          type: string
+          description: 行業名稱。
+        rank:
+          type: integer
+          description: 名次。
+        value:
+          type:
+            - string
+            - number
+          description: 行業總市值。
+        change_percent:
+          type:
+            - string
+            - number
+            - "null"
+          description: 漲跌幅。
+      additionalProperties: true
+    IndustriesTreeEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/IndustriesTreeData"
+    IndustriesTreeData:
+      type: object
+      required:
+        - market
+        - industry_counter_id
+        - top
+        - chain
+      properties:
+        market:
+          type: string
+          description: 查詢市場。
+        industry_counter_id:
+          type: string
+          description: 行業節點 ID。
+        top:
+          $ref: "#/components/schemas/IndustryTop"
+        chain:
+          $ref: "#/components/schemas/IndustryChainNode"
+      additionalProperties: true
+    IndustryTop:
+      type: object
+      required:
+        - name
+        - market
+      properties:
+        name:
+          type: string
+          description: 頂層行業名稱。
+        market:
+          type: string
+          description: 查詢市場。
+      additionalProperties: false
+    IndustryChainNode:
+      type: object
+      required:
+        - name
+        - level
+        - market
+        - counter_id
+        - next
+      properties:
+        name:
+          type: string
+          description: 行業名稱。
+        level:
+          type: integer
+          description: 節點層級。
+        market:
+          type: string
+          description: 查詢市場。
+        counter_id:
+          type: string
+          description: 行業節點 ID。
+        parent_code:
+          type: string
+          description: 父節點代碼。
+        sharelist_id:
+          type: string
+          description: 股票列表 ID。
+        symbol:
+          type: string
+          description: 節點關聯代碼。
+        stock_num:
+          type: integer
+          minimum: 0
+          description: 股票數量。
+        chg:
+          type:
+            - string
+            - number
+            - "null"
+          description: 變動值。
+        ytd_chg:
+          type:
+            - string
+            - number
+            - "null"
+          description: 年初至今變動值。
+        next:
+          type: array
+          description: 下級行業分類列表；元素遞歸使用相同節點結構。
+          items:
+            $ref: "#/components/schemas/IndustryChainNode"
+      additionalProperties: false
+    DividendsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required:
+            - page
+          properties:
+            data:
+              $ref: "#/components/schemas/DividendData"
+            page:
+              $ref: "#/components/schemas/PageInfo"
+    DividendsTTMEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/DividendTTMData"
+    BuybackEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/BuybackData"
+    CorporateActionsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/CorporateActionsData"
+    DividendData:
+      type: object
+      required:
+        - symbol
+        - events
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        events:
+          type: array
+          description: 符合篩選條件的分紅記錄列表。
+          items:
+            $ref: "#/components/schemas/DividendEvent"
+      additionalProperties: true
+    DividendEvent:
+      type: object
+      required:
+        - event_id
+        - type
+        - distribution_kind
+        - description
+        - amount
+        - stock_distribution_ratio
+        - currency
+        - declaration_date
+        - record_date
+        - ex_date
+        - payment_date
+        - detail_level
+      properties:
+        event_id:
+          type: string
+          description: 事件 ID。
+        type:
+          type: string
+          enum:
+            - normal
+            - special
+            - non_cash
+            - unknown
+          description: 分紅類別。
+        distribution_kind:
+          type: string
+          enum:
+            - cash
+            - stock
+            - other_non_cash
+            - unknown
+          description: 分派形式。
+        description:
+          type:
+            - string
+            - "null"
+          description: 事件說明。
+        amount:
+          type:
+            - string
+            - "null"
+          description: 每股現金金額；非現金分派時可能為 null。
+        stock_distribution_ratio:
+          type:
+            - string
+            - "null"
+          description: 每股送股或轉增比例；例如 `0.7` 表示每 1 股送轉 0.7 股，即每 10 股送轉 7 股。
+        currency:
+          type:
+            - string
+            - "null"
+          description: 幣種。
+        declaration_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: 公告日，格式 `YYYY-MM-DD`；可能為 `null`。
+        record_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: 股權登記日，格式 `YYYY-MM-DD`；可能為 `null`。
+        ex_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: 除權除息日，格式 `YYYY-MM-DD`；可能為 `null`。
+        payment_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: 支付日，格式 `YYYY-MM-DD`；可能為 `null`。
+        detail_level:
+          type: string
+          enum:
+            - summary
+            - detail
+          description: 詳情級別。
+      additionalProperties: true
+    DividendTTMData:
+      type: object
+      required:
+        - symbol
+        - as_of_date
+        - window_start_exclusive
+        - currencies
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        as_of_date:
+          type: string
+          format: date
+          description: TTM 統計截止日，格式 `YYYY-MM-DD`。
+        window_start_exclusive:
+          type: string
+          format: date
+          description: 最近 12 個月窗口的排他起點，格式 `YYYY-MM-DD`。
+        currencies:
+          type: array
+          description: 按幣種分別匯總的現金股息列表。
+          items:
+            $ref: "#/components/schemas/DividendTTMCurrency"
+      additionalProperties: true
+    DividendTTMCurrency:
+      type: object
+      required:
+        - currency
+        - normal_cash_dps_ttm
+        - special_cash_dps_ttm
+        - total_cash_dps_ttm
+        - normal_event_count
+        - special_event_count
+      properties:
+        currency:
+          type: string
+        normal_cash_dps_ttm:
+          type: string
+        special_cash_dps_ttm:
+          type: string
+        total_cash_dps_ttm:
+          type: string
+        normal_event_count:
+          type: integer
+          minimum: 0
+        special_event_count:
+          type: integer
+          minimum: 0
+      additionalProperties: true
+    BuybackData:
+      type: object
+      required:
+        - symbol
+        - currency
+        - ttm
+        - history
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        currency:
+          type: string
+          description: 回購金額幣種。
+        ttm:
+          $ref: "#/components/schemas/BuybackTTM"
+        history:
+          type: array
+          description: 歷史年度回購記錄。
+          items:
+            $ref: "#/components/schemas/BuybackHistoryItem"
+      additionalProperties: true
+    BuybackTTM:
+      type: object
+      required:
+        - net_buyback
+        - net_buyback_yield
+        - buyback_payout_ratio
+        - buyback_to_cashflow_ratio
+      properties:
+        net_buyback:
+          type:
+            - string
+            - number
+            - "null"
+          description: 凈回購額。
+        net_buyback_yield:
+          type:
+            - string
+            - number
+            - "null"
+          description: 凈回購收益率；可能為 null。
+        buyback_payout_ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: 回購支付率；可能為 null。
+        buyback_to_cashflow_ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: 回購額與現金流比率；可能為 null。
+      additionalProperties: true
+    BuybackHistoryItem:
+      type: object
+      required:
+        - currency
+        - fiscal_year
+        - fiscal_year_range
+        - net_buyback
+        - net_buyback_yield
+        - net_buyback_growth_rate
+      properties:
+        currency:
+          type: string
+          description: 回購金額幣種。
+        fiscal_year:
+          type: string
+          description: 財年。
+        fiscal_year_range:
+          type: string
+          description: 財年日期範圍文本，例如 `2024/01/01 - 2024/12/31`。
+        net_buyback:
+          type:
+            - string
+            - number
+            - "null"
+          description: 凈回購額。
+        net_buyback_yield:
+          type:
+            - string
+            - number
+            - "null"
+          description: 凈回購收益率；可能為 null。
+        net_buyback_growth_rate:
+          type:
+            - string
+            - number
+            - "null"
+          description: 凈回購增長率；可能為 null。
+      additionalProperties: false
+    CorporateActionsData:
+      type: object
+      required:
+        - symbol
+        - events
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        events:
+          type: array
+          description: 公司行動事件列表。
+          items:
+            $ref: "#/components/schemas/CorporateActionItem"
+      additionalProperties: true
+    CorporateActionItem:
+      type: object
+      required:
+        - event_id
+        - event_date
+        - date_type
+        - date_zone
+        - act_type
+        - act_desc
+        - action_code
+        - is_recent
+      properties:
+        event_id:
+          type: string
+          description: 事件 ID。
+        event_date:
+          type: string
+          format: date
+          description: 事件日期，格式 `YYYY-MM-DD`。
+        date_type:
+          type: string
+          description: 日期類型。
+        date_zone:
+          type: string
+          description: 時區。
+        act_type:
+          type: string
+          description: 行動類型。
+        act_desc:
+          type: string
+          description: 行動說明。
+        action_code:
+          type: string
+          description: 行動代碼。
+        is_recent:
+          type: boolean
+          description: 是否為近期事件。
+      additionalProperties: true
+    LatestShareholdersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/LatestShareholdersData"
+    LatestShareholdersData:
+      type: object
+      required:
+        - symbol
+        - report_date
+        - total
+        - members
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        report_date:
+          type: string
+          format: date
+          description: 報告日期，格式 `YYYY-MM-DD`。
+        total:
+          type: integer
+          description: 股東記錄總數。
+        members:
+          type: array
+          description: 股東記錄列表。
+          items:
+            $ref: "#/components/schemas/LatestShareholderMember"
+      additionalProperties: false
+    LatestShareholderMember:
+      type: object
+      required:
+        - shareholder_name
+        - percent_of_shares
+        - shares_changed
+        - report_date
+      properties:
+        shareholder_name:
+          type: string
+          description: 股東名稱。
+        percent_of_shares:
+          type: string
+          description: 持股比例數值，不含百分號。
+        shares_changed:
+          type: string
+          description: 較上一報告期的股份變動數量。
+        report_date:
+          type: string
+          format: date
+          description: 報告日期，格式 `YYYY-MM-DD`。
+      additionalProperties: false
+    TopShareholdersEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/TopShareholdersData"
+    TopShareholdersData:
+      type: object
+      required:
+        - symbol
+        - total
+        - periods
+        - info
+        - members
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        total:
+          type: integer
+          description: 匯總記錄數。
+        periods:
+          type: array
+          items:
+            type: string
+          description: 可用報告期列表。
+        info:
+          type: array
+          items:
+            $ref: "#/components/schemas/TopShareholderPeriod"
+          description: 按報告期分組的股東持倉數據。
+        members:
+          type: array
+          description: 整理後的股東記錄。
+          items:
+            $ref: "#/components/schemas/TopShareholderMember"
+      additionalProperties: false
+    TopShareholderPeriod:
+      type: object
+      required:
+        - period
+        - share_holders
+      properties:
+        period:
+          type: string
+          description: 報告期。
+        share_holders:
+          type: array
+          description: 該報告期的股東列表。
+          items:
+            $ref: "#/components/schemas/TopShareholderPeriodMember"
+      additionalProperties: false
+    TopShareholderPeriodMember:
+      type: object
+      required:
+        - filing_date
+        - name
+        - object_id
+        - percent_shares_changed
+        - percent_shares_held
+        - period
+        - shares_changed
+        - shares_held
+      properties:
+        filing_date:
+          type: string
+          description: 原始申報日期文本，例如 `2026/05/07`。
+        name:
+          type: string
+          description: 股東名稱。
+        object_id:
+          type: string
+          description: 股東對象 ID。
+        percent_shares_changed:
+          type: string
+          description: 持股比例變化，包含百分號。
+        percent_shares_held:
+          type: string
+          description: 持股比例，包含百分號。
+        period:
+          type: string
+          description: 報告期。
+        shares_changed:
+          type: string
+          description: 股份變動。
+        shares_held:
+          type: string
+          description: 持股數量，以字符串返回。
+      additionalProperties: false
+    TopShareholderMember:
+      type: object
+      required:
+        - object_id
+        - shareholder_name
+        - shareholder_type
+        - shares_held
+        - percent_shares_held
+        - percent_shares_held_raw
+        - percent_shares_changed
+        - filing_date
+        - report_date
+        - detail_available
+      properties:
+        object_id:
+          type: string
+          description: 股東對象 ID。
+        shareholder_name:
+          type: string
+          description: 股東名稱。
+        shareholder_type:
+          type:
+            - string
+            - "null"
+          description: 股東類型。
+        shares_held:
+          type: string
+          description: 持股數量，以字符串返回。
+        percent_shares_held:
+          type:
+            - string
+            - "null"
+          description: 持股比例數值，不含百分號；無法轉換時為 null。
+        percent_shares_held_raw:
+          type: string
+          description: 持股比例原始文本，包含百分號并可保留 `<0.01%` 等表示。
+        percent_shares_changed:
+          type:
+            - string
+            - "null"
+          description: 持股比例變化數值，不含百分號；無法轉換時為 null。
+        filing_date:
+          type: string
+          format: date
+          description: 原始申報日期文本，例如 `2026/05/07`。
+        report_date:
+          type:
+            - string
+            - "null"
+          format: date
+          description: 報告日期，格式 `YYYY-MM-DD`；可能為 `null`。
+        detail_available:
+          type: boolean
+          description: 是否可查詢股東詳情。
+      additionalProperties: false
+    ShareholderDetailEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/ShareholderDetailData"
+    ShareholderDetailData:
+      type: object
+      required:
+        - symbol
+        - object_id
+        - name
+        - holding_summary
+        - holding_periods
+        - holding_details
+        - trading_periods
+        - tradings
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        object_id:
+          type: string
+          description: 股東對象 ID。
+        name:
+          type: string
+          description: 股東名稱。
+        title:
+          type:
+            - string
+            - "null"
+          description: 股東或機構標題。
+        holding_summary:
+          type: array
+          description: 分報告期的持倉匯總。
+          items:
+            $ref: "#/components/schemas/ShareholderHoldingSummary"
+        holding_periods:
+          type: array
+          description: 可用持倉報告期列表。
+          items:
+            type: string
+        holding_details:
+          type: array
+          description: 逐報告期持倉明細。
+          items:
+            $ref: "#/components/schemas/ShareholderHoldingDetail"
+        trading_periods:
+          type: array
+          description: 可用交易統計期間。
+          items:
+            type: string
+        tradings:
+          type: array
+          description: 分期間交易匯總。
+          items:
+            $ref: "#/components/schemas/ShareholderTradingSummary"
+      additionalProperties: false
+    ShareholderHoldingSummary:
+      type: object
+      required:
+        - accum_buy
+        - accum_sell
+        - percent_stock_price_changed
+        - period
+        - stock_price
+      properties:
+        accum_buy:
+          type: string
+          description: 該報告期累計買入數量。
+        accum_sell:
+          type: string
+          description: 該報告期累計賣出數量。
+        percent_stock_price_changed:
+          type: string
+          description: 該報告期股價變化比例，包含百分號。
+        period:
+          type: string
+          description: 報告期。
+        stock_price:
+          type: string
+          description: 該報告期對應股價。
+      additionalProperties: false
+    ShareholderHoldingDetail:
+      type: object
+      required:
+        - filing_date
+        - name
+        - object_id
+        - percent_shares_changed
+        - percent_shares_held
+        - period
+        - shares_changed
+        - shares_held
+      properties:
+        filing_date:
+          type: string
+          description: 原始申報日期文本，例如 `2026/05/07`。
+        name:
+          type: string
+          description: 股東名稱。
+        object_id:
+          type: string
+          description: 股東對象 ID。
+        percent_shares_changed:
+          type: string
+          description: 持股比例變化，包含百分號。
+        percent_shares_held:
+          type: string
+          description: 持股比例，包含百分號。
+        period:
+          type: string
+          description: 報告期。
+        shares_changed:
+          type: string
+          description: 股份變動數量。
+        shares_held:
+          type: string
+          description: 持股數量。
+      additionalProperties: false
+    ShareholderTradingSummary:
+      type: object
+      required:
+        - accum_buy
+        - accum_sell
+        - net_buy
+        - period
+        - trading_details
+      properties:
+        accum_buy:
+          type: string
+          description: 該報告期累計買入數量。
+        accum_sell:
+          type: string
+          description: 該報告期累計賣出數量。
+        net_buy:
+          type: string
+          description: 該期間凈買入數量。
+        period:
+          type: string
+          description: 交易統計期間。
+        trading_details:
+          type: array
+          description: 該期間的交易明細列表。
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: false
+    FundHoldingsEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required:
+            - page
+          properties:
+            data:
+              $ref: "#/components/schemas/FundHoldingsData"
+            page:
+              $ref: "#/components/schemas/PageInfo"
+    PageInfo:
+      type: object
+      required:
+        - next_cursor
+        - limit
+      properties:
+        next_cursor:
+          type:
+            - string
+            - "null"
+          description: 下一頁游標；非空時原樣作為下一次請求的 cursor 參數，末頁為 null。
+        limit:
+          type: integer
+          minimum: 1
+          description: 當前分頁上限。
+      additionalProperties: true
+    FundHoldingsData:
+      type: object
+      required:
+        - symbol
+        - total
+        - members
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        total:
+          type: integer
+          description: 持有該股票的基金記錄總數。
+        members:
+          type: array
+          description: 披露持有該股票的基金列表。
+          items:
+            $ref: "#/components/schemas/FundHoldingMember"
+      additionalProperties: true
+    FundHoldingMember:
+      type: object
+      required:
+        - fund_code
+        - fund_symbol
+        - fund_name
+        - currency
+        - position_ratio
+        - report_date
+      properties:
+        fund_code:
+          type: string
+          description: 基金代碼。
+        fund_symbol:
+          type: string
+          description: 標準化基金代碼。
+        fund_name:
+          type: string
+          description: 基金名稱。
+        currency:
+          type: string
+          description: 幣種。
+        position_ratio:
+          type:
+            - string
+            - number
+            - "null"
+          description: 該股票在對應基金持倉中的比例。
+        report_date:
+          type: string
+          format: date
+          description: 報告日期，格式 `YYYY-MM-DD`。
+      additionalProperties: true
+    NewsEnvelope:
+      type: object
+      required:
+        - code
+        - data
+      properties:
+        code:
+          type: integer
+          const: 0
+        data:
+          $ref: "#/components/schemas/NewsData"
+      additionalProperties: false
+    NewsData:
+      type: object
+      required:
+        - symbol
+        - limit
+        - news
+      properties:
+        symbol:
+          type: string
+          description: 股票代碼。
+        limit:
+          type: integer
+          description: 本次請求的返回條數上限。
+        news:
+          type: array
+          description: 新聞列表。
+          items:
+            $ref: "#/components/schemas/NewsItem"
+      additionalProperties: false
+    NewsItem:
+      type: object
+      required:
+        - news_id
+        - title
+        - description
+        - published_at
+        - has_body
+      properties:
+        news_id:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          description: 新聞 ID，可用於查詢詳情。
+        title:
+          type: string
+          description: 新聞標題。
+        description:
+          type:
+            - string
+            - "null"
+          description: 新聞摘要。
+        published_at:
+          type: string
+          format: date-time
+          description: 發布時間，RFC 3339 日期時間字符串（UTC）。
+        has_body:
+          type: boolean
+          description: 是否有可用正文。
+      additionalProperties: false
+    NewsDetailEnvelope:
+      type: object
+      required:
+        - code
+        - data
+      properties:
+        code:
+          type: integer
+          const: 0
+        data:
+          $ref: "#/components/schemas/NewsDetailItem"
+      additionalProperties: false
+    NewsDetailItem:
+      type: object
+      required:
+        - news_id
+        - title
+        - description
+        - published_at
+        - detail_status
+        - content_scope
+        - body_text
+        - body_html
+      properties:
+        news_id:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          description: 新聞 ID。
+        title:
+          type: string
+          description: 新聞標題。
+        description:
+          type:
+            - string
+            - "null"
+          description: 新聞摘要。
+        published_at:
+          type: string
+          format: date-time
+          description: 發布時間，RFC 3339 日期時間字符串（UTC）。
+        detail_status:
+          type: string
+          enum:
+            - pending
+            - succeeded
+            - blocked
+            - failed
+        content_scope:
+          type: string
+          enum:
+            - full
+            - excerpt
+            - unknown
+            - none
+        body_text:
+          type:
+            - string
+            - "null"
+          description: 純文本正文；不可用時可能為 null。
+        body_html:
+          type:
+            - string
+            - "null"
+          description: HTML 正文；不可用時可能為 null。
+      additionalProperties: false
+    NewsErrorEnvelope:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          description: TickDB API 業務錯誤碼；可能是整數或字串。
+          oneOf:
+            - type: integer
+            - type: string
+        message:
+          type: string
+          description: 錯誤說明。
+        error:
+          type: string
+          description: 相容錯誤標識；僅部分錯誤回應返回。
+        data:
+          description: 可選的錯誤上下文。
+          oneOf:
+            - type: "null"
+            - type: object
+              additionalProperties: true
+            - type: array
+              items: {}
+      additionalProperties: true
+    CalendarEnvelope:
+      allOf:
+        - $ref: "#/components/schemas/SuccessEnvelope"
+        - type: object
+          required:
+            - page
+          properties:
+            data:
+              $ref: "#/components/schemas/CalendarData"
+            page:
+              $ref: "#/components/schemas/CalendarPage"
+    CalendarPage:
+      type: object
+      required:
+        - next_cursor
+        - limit
+      properties:
+        next_cursor:
+          type:
+            - string
+            - "null"
+          description: 下一頁遊標；末頁為 `null`。
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 500
+          description: 當前分頁上限。
+      additionalProperties: false
+    CalendarData:
+      type: object
+      required:
+        - from
+        - to
+        - events
+      properties:
+        from:
+          type: string
+          format: date
+          description: 查詢開始日期，`YYYY-MM-DD`。
+        to:
+          type: string
+          format: date
+          description: 查詢結束日期，`YYYY-MM-DD`。
+        events:
+          type: array
+          description: 當前頁事件列表；無事件時為空陣列。
+          maxItems: 500
+          items:
+            $ref: "#/components/schemas/FullCalendarEvent"
+      additionalProperties: false
+    FullCalendarEvent:
+      type: object
+      required:
+        - category
+        - content
+        - counter_name
+        - currency
+        - date_type
+        - event_datetime
+        - event_type
+        - market
+        - star
+        - symbol
+      properties:
+        category:
+          type: string
+          description: 事件細分類別，可能比請求類別更具體。
+        event_datetime:
+          type: string
+          format: date-time
+          description: 事件時間，UTC 日期時間字串。
+        symbol:
+          type: string
+          description: 關聯產品代碼；不適用時可能為空。
+        market:
+          type: string
+          enum:
+            - US
+            - HK
+            - CN
+          description: 所屬市場。
+        event_type:
+          type: string
+          description: 事件類型。
+        content:
+          type: string
+          description: 事件內容。
+        counter_name:
+          type:
+            - string
+            - "null"
+          description: 關聯名稱；可能為 `null`。
+        date_type:
+          type:
+            - string
+            - "null"
+          description: 事件日期類型；可能為 `null`。
+        star:
+          type: integer
+          description: 重要程度。
+        currency:
+          type:
+            - string
+            - "null"
+          description: 幣種；可能為 `null`。
+        issue_price:
+          type:
+            - string
+            - "null"
+          description: 新股發行價格；僅相關事件返回，價格不可用時為 `null`。
+        data:
+          type: array
+          description: 事件附加資料；沒有附加資料時省略。
+          items:
+            $ref: "#/components/schemas/CalendarEventData"
+      additionalProperties: false
+    CalendarEventData:
+      type: object
+      required:
+        - key
+        - value_type
+        - value_text
+        - value_raw
+      properties:
+        key:
+          type: string
+          description: 附加資料鍵名。
+        value_type:
+          type: string
+          description: 值類型。
+        value_text:
+          type:
+            - string
+            - "null"
+          description: 顯示值；可能為 `null`。
+        value_raw:
+          type:
+            - string
+            - "null"
+          description: 原始值；可能為 `null`。
+      additionalProperties: false
+    FullMarketTicker:
+      type: object
+      required:
+        - symbol
+        - last_price
+        - timestamp
+      additionalProperties: false
+      properties:
+        symbol:
+          type: string
+          description: 交易產品代碼。
+        name:
+          type: string
+          description: 產品名稱。
+        type:
+          type: string
+          enum:
+            - stock
+            - indices
+          description: 產品類型：`stock` 股票類產品、`indices` 指數。
+        category:
+          type: string
+          enum:
+            - sh_stock
+            - sz_stock
+            - bj_stock
+            - etf
+            - cn_index
+            - cn_bond
+          description: A 股產品細分類別；僅 A 股全量行情返回。
+        last_price:
+          type: string
+          description: 最新成交價。
+        open:
+          type: string
+          description: 當日開盤價；數據不可用時不返回。
+        prev_close:
+          type: string
+          description: 上一交易日收盤價；數據不可用時不返回。
+        volume_24h:
+          type: string
+          description: 當日累計成交量。
+        quote_volume_24h:
+          type: string
+          description: 當日累計成交額。
+        high_24h:
+          type: string
+          description: 當日最高價。
+        low_24h:
+          type: string
+          description: 當日最低價。
+        price_change_24h:
+          type: string
+          description: 相對昨收的價格變化。
+        price_change_percent_24h:
+          type: string
+          description: 相對昨收的價格變化百分比。
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix 時間戳，單位為毫秒。
+    FullMarketTickerResponse:
+      type: object
+      required:
+        - code
+        - message
+        - data
+      additionalProperties: false
+      properties:
+        code:
+          type: integer
+          example: 0
+        message:
+          type: string
+          example: success
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/FullMarketTicker"
+x-user-api-scope:
+  primary_user_api_count: 25
+  authentication: X-API-Key
+x-fundamentals-product-scope:
+  supported_stock_categories:
+    - market: US
+      exchanges:
+        - NASDAQ
+        - NYSE
+        - AMEX
+      category: stock
+    - market: HK
+      exchanges:
+        - HKEX
+      category: stock
+    - market: CN
+      exchanges:
+        - SH
+        - SZ
+      category: stock
+  unsupported_upstream_categories:
+    - US_ARCA
+    - US_BATS
+    - CN_BJ_STOCK
+    - CN_SH_ETF
+    - CN_SZ_ETF
+  unsupported_behavior: 不承诺 fundamentals 数据可用性；当前接口行为包括结构化 404 或格式正确的成功空响应。
+paths:
+  /v1/apikeys/subscriptions:
+    get:
+      tags:
+        - account
+      summary: APIKey管理
+      description: 無需登入官網，即可查詢 API Key 的到期情況，方便定時檢查和設定提醒。
+      operationId: getAPIKeyStatus
+      responses:
+        "200":
+          $ref: "#/components/responses/APIKeyStatusResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/market/ticker:
+    get:
+      summary: 行情快照
+      description: 獲取一個或多個交易品種的實時市場行情數據。
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: 交易產品代碼，多個用逗號分隔，最多50個
+          schema:
+            type: string
+            default: 700.HK,AAPL.US
+            example: 700.HK,AAPL.US
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                  - message
+                  - data
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - symbol
+                        - last_price
+                        - timestamp
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          description: 交易產品
+                        name:
+                          type: string
+                          description: 產品名稱；名稱信息可用時返回
+                        type:
+                          type: string
+                          enum:
+                            - stock
+                            - indices
+                            - crypto
+                            - forex
+                            - futures
+                          description: 產品類型；產品類型成功識別時返回
+                        category:
+                          type: string
+                          description: A股產品細分類別，例如 `sh_stock`、`sz_stock`、`bj_stock`、`etf`、`cn_bond`、`cn_index`；僅查詢A股市場產品且分類信息可用時返回
+                        last_price:
+                          type: string
+                          description: 最新成交價
+                        open:
+                          type: string
+                          description: 開盤價；行情統計可用時返回。傳統市場通常為當日或當前交易時段開盤價，加密貨幣按對應行情統計窗口返回
+                        prev_close:
+                          type: string
+                          description: 昨收或參考價；行情統計可用時返回。傳統市場通常為上一交易日或上一交易時段收盤價，加密貨幣按對應行情統計窗口返回
+                        bid_price:
+                          type: string
+                          description: 最優買價；盤口報價可用時返回
+                        ask_price:
+                          type: string
+                          description: 最優賣價；盤口報價可用時返回
+                        volume_24h:
+                          type: string
+                          description: 累計成交量；數據可用時返回。加密貨幣通常為滾動24小時成交量，傳統市場通常為當日或當前交易時段成交量
+                        quote_volume_24h:
+                          type: string
+                          description: 與 `volume_24h` 相同統計窗口的成交額；成交額數據可用時返回
+                        high_24h:
+                          type: string
+                          description: 最高價；數據可用時返回，統計窗口與 `volume_24h` 一致
+                        low_24h:
+                          type: string
+                          description: 最低價；數據可用時返回，統計窗口與 `volume_24h` 一致
+                        price_change_24h:
+                          type: string
+                          description: 價格變化；數據可用時返回，統計窗口與 `volume_24h` 一致
+                        price_change_percent_24h:
+                          type: string
+                          description: 價格變化百分比；數據可用時返回，非空數值保留兩位小數
+                        timestamp:
+                          type: integer
+                          format: int64
+                          description: Unix 時間戳，單位為毫秒
+                        pre_market_quote:
+                          type: object
+                          description: 盤前行情對象；僅支援擴展交易時段的產品（如美股）且盤前行情數據可用時返回
+                          required:
+                            - last_done
+                            - timestamp
+                            - volume
+                            - high
+                            - low
+                            - prev_close
+                          additionalProperties: false
+                          properties:
+                            last_done:
+                              type: string
+                              description: 最新價
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: Unix 時間戳，單位為毫秒
+                            volume:
+                              type: integer
+                              format: int64
+                              description: 成交量
+                            quote_volume:
+                              type: string
+                              description: 成交額，期貨通常不返回
+                            high:
+                              type: string
+                              description: 最高價
+                            low:
+                              type: string
+                              description: 最低價
+                            prev_close:
+                              type: string
+                              description: 昨收或參考價；行情統計可用時返回。傳統市場通常為上一交易日或上一交易時段收盤價，加密貨幣按對應行情統計窗口返回
+                        post_market_quote:
+                          type: object
+                          description: 盤後行情對象；僅支援擴展交易時段的產品（如美股）且盤後行情數據可用時返回
+                          required:
+                            - last_done
+                            - timestamp
+                            - volume
+                            - high
+                            - low
+                            - prev_close
+                          additionalProperties: false
+                          properties:
+                            last_done:
+                              type: string
+                              description: 最新價
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: Unix 時間戳，單位為毫秒
+                            volume:
+                              type: integer
+                              format: int64
+                              description: 成交量
+                            quote_volume:
+                              type: string
+                              description: 成交額，期貨通常不返回
+                            high:
+                              type: string
+                              description: 最高價
+                            low:
+                              type: string
+                              description: 最低價
+                            prev_close:
+                              type: string
+                              description: 昨收或參考價；行情統計可用時返回。傳統市場通常為上一交易日或上一交易時段收盤價，加密貨幣按對應行情統計窗口返回
+                        overnight_quote:
+                          type: object
+                          description: 夜盤行情對象；僅支援擴展交易時段的產品（如美股）且夜盤行情數據可用時返回
+                          required:
+                            - last_done
+                            - timestamp
+                            - volume
+                            - high
+                            - low
+                            - prev_close
+                          additionalProperties: false
+                          properties:
+                            last_done:
+                              type: string
+                              description: 最新價
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: Unix 時間戳，單位為毫秒
+                            volume:
+                              type: integer
+                              format: int64
+                              description: 成交量
+                            quote_volume:
+                              type: string
+                              description: 成交額，期貨通常不返回
+                            high:
+                              type: string
+                              description: 最高價
+                            low:
+                              type: string
+                              description: 最低價
+                            prev_close:
+                              type: string
+                              description: 昨收或參考價；行情統計可用時返回。傳統市場通常為上一交易日或上一交易時段收盤價，加密貨幣按對應行情統計窗口返回
+                    example:
+                      - symbol: 700.HK
+                        last_price: "543"
+                        volume_24h: "11205874"
+                        high_24h: "557"
+                        low_24h: "543"
+                        price_change_24h: "-9"
+                        price_change_percent_24h: "-1.63"
+                        timestamp: 1773292807000
+                      - symbol: AAPL.US
+                        last_price: "260.81"
+                        volume_24h: "26218927"
+                        high_24h: "262.13"
+                        low_24h: "259.55"
+                        price_change_24h: "-0.02"
+                        price_change_percent_24h: "-0.01"
+                        timestamp: 1773259201000
+  /v1/market/ticker/cn-stock:
+    get:
+      summary: A股全量行情
+      description: 獲取A股市場當前全量行情快照。
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        "406":
+          description: 請求成功。
+        "503":
+          description: 請求成功。
+  /v1/market/ticker/hk-stock:
+    get:
+      summary: 港股全量行情
+      description: 獲取港股市場當前全量行情快照。
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        "406":
+          description: 請求成功。
+        "503":
+          description: 請求成功。
+  /v1/market/ticker/us-stock:
+    get:
+      summary: 美股全量行情
+      description: 獲取美股市場當前全量行情快照。
+      parameters:
+        - $ref: "#/components/parameters/FullMarketCompressionHeader"
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FullMarketTickerResponse"
+        "406":
+          description: 請求成功。
+        "503":
+          description: 請求成功。
+  /v1/market/kline:
+    get:
+      summary: K 線查詢
+      description: 按週期和時間範圍查詢 K 線數據。
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: 交易產品代碼
+          schema:
+            type: string
+            default: 700.HK
+            example: 700.HK
+        - name: interval
+          in: query
+          required: true
+          description: K線週期，可選值：1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M
+          schema:
+            type: string
+            enum:
+              - 1m
+              - 3m
+              - 5m
+              - 15m
+              - 30m
+              - 1h
+              - 2h
+              - 4h
+              - 1d
+              - 1w
+              - 1M
+            default: 1h
+            example: 1h
+        - name: limit
+          in: query
+          required: false
+          description: 返回記錄數，默認 100；大於 1000 時按 1000 處理，非正數使用默認值 100
+          schema:
+            type: integer
+            example: 100
+        - name: start_time
+          in: query
+          required: false
+          description: 開始時間戳（毫秒）
+          schema:
+            type: integer
+            example: 1703123456789
+        - name: end_time
+          in: query
+          required: false
+          description: 結束時間戳（毫秒）
+          schema:
+            type: integer
+            example: 1703209856789
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+        - name: adjust
+          in: query
+          required: false
+          description: 復權方式，適用於 A 股、港股和美股。可選值：`none` 不復權、`forward` 前復權、`backward` 後復權；不傳時默認不復權（`none`）
+          schema:
+            type: string
+            enum:
+              - none
+              - forward
+              - backward
+            default: none
+            example: forward
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: 700.HK
+                      type:
+                        type: string
+                        enum:
+                          - stock
+                          - indices
+                          - crypto
+                          - forex
+                          - futures
+                      interval:
+                        type: string
+                        example: 1h
+                      adjust:
+                        type: string
+                        enum:
+                          - none
+                          - forward
+                          - backward
+                        description: 實際使用的復權方式：`none`、`forward` 或 `backward`
+                        example: none
+                      klines:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            time:
+                              type: integer
+                            open:
+                              type: string
+                            high:
+                              type: string
+                            low:
+                              type: string
+                            close:
+                              type: string
+                            volume:
+                              type: string
+                            quote_volume:
+                              type: string
+                              description: 成交額，期貨通常不返回
+                            open_interest:
+                              type: string
+                              description: 持倉量，僅期貨返回
+                        example:
+                          - time: 1773291600000
+                            open: "545.5"
+                            high: "546.5"
+                            low: "541.5"
+                            close: "543.5"
+                            volume: "1549300"
+                            quote_volume: "842560983.33"
+  /v1/market/depth:
+    get:
+      summary: 盤口深度
+      description: 獲取交易品種的即時買賣盤口數據。
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: 交易產品代碼
+          schema:
+            type: string
+            default: 700.HK
+            example: 700.HK
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: 700.HK
+                      type:
+                        type: string
+                        enum:
+                          - stock
+                          - indices
+                          - crypto
+                          - forex
+                          - futures
+                      timestamp:
+                        type: integer
+                        example: 1768274016162
+                      bids:
+                        type: array
+                        description: 買盤數組，每個元素為 [價格, 數量]
+                        items:
+                          type: array
+                          items:
+                            type: string
+                        example:
+                          - - "626"
+                            - "19700"
+                          - - "625.5"
+                            - "40800"
+                      asks:
+                        type: array
+                        description: 賣盤數組，每個元素為 [價格, 數量]
+                        items:
+                          type: array
+                          items:
+                            type: string
+                        example:
+                          - - "626.5"
+                            - "36100"
+                          - - "627"
+                            - "50700"
+  /v1/market/trades:
+    get:
+      summary: 逐筆成交
+      description: 獲取交易品種的逐筆成交記錄。
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: 交易產品代碼
+          schema:
+            type: string
+            default: 700.HK
+            example: 700.HK
+        - name: limit
+          in: query
+          required: false
+          description: 返回成交記錄數，默認100，最大1000
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            example: 100
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                        example: BU2609
+                      type:
+                        type: string
+                        enum:
+                          - stock
+                          - indices
+                          - crypto
+                          - forex
+                          - futures
+                        example: futures
+                      trades:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: 1703123456789_0
+                            price:
+                              type: string
+                              example: "4315.00"
+                            quantity:
+                              type: string
+                              example: "2"
+                            side:
+                              type: string
+                              enum:
+                                - buy
+                                - sell
+                                - neutral
+                              example: sell
+                            timestamp:
+                              type: integer
+                              example: 1703123456789
+                            open_interest_change:
+                              type:
+                                - integer
+                                - "null"
+                              description: 持倉變化，僅期貨返回
+                              example: 0
+                            position_effect:
+                              type: string
+                              description: 持倉影響，僅期貨返回；取值見下表
+                              enum:
+                                - long_open
+                                - short_open
+                                - both_open
+                                - long_close
+                                - short_close
+                                - both_close
+                                - long_transfer
+                                - short_transfer
+                              example: short_transfer
+  /v1/symbols/available:
+    get:
+      summary: 產品查詢
+      description: 查詢 TickDB 支援的產品，涵蓋外匯、指數、美股、港股、A股、中國期貨、香港期貨、加密貨幣等市場，產品列表持續增加中。
+      parameters:
+        - name: type
+          in: query
+          required: false
+          description: 產品類型過濾，可選值：stock, crypto, forex, indices, futures
+          schema:
+            type: string
+            enum:
+              - stock
+              - crypto
+              - forex
+              - indices
+              - futures
+            example: stock
+        - name: market
+          in: query
+          required: false
+          description: 市場過濾，可選值：GLOBAL, US, HK, CN
+          schema:
+            type: string
+            enum:
+              - GLOBAL
+              - US
+              - HK
+              - CN
+            example: CN
+        - name: limit
+          in: query
+          required: false
+          description: 每頁返回數量，預設100，最大1000
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+            example: 50
+        - name: offset
+          in: query
+          required: false
+          description: 分頁偏移量，預設0
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      products:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            symbol:
+                              type: string
+                              example: 000001.SZ
+                            name:
+                              type: string
+                              example: 平安银行
+                            market:
+                              type: string
+                              example: CN
+                            type:
+                              type: string
+                              example: stock
+                            currency:
+                              type: string
+                              example: CNY
+                            is_active:
+                              type: boolean
+                              example: true
+                            updated_at:
+                              type: string
+                              format: date-time
+                              description: 更新時間，RFC 3339 日期時間字符串，包含時區信息
+                              example: 2026-03-15T20:27:58Z
+                      summary:
+                        type: object
+                        properties:
+                          total_products:
+                            type: integer
+                            example: 32492
+                          by_market:
+                            type: object
+                            additionalProperties:
+                              type: integer
+                            example:
+                              CN: 6643
+                              GLOBAL: 14833
+                              HK: 2909
+                              US: 8107
+                          by_type:
+                            type: object
+                            additionalProperties:
+                              type: integer
+                            example:
+                              crypto: 877
+                              stock: 17658
+                              forex: 1207
+                              indices: 12750
+                          last_updated:
+                            type: string
+                            format: date-time
+                            description: 最後更新時間，RFC 3339 日期時間字符串，包含時區信息
+                            example: 2026-03-27T11:09:44+08:00
+                      pagination:
+                        type: object
+                        properties:
+                          limit:
+                            type: integer
+                            example: 10
+                          offset:
+                            type: integer
+                            example: 0
+                          total:
+                            type: integer
+                            example: 6642
+                          count:
+                            type: integer
+                            example: 10
+  /v1/market/kline/latest:
+    get:
+      summary: 實時 K 線
+      description: 獲取當前時間週期內正在形成並實時更新的 K 線數據。
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: 交易產品代碼，多個用逗號分隔，最多50個，例如：AAPL.US,00700.HK
+          schema:
+            type: string
+            default: AAPL.US,00700.HK
+            example: AAPL.US,00700.HK
+        - name: interval
+          in: query
+          required: true
+          description: K線週期，可選值：1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 1d, 1w, 1M
+          schema:
+            type: string
+            enum:
+              - 1m
+              - 3m
+              - 5m
+              - 15m
+              - 30m
+              - 1h
+              - 2h
+              - 4h
+              - 1d
+              - 1w
+              - 1M
+            default: 3m
+            example: 3m
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`、`futures`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+              - futures
+            example: stock
+        - name: adjust
+          in: query
+          required: false
+          description: 復權方式，適用於 A 股、港股和美股。可選值：`none` 不復權、`forward` 前復權、`backward` 後復權；不傳時默認不復權（`none`）
+          schema:
+            type: string
+            enum:
+              - none
+              - forward
+              - backward
+            default: none
+            example: forward
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        type:
+                          type: string
+                          enum:
+                            - stock
+                            - indices
+                            - crypto
+                            - forex
+                            - futures
+                        interval:
+                          type: string
+                        adjust:
+                          type: string
+                          enum:
+                            - none
+                            - forward
+                            - backward
+                          description: 實際使用的復權方式：`none`、`forward` 或 `backward`
+                          example: none
+                        klines:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              time:
+                                type: integer
+                              open:
+                                type: string
+                              high:
+                                type: string
+                              low:
+                                type: string
+                              close:
+                                type: string
+                              volume:
+                                type: string
+                              quote_volume:
+                                type: string
+                                description: 成交額，期貨通常不返回
+                              open_interest:
+                                type: string
+                                description: 持倉量，僅期貨返回
+                    example:
+                      - symbol: AAPL.US
+                        interval: 3m
+                        adjust: none
+                        klines:
+                          - time: 1773259020000
+                            open: "260.86"
+                            high: "261.05"
+                            low: "260.7"
+                            close: "260.81"
+                            volume: "963419"
+                            quote_volume: "251311057.55"
+                      - symbol: 00700.HK
+                        interval: 3m
+                        adjust: none
+                        klines:
+                          - time: 1773293400000
+                            open: "542.5"
+                            high: "544.5"
+                            low: "542"
+                            close: "544.5"
+                            volume: "80300"
+                            quote_volume: "43656433.33"
+        "400":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 400
+                  message:
+                    type: string
+                    example: Invalid parameters
+        "401":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 401
+                  message:
+                    type: string
+                    example: Unauthorized
+  /v1/market/kline/ex-factors:
+    get:
+      summary: 復權因子
+      description: 獲取 A 股、港股和美股的前復權、後復權因子。
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: 股票代碼，多個用逗號分隔
+          schema:
+            type: string
+            default: 600519.SH
+            example: 600519.SH,700.HK,AAPL.US
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，僅支援 `stock`；代碼無歧義時無需傳遞
+          schema:
+            type: string
+            enum:
+              - stock
+            example: stock
+        - name: start_time
+          in: query
+          required: false
+          description: 開始時間戳，單位為毫秒，包含該時刻
+          schema:
+            type: integer
+            format: int64
+        - name: end_time
+          in: query
+          required: false
+          description: 結束時間戳，單位為毫秒，包含該時刻
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                  - message
+                  - data
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        description: 按股票代碼分組的復權因子對象
+                        additionalProperties:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - timestamp
+                              - adjust
+                              - factor_a
+                              - factor_b
+                            properties:
+                              timestamp:
+                                type: integer
+                                format: int64
+                                description: 因子生效時間戳，單位為毫秒
+                              adjust:
+                                type: string
+                                enum:
+                                  - forward
+                                  - backward
+                                description: 復權方向：`forward` 為前復權，`backward` 為後復權
+                              factor_a:
+                                type: number
+                                description: 復權計算中的乘法因子
+                              factor_b:
+                                type: number
+                                description: 復權計算中的加法因子
+        "400":
+          description: 請求成功。
+        "503":
+          description: 請求成功。
+  /v1/market/intraday:
+    get:
+      summary: 當日分時
+      description: 獲取股票當日的分時數據，包括每分鐘的價格、成交量、成交額等信息。
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: 股票代碼，多個用逗號分隔，最多50個
+          schema:
+            type: string
+            default: 700.HK,9988.HK
+            example: 700.HK,9988.HK
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+            example: stock
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - symbol
+                        - type
+                        - lines
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          example: 700.HK
+                        type:
+                          type: string
+                          enum:
+                            - stock
+                          example: stock
+                        lines:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - timestamp
+                              - price
+                              - volume
+                              - turnover
+                              - avg_price
+                            additionalProperties: false
+                            properties:
+                              timestamp:
+                                type: integer
+                                example: 1773192600000
+                                description: 當前分鐘的開始時間，Unix 時間戳，單位為毫秒
+                              price:
+                                type: string
+                                example: "568"
+                                description: 當前分鐘的收盤價格
+                              volume:
+                                type: integer
+                                example: 7294905
+                                description: 成交量
+                              turnover:
+                                type: string
+                                example: "4181560679.96"
+                                description: 成交額
+                              avg_price:
+                                type: string
+                                example: "573.216605"
+                                description: 均價
+              examples:
+                single_symbol:
+                  summary: 單個產品回應
+                  value:
+                    code: 0
+                    message: success
+                    data:
+                      - symbol: 700.HK
+                        type: stock
+                        lines:
+                          - timestamp: 1773192600000
+                            price: "568"
+                            volume: 7294905
+                            turnover: "4181560679.96"
+                            avg_price: "573.216605"
+  /v1/market/trading-sessions:
+    get:
+      summary: 交易時段
+      description: 查詢一個或全部支援市場的交易時段信息，包括開盤時間、收盤時間等。
+      parameters:
+        - name: market
+          in: query
+          required: false
+          description: 市場代碼，可選值：`US`、`HK`、`CN`；不傳時返回全部支援市場
+          schema:
+            type: string
+            enum:
+              - US
+              - HK
+              - CN
+            example: US
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        market:
+                          type: string
+                          enum:
+                            - US
+                            - HK
+                            - CN
+                        trading_sessions:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              begin_time:
+                                type: integer
+                              end_time:
+                                type: integer
+                              trade_session:
+                                type: integer
+                    example:
+                      - market: US
+                        trading_sessions:
+                          - begin_time: 400
+                            end_time: 930
+                            trade_session: 1
+                          - begin_time: 930
+                            end_time: 1600
+                          - begin_time: 1600
+                            end_time: 2000
+                            trade_session: 2
+  /v1/market/trade-days:
+    get:
+      summary: 交易日曆
+      description: 查詢指定市場在特定時間範圍內的交易日列表，用於判斷某日是否為交易日。
+      parameters:
+        - name: market
+          in: query
+          required: true
+          description: 市場代碼，可選值：`US`、`HK`、`CN`
+          schema:
+            type: string
+            enum:
+              - US
+              - HK
+              - CN
+            default: US
+            example: US
+        - name: beg_day
+          in: query
+          required: true
+          description: 開始日期，格式：YYYYMMDD，必須在最近一年範圍內
+          schema:
+            type: string
+            pattern: ^[0-9]{8}$
+            default: "20260201"
+            example: "20260201"
+        - name: end_day
+          in: query
+          required: true
+          description: 結束日期，格式：YYYYMMDD；與開始日期的範圍最多為 31 天
+          schema:
+            type: string
+            pattern: ^[0-9]{8}$
+            default: "20260228"
+            example: "20260228"
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - code
+                  - data
+                additionalProperties: false
+                properties:
+                  code:
+                    type: integer
+                    const: 0
+                    example: 0
+                  data:
+                    type: object
+                    required:
+                      - market
+                      - trade_days
+                      - half_trade_days
+                    additionalProperties: false
+                    properties:
+                      market:
+                        type: string
+                        enum:
+                          - US
+                          - HK
+                          - CN
+                      trade_days:
+                        type: array
+                        items:
+                          type: string
+                      half_trade_days:
+                        type: array
+                        items:
+                          type: string
+                    example:
+                      market: US
+                      trade_days:
+                        - "20260202"
+                        - "20260203"
+                        - "20260204"
+                        - "20260205"
+                        - "20260206"
+                        - "20260209"
+                        - "20260210"
+                        - "20260211"
+                        - "20260212"
+                        - "20260213"
+                        - "20260217"
+                        - "20260218"
+                        - "20260219"
+                        - "20260220"
+                        - "20260223"
+                        - "20260224"
+                        - "20260225"
+                        - "20260226"
+                        - "20260227"
+                      half_trade_days: []
+  /v1/market/stock-info:
+    get:
+      summary: 股票資訊
+      description: 獲取股票名稱、交易所、幣種、股本和每股指標等基礎信息。
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: 股票代碼，多個用逗號分隔，最多 500 個
+          schema:
+            type: string
+            default: 700.HK,AAPL.US,000001.SZ
+            example: 700.HK,AAPL.US,000001.SZ
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+            example: stock
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - symbol
+                        - name_cn
+                        - exchange
+                        - currency
+                        - lot_size
+                      additionalProperties: false
+                      properties:
+                        symbol:
+                          type: string
+                          description: 交易產品
+                        name_cn:
+                          type: string
+                          description: 中文簡體標的名稱
+                        name_en:
+                          type: string
+                          description: 英文標的名稱；港股、美股返回
+                        name_hk:
+                          type: string
+                          description: 中文繁體標的名稱；港股、美股返回
+                        exchange:
+                          type: string
+                          description: 標的所屬交易所
+                        currency:
+                          type: string
+                          description: 交易幣種（CNY/USD/HKD）
+                        lot_size:
+                          type: integer
+                          description: 每手股數
+                        total_shares:
+                          type: integer
+                          description: 總股本；數據可用時返回
+                        circulating_shares:
+                          type: integer
+                          description: 流通股本；數據可用時返回
+                        hk_shares:
+                          type: integer
+                          description: H股股本；港股及同時發行H股的A股公司返回
+                        eps:
+                          type: string
+                          description: 每股收益；數據可用時返回
+                        eps_ttm:
+                          type: string
+                          description: 最近十二個月每股收益；港股、美股數據可用時返回
+                        bps:
+                          type: string
+                          description: 每股淨資產；數據可用時返回
+                        dividend_yield:
+                          type: string
+                          description: 股息率；港股、美股數據可用時返回
+                        stock_derivatives:
+                          type: array
+                          description: 支援的衍生品類型數組；`1` 表示期權，`2` 表示輪證，港股、美股數據可用時返回
+                          items:
+                            type: integer
+                            enum:
+                              - 1
+                              - 2
+                        board:
+                          type: string
+                          description: A股所屬板塊或證券分類代碼；A股返回
+                    example:
+                      - symbol: 700.HK
+                        name_cn: 腾讯控股
+                        name_en: TENCENT
+                        name_hk: 騰訊控股
+                        exchange: SEHK
+                        currency: HKD
+                        lot_size: 100
+                        total_shares: 9095085993
+                        circulating_shares: 9095085993
+                        hk_shares: 9095085993
+                        eps: "27.3701441378468889"
+                        eps_ttm: "29.8128867314657505"
+                        bps: "143.787288892927458"
+                        dividend_yield: "5.3133478570728672"
+                        stock_derivatives:
+                          - 2
+                      - symbol: AAPL.US
+                        name_cn: 苹果
+                        name_en: Apple
+                        name_hk: 蘋果
+                        exchange: NASD
+                        currency: USD
+                        lot_size: 1
+                        total_shares: 14594180000
+                        circulating_shares: 14569121909
+                        eps: "7.6749772854658501"
+                        eps_ttm: "8.8343435533890907"
+                        bps: "7.3673203975831462"
+                        dividend_yield: "1.06"
+                        stock_derivatives:
+                          - 1
+                      - symbol: 000001.SZ
+                        name_cn: 平安银行
+                        exchange: SZ
+                        currency: CNY
+                        lot_size: 100
+                        total_shares: 19405918198
+                        circulating_shares: 19405684991
+                        eps: "1.24"
+                        bps: "24.13"
+                        board: sz_stock
+  /v1/market/calc-index:
+    get:
+      summary: 市場指標
+      description: 獲取股票的綜合市場指標，包括行情統計、估值指標、資金流向以及衍生品相關指標。
+      parameters:
+        - name: symbols
+          in: query
+          required: true
+          description: 股票代碼，多個用逗號分隔，最多50個
+          schema:
+            type: string
+            default: 700.HK
+            example: 700.HK,AAPL.US
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+            example: stock
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        last_done:
+                          type: string
+                        change_val:
+                          type: string
+                        change_rate:
+                          type: string
+                        volume:
+                          type: string
+                        turnover:
+                          type: string
+                        ytd_change_rate:
+                          type: string
+                        turnover_rate:
+                          type: string
+                        total_market_value:
+                          type: string
+                        capital_flow:
+                          type: string
+                        amplitude:
+                          type: string
+                        volume_ratio:
+                          type: string
+                        pe_ttm_ratio:
+                          type: string
+                        pb_ratio:
+                          type: string
+                        dividend_ratio_ttm:
+                          type: string
+                        five_day_change_rate:
+                          type: string
+                        ten_day_change_rate:
+                          type: string
+                        half_year_change_rate:
+                          type: string
+                        five_minutes_change_rate:
+                          type: string
+                    example:
+                      - symbol: 700.HK
+                        last_done: "547.5"
+                        change_val: "-4.5"
+                        change_rate: "-0.0082"
+                        volume: "16521084"
+                        turnover: "0.0018"
+                        ytd_change_rate: "-0.086"
+                        turnover_rate: "0.18"
+                        total_market_value: "4985729978437.5"
+                        capital_flow: "-277985600"
+                        amplitude: "0.0281"
+                        volume_ratio: "0.47"
+                        pe_ttm_ratio: "20.89"
+                        pb_ratio: "3.88"
+                        dividend_ratio_ttm: "0.83"
+                        five_day_change_rate: "0.0906"
+                        ten_day_change_rate: "0.0693"
+                        half_year_change_rate: "-0.1492"
+                        five_minutes_change_rate: "0"
+  /v1/market/capital-flow:
+    get:
+      summary: 資金流向
+      description: 獲取股票的資金流向數據，包括主力資金、大單、中單、小單的流入流出情況。
+      parameters:
+        - name: symbol
+          in: query
+          required: true
+          description: 股票代碼
+          schema:
+            type: string
+            example: 700.HK
+            default: 700.HK
+        - name: type
+          in: query
+          required: false
+          description: 產品類型，可選。代碼無歧義時無需傳遞；若返回 `AMBIGUOUS_SYMBOL` 錯誤，按提示傳入對應值即可。可選值：`stock`、`indices`、`crypto`、`forex`
+          schema:
+            type: string
+            enum:
+              - stock
+              - indices
+              - crypto
+              - forex
+            example: stock
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 0
+                  message:
+                    type: string
+                    example: success
+                  data:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                      timestamp:
+                        type: integer
+                        format: int64
+                        description: 數據更新時間，Unix 時間戳，單位為秒
+                      intraday_flow:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            timestamp:
+                              type: integer
+                              format: int64
+                              description: 數據更新時間，Unix 時間戳，單位為秒
+                            inflow:
+                              type: string
+                      distribution:
+                        type: object
+                        properties:
+                          timestamp:
+                            type: integer
+                            format: int64
+                            description: 數據更新時間，Unix 時間戳，單位為秒
+                          capital_in:
+                            type: object
+                            properties:
+                              large:
+                                type: string
+                              medium:
+                                type: string
+                              small:
+                                type: string
+                          capital_out:
+                            type: object
+                            properties:
+                              large:
+                                type: string
+                              medium:
+                                type: string
+                              small:
+                                type: string
+                    example:
+                      symbol: 700.HK
+                      timestamp: 1773306211
+                      intraday_flow:
+                        - timestamp: 1773279000
+                          inflow: "-12199.34"
+                        - timestamp: 1773279060
+                          inflow: "-15137.59"
+                      distribution:
+                        timestamp: 1773303000
+                        capital_in:
+                          large: "173056.31"
+                          medium: "164958.55"
+                          small: "83945.69"
+                        capital_out:
+                          large: "179434.39"
+                          medium: "176045.91"
+                          small: "92979.74"
+  /v1/fundamentals/profile:
+    get:
+      tags:
+        - fundamentals-company
+      summary: 公司資料
+      description: 獲取公司的基本資料、所屬市場、行業和上市信息。
+      operationId: getFundamentalsProfile
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ProfileResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/executives:
+    get:
+      tags:
+        - fundamentals-company
+      summary: 高管與董事
+      description: 獲取公司當前高管、董事及關鍵人員列表。
+      operationId: getFundamentalsExecutives
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ExecutivesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/financials/latest:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: 近期財務報表
+      description: 查詢最近若干期利潤表、資產負債表或現金流量表的指標數據。
+      operationId: getFundamentalsFinancialsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/KindQuery"
+        - $ref: "#/components/parameters/NQuery"
+        - $ref: "#/components/parameters/PeriodTypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/FinancialRowsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/financials/annual:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: 年度財務報表
+      description: 查詢最近若干年的利潤表、資產負債表或現金流量表指標數據。
+      operationId: getFundamentalsFinancialsAnnual
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/KindQuery"
+        - $ref: "#/components/parameters/NQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/FinancialRowsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/financials/ttm:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: 財務數據 TTM
+      description: 查詢最近四個有效單季匯總的近12個月利潤表或現金流量表指標。
+      operationId: getFundamentalsFinancialsTTM
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/TTMKindQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/FinancialRowsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/segments/latest:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: 營收構成
+      description: 展示最近一期按業務或地區劃分的收入金額和占比。
+      operationId: getFundamentalsSegmentsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/SegmentCategoryQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/SegmentsLatestResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/segments/history:
+    get:
+      tags:
+        - fundamentals-financials
+      summary: 歷史營收構成
+      description: 展示歷史報告期按業務或地區劃分的收入金額和占比。
+      operationId: getFundamentalsSegmentsHistory
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/SegmentCategoryQuery"
+        - $ref: "#/components/parameters/ReportQuery"
+        - $ref: "#/components/parameters/SegmentLimitQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/SegmentsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/valuation/latest:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: 最新估值
+      description: 獲取股票當前市盈率及近一年區間統計。
+      operationId: getFundamentalsValuationLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ValuationLatestResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/valuation/ts:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: 歷史估值
+      description: 查詢市盈率（PE）按日或按月的歷史數值。
+      operationId: getFundamentalsValuationTimeSeries
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/GranularityQuery"
+        - $ref: "#/components/parameters/ValuationFromQuery"
+        - $ref: "#/components/parameters/ValuationToQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ValuationTimeSeriesResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/industry/peers:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: 同行估值對比
+      description: 查詢與該股票同行的公司及其估值、每股收益等可比指標。
+      operationId: getFundamentalsIndustryPeers
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/IndustryPeersResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/industry/dist:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: 行業估值分布
+      description: 獲取股票所屬行業的估值分布和樣本統計。
+      operationId: getFundamentalsIndustryDistribution
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/IndustryDistributionResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/industries/rank:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: 行業指標排行
+      description: 查詢指定市場按行業指標排序的結果。
+      operationId: getFundamentalsIndustriesRank
+      parameters:
+        - $ref: "#/components/parameters/RequiredMarketQuery"
+        - $ref: "#/components/parameters/IndustryRankLimitQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/IndustriesRankResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/industries/tree:
+    get:
+      tags:
+        - fundamentals-valuation-industry
+      summary: 行業分類層級
+      description: 查詢指定行業所屬的頂層分類及下級行業分類。
+      operationId: getFundamentalsIndustriesTree
+      parameters:
+        - $ref: "#/components/parameters/RequiredMarketQuery"
+        - $ref: "#/components/parameters/IndustryCounterIDQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/IndustriesTreeResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/dividends:
+    get:
+      tags:
+        - fundamentals-capital-actions
+      summary: 分紅記錄
+      description: 查詢股票的分紅記錄，包括歷史及已知的未來分紅事件，支援日期、類型和分頁篩選。
+      operationId: getFundamentalsDividends
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/DividendTypeQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+        - $ref: "#/components/parameters/DividendLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/DividendsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/dividends/ttm:
+    get:
+      tags:
+        - fundamentals-capital-actions
+      summary: 股息TTM
+      description: TTM 指截至統計日的最近 12 個月；查詢這段時間內按幣種匯總的每股現金股息。
+      operationId: getFundamentalsDividendsTTM
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/DividendAsOfQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/DividendsTTMResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/buyback:
+    get:
+      tags:
+        - fundamentals-capital-actions
+      summary: 股票回購
+      description: 獲取公司回購計劃、執行情況和歷史指標。
+      operationId: getFundamentalsBuyback
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/BuybackResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/shareholders/latest:
+    get:
+      tags:
+        - fundamentals-holders
+      summary: 最新股東結構
+      description: 獲取當前股東結構快照。
+      operationId: getFundamentalsShareholdersLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/LatestShareholdersResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/shareholders/top:
+    get:
+      tags:
+        - fundamentals-holders
+      summary: 股東持倉
+      description: 查詢主要股東在不同報告期的持股情況、持倉變動及詳情可用狀態。
+      operationId: getFundamentalsShareholdersTop
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/TopShareholdersResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/shareholders/detail:
+    get:
+      tags:
+        - fundamentals-holders
+      summary: 股東持倉詳情
+      description: 根據股東對象 ID 查詢單個股東的持倉和交易明細。
+      operationId: getFundamentalsShareholderDetail
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/ObjectIDQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/ShareholderDetailResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/fund-holdings/latest:
+    get:
+      tags:
+        - fundamentals-holders
+      summary: 持股基金
+      description: 查詢哪些基金披露持有指定股票，以及該股票在各基金持倉中的比例；支援分頁查詢。
+      operationId: getFundamentalsFundHoldingsLatest
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/FundHoldingsLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/FundHoldingsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/corp-actions:
+    get:
+      tags:
+        - fundamentals-capital-actions
+      summary: 公司行動
+      description: 查詢拆股、并股、配股、代碼變更等公司行動事件。
+      operationId: getFundamentalsCorporateActions
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CorporateActionsResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/news:
+    get:
+      tags:
+        - fundamentals-events
+      summary: 個股新聞
+      description: 獲取個股新聞列表、發布時間和正文可用狀態。
+      operationId: getFundamentalsNews
+      parameters:
+        - $ref: "#/components/parameters/SymbolQuery"
+        - $ref: "#/components/parameters/TypeQuery"
+        - $ref: "#/components/parameters/NewsLimitQuery"
+        - $ref: "#/components/parameters/FromQuery"
+        - $ref: "#/components/parameters/ToQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/NewsResponse"
+        default:
+          $ref: "#/components/responses/NewsErrorResponse"
+  /v1/fundamentals/news/{news_id}:
+    get:
+      tags:
+        - fundamentals-events
+      summary: 新聞詳情
+      description: 根據新聞 ID 查詢新聞正文或可用摘要。
+      operationId: getFundamentalsNewsDetail
+      parameters:
+        - $ref: "#/components/parameters/NewsIDPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/NewsDetailResponse"
+        "400":
+          $ref: "#/components/responses/NewsErrorResponse"
+        "404":
+          $ref: "#/components/responses/NewsErrorResponse"
+        default:
+          $ref: "#/components/responses/NewsErrorResponse"
+  /v1/fundamentals/calendar/report:
+    get:
+      tags:
+        - fundamentals-events
+      summary: 財報日曆
+      description: 查詢財報和業績公布事件。
+      operationId: getFundamentalsCalendarReport
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/calendar/dividend:
+    get:
+      tags:
+        - fundamentals-events
+      summary: 股息日曆
+      description: 查詢股息派發事件。
+      operationId: getFundamentalsCalendarDividend
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/calendar/split:
+    get:
+      tags:
+        - fundamentals-events
+      summary: 拆股日曆
+      description: 查詢拆股、合股等事件。
+      operationId: getFundamentalsCalendarSplit
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/calendar/ipo:
+    get:
+      tags:
+        - fundamentals-events
+      summary: 新股日曆
+      description: 查詢新股發行與上市事件。
+      operationId: getFundamentalsCalendarIPO
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/calendar/other:
+    get:
+      tags:
+        - fundamentals-events
+      summary: 其他日曆
+      description: 按類別查詢宏觀數據、休市、會議等其他財經事件。
+      operationId: getFundamentalsCalendarOther
+      parameters:
+        - $ref: "#/components/parameters/CalendarFromQuery"
+        - $ref: "#/components/parameters/CalendarToQuery"
+        - $ref: "#/components/parameters/CalendarOtherCategoryQuery"
+        - $ref: "#/components/parameters/CalendarMarketQuery"
+        - $ref: "#/components/parameters/CalendarSymbolsQuery"
+        - $ref: "#/components/parameters/CalendarLimitQuery"
+        - $ref: "#/components/parameters/CursorQuery"
+      responses:
+        "200":
+          $ref: "#/components/responses/CalendarResponse"
+        default:
+          $ref: "#/components/responses/ErrorResponse"
+  /v1/fundamentals/market/status:
+    get:
+      tags:
+        - fundamentals-events
+      summary: 市場狀態
+      description: 查詢不同市場當前的交易階段和市場時間。
+      operationId: getFundamentalsMarketStatus
+      responses:
+        "200":
+          description: 請求成功。
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - markets
+                        properties:
+                          markets:
+                            type: array
+                            items:
+                              type: object
+                              required:
+                                - market
+                                - market_time
+                                - trade_status
+                              properties:
+                                market:
+                                  type: string
+                                  example: US
+                                market_time:
+                                  type: string
+                                  format: date-time
+                                trade_status:
+                                  type: integer
+        default:
+          $ref: "#/components/responses/ErrorResponse"

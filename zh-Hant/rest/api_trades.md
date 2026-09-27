@@ -1,8 +1,22 @@
 ---
-title: 最近成交
-description: 獲取交易品種的逐筆成交、最近成交執行記錄。
-openapi: GET /v1/market/trades
+title: 逐筆成交
+description: 獲取交易品種的逐筆成交記錄。
+openapi: "openapi.zh-Hant.yaml GET /v1/market/trades"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## 套餐權限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免費版 | ❌ |
+| 基礎版 | ✅ |
+| 專業版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企業版 | ✅ |
 
 ## 注意事項
 - side：買入（buy）/ 賣出（sell）/ 中性（neutral）
@@ -10,14 +24,14 @@ openapi: GET /v1/market/trades
 
 ## 支持的市場
 
-**美股**、**港股**、**A股**、**中國期貨**、**加密貨幣**
-
-示例：
-- 美股：AAPL.US、TSLA.US、MSFT.US
-- 港股：700.HK、9988.HK、3690.HK
-- A股：600519.SH、000001.SZ、920186.BJ
-- 中國期貨：BU2609、IC2606、AP8888
-- 加密貨幣：BTCUSDT、ETHUSDT、ADAUSDT
+| 市場 | 示例 |
+|---|---|
+| 美股 | AAPL.US, TSLA.US, MSFT.US |
+| 港股 | 700.HK, 9988.HK, 3690.HK |
+| A股 | 600519.SH, 000001.SZ, 920186.BJ |
+| 中國期貨 | BU2609, IC2606, AP8888 |
+| 香港期貨 | HSI8888, MHI8888, HTI8888 |
+| 加密貨幣 | BTCUSDT, ETHUSDT, ADAUSDT |
 
 ## 請求參數
 

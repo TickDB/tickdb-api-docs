@@ -1,24 +1,39 @@
 ---
 title: Trading Sessions
-description: Query trading session information for a specified market, including opening time, closing time, etc.
-openapi: GET /v1/market/trading-sessions
+description: Query trading session information for one or all supported markets, including opening and closing times.
+openapi: "openapi.en.yaml GET /v1/market/trading-sessions"
+contextual:
+  options:
+    - copy
+    - view
 ---
 
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ✅ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
+
 ## Notes
-- Market code is case-insensitive
 - All returned times are in the **local timezone** of each market
 
 ## Supported Markets
 
-- **US** - US Stock Market
-- **HK** - Hong Kong Stock Exchange
-- **CN** - A-Share Market
+| Market | Examples |
+|---|---|
+| US Stocks | US |
+| HK Stocks | HK |
+| A-Shares | CN |
 
 ## Request Parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| market | Yes | Market code, options: US, HK, CN |
+| market | No | Market code: `US`, `HK`, or `CN`. Omit it to return all supported markets |
 
 ## Response Fields
 

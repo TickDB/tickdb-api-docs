@@ -1,0 +1,1323 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "TickDB WebSocket 介面",
+    "version": "1.0.3",
+    "description": "統一即時行情 WebSocket 介面，支援外匯、指數、美股、港股、A 股、中國期貨和加密貨幣。",
+    "contact": {
+      "email": "support@tickdb.ai"
+    }
+  },
+  "servers": {
+    "production": {
+      "host": "api.tickdb.ai",
+      "protocol": "wss",
+      "description": "正式環境 WebSocket 服務",
+      "pathname": "/v1/realtime",
+      "security": [
+        {
+          "$ref": "#/components/securitySchemes/apiKey"
+        }
+      ]
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "httpApiKey",
+        "name": "api_key",
+        "in": "query"
+      }
+    },
+    "messages": {
+      "errorResponse": {
+        "name": "ErrorResponse",
+        "title": "WebSocket 錯誤回應",
+        "summary": "WebSocket 連線建立後返回的訂閱或命令錯誤。",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cmd": {
+              "type": "string",
+              "description": "觸發錯誤的命令。"
+            },
+            "code": {
+              "description": "錯誤碼；比較前應統一轉為字串。",
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "message": {
+              "type": "string",
+              "description": "錯誤說明。"
+            },
+            "data": {
+              "description": "可選的錯誤上下文。",
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                }
+              ]
+            }
+          },
+          "required": [
+            "cmd",
+            "code",
+            "message"
+          ]
+        }
+      }
+    }
+  },
+  "channels": {
+    "ticker_cn_stock": {
+      "address": "/v1/realtime",
+      "description": "A 股全量行情訂閱；建立 WebSocket 連線時須協商 permessage-deflate 壓縮。",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "CN_StockFullMarketSubscriptionRequest",
+          "title": "訂閱或取消訂閱 A 股全量行情",
+          "summary": "訂閱或取消訂閱全部 A 股標的的行情更新；連線必須啟用 permessage-deflate。",
+          "contentType": "application/json",
+          "examples": [
+            {
+              "name": "subscribe",
+              "payload": {
+                "cmd": "subscribe",
+                "data": {
+                  "universes": [
+                    "CN_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "unsubscribe",
+              "payload": {
+                "cmd": "unsubscribe",
+                "data": {
+                  "universes": [
+                    "CN_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            }
+          ],
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "default": "subscribe",
+                "description": "命令類型：訂閱或取消訂閱。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "universes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "CN_Stock"
+                      ]
+                    },
+                    "default": [
+                      "CN_Stock"
+                    ],
+                    "description": "要訂閱或取消訂閱的全市場標識。"
+                  },
+                  "channels": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "ticker"
+                      ]
+                    },
+                    "default": [
+                      "ticker"
+                    ],
+                    "description": "全量行情固定使用 ticker 頻道。"
+                  }
+                },
+                "required": [
+                  "universes",
+                  "channels"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tickerBatch": {
+          "name": "CN_StockFullMarketTickerBatch",
+          "title": "A 股全量行情批次",
+          "summary": "初始快照和後續行情更新均以陣列分批傳送，每批最多 500 條訊息。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/channels/ticker/messages/tickerData/payload"
+            }
+          }
+        }
+      }
+    },
+    "ticker_hk_stock": {
+      "address": "/v1/realtime",
+      "description": "港股全量行情訂閱；建立 WebSocket 連線時須協商 permessage-deflate 壓縮。",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "HK_StockFullMarketSubscriptionRequest",
+          "title": "訂閱或取消訂閱港股全量行情",
+          "summary": "訂閱或取消訂閱全部港股標的的行情更新；連線必須啟用 permessage-deflate。",
+          "contentType": "application/json",
+          "examples": [
+            {
+              "name": "subscribe",
+              "payload": {
+                "cmd": "subscribe",
+                "data": {
+                  "universes": [
+                    "HK_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "unsubscribe",
+              "payload": {
+                "cmd": "unsubscribe",
+                "data": {
+                  "universes": [
+                    "HK_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            }
+          ],
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "default": "subscribe",
+                "description": "命令類型：訂閱或取消訂閱。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "universes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "HK_Stock"
+                      ]
+                    },
+                    "default": [
+                      "HK_Stock"
+                    ],
+                    "description": "要訂閱或取消訂閱的全市場標識。"
+                  },
+                  "channels": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "ticker"
+                      ]
+                    },
+                    "default": [
+                      "ticker"
+                    ],
+                    "description": "全量行情固定使用 ticker 頻道。"
+                  }
+                },
+                "required": [
+                  "universes",
+                  "channels"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tickerBatch": {
+          "name": "HK_StockFullMarketTickerBatch",
+          "title": "港股全量行情批次",
+          "summary": "初始快照和後續行情更新均以陣列分批傳送，每批最多 500 條訊息。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/channels/ticker/messages/tickerData/payload"
+            }
+          }
+        }
+      }
+    },
+    "ticker_us_stock": {
+      "address": "/v1/realtime",
+      "description": "美股全量行情訂閱；建立 WebSocket 連線時須協商 permessage-deflate 壓縮。",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "US_StockFullMarketSubscriptionRequest",
+          "title": "訂閱或取消訂閱美股全量行情",
+          "summary": "訂閱或取消訂閱全部美股標的的行情更新；連線必須啟用 permessage-deflate。",
+          "contentType": "application/json",
+          "examples": [
+            {
+              "name": "subscribe",
+              "payload": {
+                "cmd": "subscribe",
+                "data": {
+                  "universes": [
+                    "US_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "unsubscribe",
+              "payload": {
+                "cmd": "unsubscribe",
+                "data": {
+                  "universes": [
+                    "US_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            }
+          ],
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "default": "subscribe",
+                "description": "命令類型：訂閱或取消訂閱。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "universes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "US_Stock"
+                      ]
+                    },
+                    "default": [
+                      "US_Stock"
+                    ],
+                    "description": "要訂閱或取消訂閱的全市場標識。"
+                  },
+                  "channels": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "ticker"
+                      ]
+                    },
+                    "default": [
+                      "ticker"
+                    ],
+                    "description": "全量行情固定使用 ticker 頻道。"
+                  }
+                },
+                "required": [
+                  "universes",
+                  "channels"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tickerBatch": {
+          "name": "US_StockFullMarketTickerBatch",
+          "title": "美股全量行情批次",
+          "summary": "初始快照和後續行情更新均以陣列分批傳送，每批最多 500 條訊息。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/channels/ticker/messages/tickerData/payload"
+            }
+          }
+        }
+      }
+    },
+    "ticker": {
+      "address": "/v1/realtime",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "TickerSubscriptionRequest",
+          "title": "訂閱或取消訂閱即時行情",
+          "summary": "訂閱或取消訂閱一個或多個標的的即時行情。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "description": "命令類型：訂閱或取消訂閱。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "ticker",
+                      "depth",
+                      "trade"
+                    ],
+                    "default": "ticker",
+                    "description": "頻道名稱。"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT",
+                      "IC2606"
+                    ],
+                    "description": "要訂閱或取消訂閱的交易代碼列表。"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex",
+                      "futures"
+                    ],
+                    "description": "標的類型，可選；代碼無歧義時可不傳。若返回 AMBIGUOUS_SYMBOL 錯誤，請依提示指定類型。"
+                  }
+                },
+                "required": [
+                  "channel",
+                  "symbols"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tickerData": {
+          "name": "TickerData",
+          "title": "即時行情數據",
+          "summary": "即時推送的行情數據。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "ticker",
+                "description": "消息類型。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "example": "AAPL.US",
+                    "description": "交易代碼。"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "產品名稱；有數據時返回。"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex",
+                      "futures"
+                    ],
+                    "description": "標的類型。"
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "產品細分類別；有數據時返回。"
+                  },
+                  "last_price": {
+                    "type": "string",
+                    "example": "150.25",
+                    "description": "最新價。"
+                  },
+                  "open": {
+                    "type": "string",
+                    "description": "開盤價；有數據時返回。"
+                  },
+                  "prev_close": {
+                    "type": "string",
+                    "description": "昨收價或參考價；有數據時返回。"
+                  },
+                  "bid_price": {
+                    "type": "string",
+                    "description": "最優買價；有數據時返回。"
+                  },
+                  "ask_price": {
+                    "type": "string",
+                    "description": "最優賣價；有數據時返回。"
+                  },
+                  "spread": {
+                    "type": "string",
+                    "description": "外匯或貴金屬的買賣價差；有數據時返回。"
+                  },
+                  "volume_24h": {
+                    "type": "string",
+                    "description": "成交量；加密貨幣通常為滾動 24 小時，股票和期貨通常為當日或目前交易時段。"
+                  },
+                  "quote_volume_24h": {
+                    "type": "string",
+                    "description": "與 volume_24h 相同統計區間內的成交額；有數據時返回。"
+                  },
+                  "high_24h": {
+                    "type": "string",
+                    "description": "與 volume_24h 相同統計區間內的最高價。"
+                  },
+                  "low_24h": {
+                    "type": "string",
+                    "description": "與 volume_24h 相同統計區間內的最低價。"
+                  },
+                  "price_change_24h": {
+                    "type": "string",
+                    "description": "相同統計區間內的價格變化；有數據時返回。"
+                  },
+                  "price_change_percent_24h": {
+                    "type": "string",
+                    "description": "價格變化百分比；有數據時返回。"
+                  },
+                  "trade_session": {
+                    "type": "string",
+                    "enum": [
+                      "pre_market",
+                      "post_market",
+                      "overnight"
+                    ],
+                    "description": "美股延長交易時段；適用時返回。"
+                  },
+                  "quote_volume": {
+                    "type": "string",
+                    "description": "目前延長交易時段的成交額；有數據時返回。"
+                  },
+                  "pre_market_quote": {
+                    "type": "object",
+                    "description": "盤前行情；有數據時返回。"
+                  },
+                  "post_market_quote": {
+                    "type": "object",
+                    "description": "盤後行情；有數據時返回。"
+                  },
+                  "overnight_quote": {
+                    "type": "object",
+                    "description": "夜盤行情；有數據時返回。"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1703123456789,
+                    "description": "Unix 時間戳，單位為毫秒。"
+                  }
+                },
+                "required": [
+                  "symbol",
+                  "last_price",
+                  "timestamp"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        }
+      }
+    },
+    "depth": {
+      "address": "/v1/realtime",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "DepthSubscriptionRequest",
+          "title": "訂閱或取消訂閱盤口深度",
+          "summary": "訂閱或取消訂閱即時盤口深度。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "description": "命令類型：訂閱或取消訂閱。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "ticker",
+                      "depth",
+                      "trade"
+                    ],
+                    "default": "depth",
+                    "description": "頻道名稱。"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT",
+                      "IC2606"
+                    ],
+                    "description": "要訂閱或取消訂閱的交易代碼列表。"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex",
+                      "futures"
+                    ],
+                    "description": "標的類型，可選；代碼無歧義時可不傳。若返回 AMBIGUOUS_SYMBOL 錯誤，請依提示指定類型。"
+                  }
+                },
+                "required": [
+                  "channel",
+                  "symbols"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "depthData": {
+          "name": "DepthData",
+          "title": "盤口深度數據",
+          "summary": "即時推送的盤口深度數據。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "depth",
+                "description": "消息類型。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "symbol": {
+                    "type": "string",
+                    "example": "BTCUSDT",
+                    "description": "交易代碼。"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex",
+                      "futures"
+                    ],
+                    "description": "標的類型。"
+                  },
+                  "bids": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "example": [
+                      [
+                        "43250.50",
+                        "0.125"
+                      ],
+                      [
+                        "43250.00",
+                        "0.250"
+                      ]
+                    ],
+                    "description": "買盤檔位，每項為 [價格, 數量]。"
+                  },
+                  "asks": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2
+                    },
+                    "example": [
+                      [
+                        "43251.00",
+                        "0.180"
+                      ],
+                      [
+                        "43251.50",
+                        "0.320"
+                      ]
+                    ],
+                    "description": "賣盤檔位，每項為 [價格, 數量]。"
+                  },
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1703123456789,
+                    "description": "Unix 時間戳，單位為毫秒。"
+                  }
+                },
+                "required": [
+                  "symbol",
+                  "bids",
+                  "asks",
+                  "timestamp"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        }
+      }
+    },
+    "trade": {
+      "address": "/v1/realtime",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "TradeSubscriptionRequest",
+          "title": "訂閱或取消訂閱逐筆成交",
+          "summary": "訂閱或取消訂閱即時成交記錄。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "description": "命令類型：訂閱或取消訂閱。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "channel": {
+                    "type": "string",
+                    "enum": [
+                      "ticker",
+                      "depth",
+                      "trade"
+                    ],
+                    "default": "trade",
+                    "description": "頻道名稱。"
+                  },
+                  "symbols": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "examples": [
+                      "AAPL.US",
+                      "700.HK",
+                      "EURUSD",
+                      "XAUUSD",
+                      "BTCUSDT",
+                      "IC2606"
+                    ],
+                    "description": "要訂閱或取消訂閱的交易代碼列表。"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex",
+                      "futures"
+                    ],
+                    "description": "標的類型，可選；代碼無歧義時可不傳。若返回 AMBIGUOUS_SYMBOL 錯誤，請依提示指定類型。"
+                  }
+                },
+                "required": [
+                  "channel",
+                  "symbols"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tradeData": {
+          "name": "TradeData",
+          "title": "逐筆成交數據",
+          "summary": "即時推送的成交記錄數據。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "trade",
+                "description": "消息類型。"
+              },
+              "data": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "symbol": {
+                        "type": "string",
+                        "example": "700.HK",
+                        "description": "交易代碼。"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "stock",
+                          "crypto"
+                        ],
+                        "description": "標的類型。"
+                      },
+                      "trades": {
+                        "type": "array",
+                        "description": "港股、美股和加密貨幣的成交記錄。",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "成交 ID。"
+                            },
+                            "price": {
+                              "type": "string",
+                              "description": "成交價格。"
+                            },
+                            "quantity": {
+                              "type": "string",
+                              "description": "成交數量。"
+                            },
+                            "side": {
+                              "type": "string",
+                              "enum": [
+                                "buy",
+                                "sell",
+                                "neutral"
+                              ],
+                              "description": "成交方向。"
+                            },
+                            "timestamp": {
+                              "type": "integer",
+                              "description": "Unix 時間戳，單位為毫秒。"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "price",
+                            "quantity",
+                            "side",
+                            "timestamp"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "symbol",
+                      "type",
+                      "trades"
+                    ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "成交 ID；香港期貨返回。"
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "example": "600519.SH",
+                        "description": "交易代碼。"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "stock",
+                          "futures"
+                        ],
+                        "description": "標的類型。"
+                      },
+                      "price": {
+                        "type": "string",
+                        "example": "1252.48",
+                        "description": "成交價格。"
+                      },
+                      "quantity": {
+                        "type": "string",
+                        "example": "7",
+                        "description": "成交數量。"
+                      },
+                      "side": {
+                        "type": "string",
+                        "enum": [
+                          "buy",
+                          "sell",
+                          "neutral"
+                        ],
+                        "example": "sell",
+                        "description": "成交方向。"
+                      },
+                      "timestamp": {
+                        "type": "integer",
+                        "example": 1789958062000,
+                        "description": "Unix 時間戳，單位為毫秒。"
+                      },
+                      "open_interest_change": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "description": "未平倉量變化；中國期貨有數據時返回。"
+                      },
+                      "position_effect": {
+                        "type": "string",
+                        "enum": [
+                          "long_open",
+                          "short_open",
+                          "both_open",
+                          "long_close",
+                          "short_close",
+                          "both_close",
+                          "long_transfer",
+                          "short_transfer"
+                        ],
+                        "description": "開平倉類型；中國期貨有數據時返回。"
+                      }
+                    },
+                    "required": [
+                      "symbol",
+                      "type",
+                      "price",
+                      "quantity",
+                      "side",
+                      "timestamp"
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        }
+      }
+    },
+    "ping": {
+      "address": "/v1/realtime",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "pingRequest": {
+          "name": "PingRequest",
+          "title": "Ping 請求",
+          "summary": "傳送 ping 檢查連線狀態。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "ping",
+                "default": "ping",
+                "description": "Ping 命令，固定值。"
+              }
+            },
+            "required": [
+              "cmd"
+            ]
+          },
+          "examples": [
+            {
+              "payload": {
+                "cmd": "ping"
+              }
+            }
+          ]
+        },
+        "pongResponse": {
+          "name": "PongResponse",
+          "title": "Pong 回應",
+          "summary": "服務端對 ping 的回應。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "const": "pong",
+                "description": "Pong 回應。"
+              },
+              "code": {
+                "type": "integer",
+                "example": 0,
+                "description": "回應碼。"
+              },
+              "message": {
+                "type": "string",
+                "example": "pong",
+                "description": "回應訊息。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "timestamp": {
+                    "type": "integer",
+                    "example": 1768976158541,
+                    "description": "服務端時間戳，單位為毫秒。"
+                  }
+                },
+                "required": [
+                  "timestamp"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "code",
+              "message",
+              "data"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "operations": {
+    "sendTickerCnStockSubscription": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker_cn_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_cn_stock/messages/subscribeRequest"
+        }
+      ]
+    },
+    "receiveTickerCnStockBatch": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker_cn_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_cn_stock/messages/tickerBatch"
+        },
+        {
+          "$ref": "#/channels/ticker_cn_stock/messages/errorResponse"
+        }
+      ]
+    },
+    "sendTickerHkStockSubscription": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker_hk_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_hk_stock/messages/subscribeRequest"
+        }
+      ]
+    },
+    "receiveTickerHkStockBatch": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker_hk_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_hk_stock/messages/tickerBatch"
+        },
+        {
+          "$ref": "#/channels/ticker_hk_stock/messages/errorResponse"
+        }
+      ]
+    },
+    "sendTickerUsStockSubscription": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker_us_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_us_stock/messages/subscribeRequest"
+        }
+      ]
+    },
+    "receiveTickerUsStockBatch": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker_us_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_us_stock/messages/tickerBatch"
+        },
+        {
+          "$ref": "#/channels/ticker_us_stock/messages/errorResponse"
+        }
+      ]
+    },
+    "subscribeToTicker": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker/messages/tickerData"
+        }
+      ]
+    },
+    "receiveTickerData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker/messages/subscribeRequest"
+        }
+      ]
+    },
+    "subscribeToDepth": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/depth"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/depth/messages/depthData"
+        }
+      ]
+    },
+    "receiveDepthData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/depth"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/depth/messages/subscribeRequest"
+        }
+      ]
+    },
+    "subscribeToTrade": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/trade"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/trade/messages/tradeData"
+        }
+      ]
+    },
+    "receiveTradeData": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/trade"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/trade/messages/subscribeRequest"
+        }
+      ]
+    },
+    "sendPing": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ping"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ping/messages/pongResponse"
+        }
+      ]
+    },
+    "receivePong": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ping"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ping/messages/pingRequest"
+        }
+      ]
+    }
+  }
+}

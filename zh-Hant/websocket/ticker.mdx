@@ -1,0 +1,222 @@
+---
+title: 即時行情（Ticker）
+asyncapi: "/asyncapi.zh-Hant.json ticker"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## 套餐權限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免費版 | ✅ |
+| 基礎版 | ✅ |
+| 專業版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企業版 | ✅ |
+
+## 支援市場
+
+支援市場：外匯、貴金屬、指數、美股、港股、A股、中國期貨、香港期貨、加密貨幣
+
+## 訂閱
+
+```json
+{
+  "cmd": "subscribe",
+  "data": {
+    "channel": "ticker",
+    "symbols": ["AAPL.US", "BTCUSDT"]
+  }
+}
+```
+
+> `type` 對本次訂閱中的全部代碼生效。混合訂閱不同產品類型時請省略 `type`；僅在代碼存在歧義時，按產品類型拆分訂閱並傳入對應值。
+
+## 取消訂閱
+
+```json
+{
+  "cmd": "unsubscribe",
+  "data": {
+    "channel": "ticker",
+    "symbols": ["AAPL.US"]
+  }
+}
+```
+
+## 服務器響應
+
+ticker 消息根據不同市場類型返回不同的字段。
+
+### 指數
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "SPX",
+    "type": "indices",
+    "last_price": "7342.86",
+    "timestamp": 1779204386000
+  }
+}
+```
+
+### 貴金屬
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "XAUUSD",
+    "type": "forex",
+    "last_price": "5130.72000",
+    "ask_price": "5131.07000",
+    "bid_price": "5130.37000",
+    "spread": "0.70000",
+    "timestamp": 1773334355000
+  }
+}
+```
+
+### 外匯
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "EURUSD",
+    "type": "forex",
+    "last_price": "1.15200",
+    "ask_price": "1.15202",
+    "bid_price": "1.15199",
+    "spread": "0.00003",
+    "timestamp": 1773334426000
+  }
+}
+```
+
+### 股票
+
+美股：
+
+`trade_session` 僅在盤前、盤後或夜盤等延長交易時段返回，可選值為 `pre_market`、`post_market`、`overnight`。
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "NVDA.US",
+    "type": "stock",
+    "last_price": "221.25",
+    "volume_24h": "462724",
+    "high_24h": "223.44",
+    "low_24h": "220.04",
+    "trade_session": "overnight",
+    "timestamp": 1779171600000
+  }
+}
+```
+
+港股：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "700.HK",
+    "type": "stock",
+    "last_price": "461.4",
+    "volume_24h": "24687716",
+    "high_24h": "468.8",
+    "low_24h": "448.6",
+    "timestamp": 1779171608000
+  }
+}
+```
+
+A股：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "600519.SH",
+    "type": "stock",
+    "last_price": "1319.01",
+    "volume_24h": "37263",
+    "high_24h": "1329.99",
+    "low_24h": "1318",
+    "price_change_24h": "-3.99",
+    "price_change_percent_24h": "-0.30",
+    "timestamp": 1779171605000
+  }
+}
+```
+
+中國期貨：
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "last_price": "4309",
+    "bid_price": "4308",
+    "ask_price": "4310",
+    "volume_24h": "37263",
+    "high_24h": "4336",
+    "low_24h": "4278",
+    "timestamp": 1784012398000
+  }
+}
+```
+
+### 加密貨幣
+
+```json
+{
+  "cmd": "ticker",
+  "data": {
+    "symbol": "BTCUSDT",
+    "type": "crypto",
+    "last_price": "70480.57000000",
+    "volume_24h": "23737.52989000",
+    "high_24h": "71321.00000000",
+    "low_24h": "69205.91000000",
+    "price_change_24h": "-362.06000000",
+    "price_change_percent_24h": "-0.511",
+    "timestamp": 1773335135026
+  }
+}
+```
+
+### 字段說明
+
+字段名中的 `24h` 不代表所有市場都按滾動 24 小時統計：加密貨幣通常採用滾動 24 小時，股票和期貨通常採用當日或當前交易時段口徑。除 `symbol`、`last_price`、`timestamp` 外，字段按產品類型和數據可用性返回。
+
+| 字段 | 類型 | 描述 | 市場 |
+|------|------|-------------|------|
+| symbol | string | 交易產品代碼 | 全部 |
+| name | string | 產品名稱；名稱可用時返回 | 部分產品 |
+| type | string | 產品類型 | 全部 |
+| category | string | 產品細分類別；分類信息可用時返回 | A股市場產品 |
+| last_price | string | 最新價格 | 全部 |
+| timestamp | int | Unix 時間戳，單位為毫秒 | 全部 |
+| open | string | 開盤價；對應行情統計可用時返回 | 股票、期貨、加密貨幣等 |
+| prev_close | string | 昨收或統計窗口參考價；數據可用時返回 | 股票、期貨、加密貨幣等 |
+| ask_price | string | 最優賣價；報價可用時返回 | 外匯、貴金屬、期貨等 |
+| bid_price | string | 最優買價；報價可用時返回 | 外匯、貴金屬、期貨等 |
+| spread | string | 買賣價差；報價可用時返回 | 外匯、貴金屬 |
+| volume_24h | string | 成交量；統計窗口見上文 | 股票、期貨、加密貨幣 |
+| quote_volume_24h | string | 與 `volume_24h` 同一統計窗口的成交額；數據可用時返回 | 股票、加密貨幣等 |
+| high_24h | string | 最高價；統計窗口與 `volume_24h` 一致 | 股票、期貨、加密貨幣 |
+| low_24h | string | 最低價；統計窗口與 `volume_24h` 一致 | 股票、期貨、加密貨幣 |
+| price_change_24h | string | 價格變化；統計窗口與 `volume_24h` 一致，數據可用時返回 | 股票、期貨、加密貨幣 |
+| price_change_percent_24h | string | 價格變化百分比；數據可用時返回 | 股票、期貨、加密貨幣 |
+| trade_session | string | 當前擴展交易時段：`pre_market`、`post_market` 或 `overnight` | 美股擴展交易時段 |
+| quote_volume | string | 當前擴展交易時段成交額；數據可用時返回 | 美股擴展交易時段 |

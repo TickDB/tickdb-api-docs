@@ -1,0 +1,32 @@
+---
+title: Ping
+asyncapi: "/asyncapi.en.json ping"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ✅ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
+
+Use this channel to check that the connection remains available. Send `ping` and the server replies with `pong`. `data.timestamp` is a Unix timestamp in milliseconds.
+
+## Send
+
+```json
+{"cmd":"ping"}
+```
+
+## Response
+
+```json
+{"cmd":"pong","code":0,"message":"pong","data":{"timestamp":1768976158541}}
+```

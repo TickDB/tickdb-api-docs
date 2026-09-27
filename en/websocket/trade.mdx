@@ -1,0 +1,142 @@
+---
+title: Tick-by-Tick Trades (Trade)
+asyncapi: "/asyncapi.en.json trade"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ❌ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
+
+## Supported Markets
+
+Supported markets: US Stocks, HK Stocks, A-Shares, China Futures, Hong Kong Futures, Crypto
+
+## Subscribe
+
+```json
+{
+  "cmd": "subscribe",
+  "data": {
+    "channel": "trade",
+    "symbols": ["700.HK", "BTCUSDT"]
+  }
+}
+```
+
+> `type` applies to every symbol in that subscription. Omit it when subscribing to mixed product types. If a symbol is ambiguous, split the request by product type and pass the corresponding value.
+
+## Unsubscribe
+
+```json
+{
+  "cmd": "unsubscribe",
+  "data": {
+    "channel": "trade",
+    "symbols": ["700.HK"]
+  }
+}
+```
+
+## Server Response
+
+HK stocks, US stocks, and cryptocurrencies use the trade-array structure:
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "700.HK",
+    "type": "stock",
+    "trades": [
+      {
+        "id": "20950",
+        "price": "553.000",
+        "quantity": "100",
+        "side": "buy",
+        "timestamp": 1773371154000
+      }
+    ]
+  }
+}
+```
+
+A-shares, China futures, and Hong Kong futures push one trade per message, with fields directly under `data`. A-share example:
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "600519.SH",
+    "type": "stock",
+    "price": "1252.48",
+    "quantity": "7",
+    "side": "sell",
+    "timestamp": 1789958062000
+  }
+}
+```
+
+Hong Kong futures also include a trade ID:
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "id": "7687812613106827271",
+    "symbol": "HSI8888",
+    "type": "futures",
+    "price": "24907",
+    "quantity": "1",
+    "side": "buy",
+    "timestamp": 1789958359020
+  }
+}
+```
+
+China futures may also include position metadata:
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "price": "4309",
+    "quantity": "1",
+    "side": "sell",
+    "timestamp": 1784012398000,
+    "open_interest_change": 0,
+    "position_effect": "short_transfer"
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Description |
+|------|------|-------------|
+| data.symbol | string | Trading symbol |
+| data.type | string | Product type |
+| data.trades | array | Trade records; returned for HK stocks, US stocks, and cryptocurrencies |
+| data.trades[].id | string | Trade ID |
+| data.trades[].price | string | Trade price |
+| data.trades[].quantity | string | Trade quantity |
+| data.trades[].side | string | `buy`, `sell`, or `neutral` |
+| data.trades[].timestamp | int | Trade timestamp in milliseconds |
+| data.id | string | Trade ID; returned for Hong Kong futures |
+| data.price | string | Single-trade price; returned for A-shares, China futures, and Hong Kong futures |
+| data.quantity | string | Single-trade quantity; returned for A-shares, China futures, and Hong Kong futures |
+| data.side | string | Single-trade side; returned for A-shares, China futures, and Hong Kong futures |
+| data.timestamp | int | Single-trade timestamp in milliseconds; returned for A-shares, China futures, and Hong Kong futures |
+| data.open_interest_change | int \| null | Change in open interest; returned for China futures when available |
+| data.position_effect | string | Position effect; returned for China futures when available: `long_open`, `short_open`, `both_open`, `long_close`, `short_close`, `both_close`, `long_transfer`, or `short_transfer` |

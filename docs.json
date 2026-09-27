@@ -58,20 +58,114 @@
                       "zh-Hans/rest/api_kline",
                       "zh-Hans/rest/api_kline_latest",
                       "zh-Hans/rest/api_depth",
-                      "zh-Hans/rest/api_trades",
-                      "zh-Hans/rest/api_intervals"
+                      "zh-Hans/rest/api_trades"
                     ]
                   },
                   {
                     "group": "股票市场接口",
                     "expanded": true,
                     "pages": [
-                      "zh-Hans/rest/api_intraday",
-                      "zh-Hans/rest/api_stock_info",
-                      "zh-Hans/rest/api_trading_sessions",
-                      "zh-Hans/rest/api_trade_days",
-                      "zh-Hans/rest/api_calc_index",
-                      "zh-Hans/rest/api_capital_flow"
+                      {
+                        "group": "全量行情",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/api_ticker_cn_stock",
+                          "zh-Hans/rest/api_ticker_hk_stock",
+                          "zh-Hans/rest/api_ticker_us_stock"
+                        ]
+                      },
+                      {
+                        "group": "个股行情与指标",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/api_stock_info",
+                          "zh-Hans/rest/api_intraday",
+                          "zh-Hans/rest/api_ex_factors",
+                          "zh-Hans/rest/api_calc_index",
+                          "zh-Hans/rest/api_capital_flow"
+                        ]
+                      },
+                      {
+                        "group": "公司概况",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/fundamentals/api_profile",
+                          "zh-Hans/rest/fundamentals/api_executives",
+                          "zh-Hans/rest/fundamentals/api_segments_latest",
+                          "zh-Hans/rest/fundamentals/api_segments_history"
+                        ]
+                      },
+                      {
+                        "group": "财务报表",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/fundamentals/financial_fields_dictionary",
+                          "zh-Hans/rest/fundamentals/api_financials_latest",
+                          "zh-Hans/rest/fundamentals/api_financials_annual",
+                          "zh-Hans/rest/fundamentals/api_financials_ttm"
+                        ]
+                      },
+                      {
+                        "group": "估值与行业",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/fundamentals/api_valuation_latest",
+                          "zh-Hans/rest/fundamentals/api_valuation_ts",
+                          "zh-Hans/rest/fundamentals/api_industry_peers",
+                          "zh-Hans/rest/fundamentals/api_industry_dist",
+                          "zh-Hans/rest/fundamentals/api_industries_rank",
+                          "zh-Hans/rest/fundamentals/api_industries_tree"
+                        ]
+                      },
+                      {
+                        "group": "分红与公司行动",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/fundamentals/api_dividends",
+                          "zh-Hans/rest/fundamentals/api_dividends_ttm",
+                          "zh-Hans/rest/fundamentals/api_buyback",
+                          "zh-Hans/rest/fundamentals/api_corp_actions"
+                        ]
+                      },
+                      {
+                        "group": "股东与机构持仓",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/fundamentals/api_shareholders_latest",
+                          "zh-Hans/rest/fundamentals/api_shareholders_top",
+                          "zh-Hans/rest/fundamentals/api_shareholder_detail",
+                          "zh-Hans/rest/fundamentals/api_fund_holdings_latest"
+                        ]
+                      },
+                      {
+                        "group": "财经日历",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/fundamentals/api_calendar_report",
+                          "zh-Hans/rest/fundamentals/api_calendar_dividend",
+                          "zh-Hans/rest/fundamentals/api_calendar_split",
+                          "zh-Hans/rest/fundamentals/api_calendar_ipo",
+                          "zh-Hans/rest/fundamentals/api_calendar_other"
+                        ]
+                      },
+                      {
+                        "group": "市场资讯",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hans/rest/fundamentals/api_market_status",
+                          "zh-Hans/rest/api_trading_sessions",
+                          "zh-Hans/rest/api_trade_days",
+                          "zh-Hans/rest/fundamentals/api_news",
+                          "zh-Hans/rest/fundamentals/api_news_detail"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "其他接口",
+                    "expanded": false,
+                    "pages": [
+                      "zh-Hans/rest/api_key_status"
                     ]
                   }
                 ]
@@ -80,12 +174,14 @@
                 "group": "WebSocket 文档",
                 "pages": [
                   "zh-Hans/websocket/websocket_quickstart",
-                  "zh-Hans/websocket/websocket_subscribe"
-                ],
-                "asyncapi": {
-                  "source": "/asyncapi.json",
-                  "directory": "zh-Hans/websocket/websocket_playground"
-                }
+                  "zh-Hans/websocket/ticker",
+                  "zh-Hans/websocket/depth",
+                  "zh-Hans/websocket/trade",
+                  "zh-Hans/websocket/ping",
+                  "zh-Hans/websocket/ticker_cn_stock",
+                  "zh-Hans/websocket/ticker_hk_stock",
+                  "zh-Hans/websocket/ticker_us_stock"
+                ]
               },
               {
                 "group": "参考",
@@ -130,20 +226,114 @@
                       "zh-Hant/rest/api_kline",
                       "zh-Hant/rest/api_kline_latest",
                       "zh-Hant/rest/api_depth",
-                      "zh-Hant/rest/api_trades",
-                      "zh-Hant/rest/api_intervals"
+                      "zh-Hant/rest/api_trades"
                     ]
                   },
                   {
                     "group": "股票市場接口",
                     "expanded": true,
                     "pages": [
-                      "zh-Hant/rest/api_intraday",
-                      "zh-Hant/rest/api_stock_info",
-                      "zh-Hant/rest/api_trading_sessions",
-                      "zh-Hant/rest/api_trade_days",
-                      "zh-Hant/rest/api_calc_index",
-                      "zh-Hant/rest/api_capital_flow"
+                      {
+                        "group": "全量行情",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/api_ticker_cn_stock",
+                          "zh-Hant/rest/api_ticker_hk_stock",
+                          "zh-Hant/rest/api_ticker_us_stock"
+                        ]
+                      },
+                      {
+                        "group": "個股行情與指標",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/api_stock_info",
+                          "zh-Hant/rest/api_intraday",
+                          "zh-Hant/rest/api_ex_factors",
+                          "zh-Hant/rest/api_calc_index",
+                          "zh-Hant/rest/api_capital_flow"
+                        ]
+                      },
+                      {
+                        "group": "公司概況",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/fundamentals/api_profile",
+                          "zh-Hant/rest/fundamentals/api_executives",
+                          "zh-Hant/rest/fundamentals/api_segments_latest",
+                          "zh-Hant/rest/fundamentals/api_segments_history"
+                        ]
+                      },
+                      {
+                        "group": "財務報表",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/fundamentals/financial_fields_dictionary",
+                          "zh-Hant/rest/fundamentals/api_financials_latest",
+                          "zh-Hant/rest/fundamentals/api_financials_annual",
+                          "zh-Hant/rest/fundamentals/api_financials_ttm"
+                        ]
+                      },
+                      {
+                        "group": "估值與行業",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/fundamentals/api_valuation_latest",
+                          "zh-Hant/rest/fundamentals/api_valuation_ts",
+                          "zh-Hant/rest/fundamentals/api_industry_peers",
+                          "zh-Hant/rest/fundamentals/api_industry_dist",
+                          "zh-Hant/rest/fundamentals/api_industries_rank",
+                          "zh-Hant/rest/fundamentals/api_industries_tree"
+                        ]
+                      },
+                      {
+                        "group": "分紅與公司行動",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/fundamentals/api_dividends",
+                          "zh-Hant/rest/fundamentals/api_dividends_ttm",
+                          "zh-Hant/rest/fundamentals/api_buyback",
+                          "zh-Hant/rest/fundamentals/api_corp_actions"
+                        ]
+                      },
+                      {
+                        "group": "股東與機構持倉",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/fundamentals/api_shareholders_latest",
+                          "zh-Hant/rest/fundamentals/api_shareholders_top",
+                          "zh-Hant/rest/fundamentals/api_shareholder_detail",
+                          "zh-Hant/rest/fundamentals/api_fund_holdings_latest"
+                        ]
+                      },
+                      {
+                        "group": "財經日曆",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/fundamentals/api_calendar_report",
+                          "zh-Hant/rest/fundamentals/api_calendar_dividend",
+                          "zh-Hant/rest/fundamentals/api_calendar_split",
+                          "zh-Hant/rest/fundamentals/api_calendar_ipo",
+                          "zh-Hant/rest/fundamentals/api_calendar_other"
+                        ]
+                      },
+                      {
+                        "group": "市場資訊",
+                        "expanded": false,
+                        "pages": [
+                          "zh-Hant/rest/fundamentals/api_market_status",
+                          "zh-Hant/rest/api_trading_sessions",
+                          "zh-Hant/rest/api_trade_days",
+                          "zh-Hant/rest/fundamentals/api_news",
+                          "zh-Hant/rest/fundamentals/api_news_detail"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "其他介面",
+                    "expanded": false,
+                    "pages": [
+                      "zh-Hant/rest/api_key_status"
                     ]
                   }
                 ]
@@ -152,12 +342,14 @@
                 "group": "WebSocket 文檔",
                 "pages": [
                   "zh-Hant/websocket/websocket_quickstart",
-                  "zh-Hant/websocket/websocket_subscribe"
-                ],
-                "asyncapi": {
-                  "source": "/asyncapi.json",
-                  "directory": "zh-Hant/websocket/websocket_playground"
-                }
+                  "zh-Hant/websocket/ticker",
+                  "zh-Hant/websocket/depth",
+                  "zh-Hant/websocket/trade",
+                  "zh-Hant/websocket/ping",
+                  "zh-Hant/websocket/ticker_cn_stock",
+                  "zh-Hant/websocket/ticker_hk_stock",
+                  "zh-Hant/websocket/ticker_us_stock"
+                ]
               },
               {
                 "group": "參考",
@@ -202,20 +394,114 @@
                       "en/rest/api_kline",
                       "en/rest/api_kline_latest",
                       "en/rest/api_depth",
-                      "en/rest/api_trades",
-                      "en/rest/api_intervals"
+                      "en/rest/api_trades"
                     ]
                   },
                   {
                     "group": "Stock Market APIs",
                     "expanded": true,
                     "pages": [
-                      "en/rest/api_intraday",
-                      "en/rest/api_stock_info",
-                      "en/rest/api_trading_sessions",
-                      "en/rest/api_trade_days",
-                      "en/rest/api_calc_index",
-                      "en/rest/api_capital_flow"
+                      {
+                        "group": "Full-Market Data",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/api_ticker_cn_stock",
+                          "en/rest/api_ticker_hk_stock",
+                          "en/rest/api_ticker_us_stock"
+                        ]
+                      },
+                      {
+                        "group": "Stock Quotes and Metrics",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/api_stock_info",
+                          "en/rest/api_intraday",
+                          "en/rest/api_ex_factors",
+                          "en/rest/api_calc_index",
+                          "en/rest/api_capital_flow"
+                        ]
+                      },
+                      {
+                        "group": "Company Overview",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/fundamentals/api_profile",
+                          "en/rest/fundamentals/api_executives",
+                          "en/rest/fundamentals/api_segments_latest",
+                          "en/rest/fundamentals/api_segments_history"
+                        ]
+                      },
+                      {
+                        "group": "Financial Statements",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/fundamentals/financial_fields_dictionary",
+                          "en/rest/fundamentals/api_financials_latest",
+                          "en/rest/fundamentals/api_financials_annual",
+                          "en/rest/fundamentals/api_financials_ttm"
+                        ]
+                      },
+                      {
+                        "group": "Valuation and Industries",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/fundamentals/api_valuation_latest",
+                          "en/rest/fundamentals/api_valuation_ts",
+                          "en/rest/fundamentals/api_industry_peers",
+                          "en/rest/fundamentals/api_industry_dist",
+                          "en/rest/fundamentals/api_industries_rank",
+                          "en/rest/fundamentals/api_industries_tree"
+                        ]
+                      },
+                      {
+                        "group": "Dividends and Corporate Actions",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/fundamentals/api_dividends",
+                          "en/rest/fundamentals/api_dividends_ttm",
+                          "en/rest/fundamentals/api_buyback",
+                          "en/rest/fundamentals/api_corp_actions"
+                        ]
+                      },
+                      {
+                        "group": "Shareholders and Institutional Holdings",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/fundamentals/api_shareholders_latest",
+                          "en/rest/fundamentals/api_shareholders_top",
+                          "en/rest/fundamentals/api_shareholder_detail",
+                          "en/rest/fundamentals/api_fund_holdings_latest"
+                        ]
+                      },
+                      {
+                        "group": "Financial Calendar",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/fundamentals/api_calendar_report",
+                          "en/rest/fundamentals/api_calendar_dividend",
+                          "en/rest/fundamentals/api_calendar_split",
+                          "en/rest/fundamentals/api_calendar_ipo",
+                          "en/rest/fundamentals/api_calendar_other"
+                        ]
+                      },
+                      {
+                        "group": "Market Information",
+                        "expanded": false,
+                        "pages": [
+                          "en/rest/fundamentals/api_market_status",
+                          "en/rest/api_trading_sessions",
+                          "en/rest/api_trade_days",
+                          "en/rest/fundamentals/api_news",
+                          "en/rest/fundamentals/api_news_detail"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Other APIs",
+                    "expanded": false,
+                    "pages": [
+                      "en/rest/api_key_status"
                     ]
                   }
                 ]
@@ -224,12 +510,14 @@
                 "group": "WebSocket Docs",
                 "pages": [
                   "en/websocket/websocket_quickstart",
-                  "en/websocket/websocket_subscribe"
-                ],
-                "asyncapi": {
-                  "source": "/asyncapi.json",
-                  "directory": "en/websocket/websocket_playground"
-                }
+                  "en/websocket/ticker",
+                  "en/websocket/depth",
+                  "en/websocket/trade",
+                  "en/websocket/ping",
+                  "en/websocket/ticker_cn_stock",
+                  "en/websocket/ticker_hk_stock",
+                  "en/websocket/ticker_us_stock"
+                ]
               },
               {
                 "group": "Reference",

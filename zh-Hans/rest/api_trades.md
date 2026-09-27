@@ -1,8 +1,22 @@
 ---
-title: 最近成交
-description: 获取交易品种的逐笔成交、最近成交执行记录。
-openapi: GET /v1/market/trades
+title: 逐笔成交
+description: 获取交易品种的逐笔成交记录。
+openapi: "openapi.yaml GET /v1/market/trades"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## 套餐权限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免费版 | ❌ |
+| 基础版 | ✅ |
+| 专业版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企业版 | ✅ |
 
 ## 注意事项
 - side：买入（buy）/ 卖出（sell）/ 中性（neutral）
@@ -10,14 +24,14 @@ openapi: GET /v1/market/trades
 
 ## 支持的市场
 
-**美股**、**港股**、**A股**、**中国期货**、**加密货币**
-
-示例：
-- 美股：AAPL.US、TSLA.US、MSFT.US
-- 港股：700.HK、9988.HK、3690.HK
-- A股：600519.SH、000001.SZ、920186.BJ
-- 中国期货：BU2609、IC2606、AP8888
-- 加密货币：BTCUSDT、ETHUSDT、ADAUSDT
+| 市场 | 示例 |
+|---|---|
+| 美股 | AAPL.US, TSLA.US, MSFT.US |
+| 港股 | 700.HK, 9988.HK, 3690.HK |
+| A股 | 600519.SH, 000001.SZ, 920186.BJ |
+| 中国期货 | BU2609, IC2606, AP8888 |
+| 香港期货 | HSI8888, MHI8888, HTI8888 |
+| 加密货币 | BTCUSDT, ETHUSDT, ADAUSDT |
 
 ## 请求参数
 

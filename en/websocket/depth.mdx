@@ -1,0 +1,81 @@
+---
+title: Orderbook (Depth)
+asyncapi: "/asyncapi.en.json depth"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ❌ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
+
+## Supported Markets
+
+Supported markets: US Stocks, HK Stocks, A-Shares, China Futures, Crypto
+
+## Subscribe
+
+```json
+{
+  "cmd": "subscribe",
+  "data": {
+    "channel": "depth",
+    "symbols": ["AAPL.US", "BTCUSDT"]
+  }
+}
+```
+
+> `type` applies to every symbol in that subscription. Omit it when subscribing to mixed product types. If a symbol is ambiguous, split the request by product type and pass the corresponding value.
+
+## Unsubscribe
+
+```json
+{
+  "cmd": "unsubscribe",
+  "data": {
+    "channel": "depth",
+    "symbols": ["AAPL.US"]
+  }
+}
+```
+
+## Server Response
+
+```json
+{
+  "cmd": "depth",
+  "data": {
+    "symbol": "BTCUSDT",
+    "bids": [
+      ["43250.50", "0.125"],
+      ["43250.00", "0.250"]
+    ],
+    "asks": [
+      ["43251.00", "0.180"],
+      ["43251.50", "0.320"]
+    ],
+    "timestamp": 1703123456789
+  }
+}
+```
+
+### Fields
+
+| Field | Type | Description |
+|------|------|-------------|
+| symbol | string | Trading symbol |
+| bids | array | Bid levels: `[price, quantity]` |
+| asks | array | Ask levels: `[price, quantity]` |
+| timestamp | int | Server timestamp in ms |
+
+**Ordering**
+- `bids`: price descending
+- `asks`: price ascending

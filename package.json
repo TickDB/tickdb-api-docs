@@ -1,15 +1,29 @@
 {
   "name": "tickdb-docs",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "TickDB API Documentation",
   "scripts": {
     "dev": "mintlify dev --port 3000 --host 0.0.0.0",
-    "check": "mintlify broken-links"
+    "check": "mintlify broken-links",
+    "check:examples": "node scripts/audit-code-examples.mjs",
+    "openapi:localize": "node scripts/localize-openapi.mjs",
+    "check:openapi": "node scripts/check-openapi-locales.mjs",
+    "asyncapi:localize": "node scripts/localize-asyncapi.mjs",
+    "check:asyncapi": "node scripts/check-asyncapi-locales.mjs"
   },
-  "keywords": ["tickdb", "api", "documentation", "market-data"],
+  "keywords": [
+    "tickdb",
+    "api",
+    "documentation",
+    "market-data"
+  ],
   "author": "TickDB Team",
   "license": "MIT",
   "devDependencies": {
-    "mintlify": "^4.2.429"
+    "mintlify": "^4.2.894",
+    "yaml": "^2.9.1"
+  },
+  "overrides": {
+    "@asyncapi/specs": "6.8.1"
   }
 }

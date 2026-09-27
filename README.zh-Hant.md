@@ -1,18 +1,17 @@
 # TickDB API 文檔
 
-官方 TickDB API 文件倉庫，提供統一的即時行情資料 API，  
-支持 **REST 與 WebSocket**，涵蓋外匯、貴金屬、指數、美股、港股、A 股、中國期貨與加密貨幣。
+TickDB API 文件倉庫，涵蓋即時與歷史行情、A 股／港股／美股全量行情、財務與基本面、財經日曆及市場資訊。支援 **REST API 與 WebSocket**，涵蓋外匯、貴金屬、指數、美股、港股、A 股、中國期貨、香港期貨和加密貨幣。
 
 🌐 **官網**：https://tickdb.ai  
 📘 **線上文件**：https://docs.tickdb.ai  
 📝 **更新日誌**：https://docs.tickdb.ai/zh-Hant/release-notes  
-💻 **GitHub**：https://github.com/TickDB  
+💻 **GitHub**：https://github.com/TickDB/tickdb-api-docs
 
 ---
 
-[简体中文](README.md) | [繁體中文](README.zh-Hant.md) | [English](README.en.md)
+[简体中文](https://github.com/TickDB/tickdb-api-docs/blob/main/README.md) | [繁體中文](https://github.com/TickDB/tickdb-api-docs/blob/main/README.zh-Hant.md) | [English](https://github.com/TickDB/tickdb-api-docs/blob/main/README.en.md)
 
-![License](https://img.shields.io/github/license/TickDB/tickdb-unified-realtime-marketdata-api)
+![License](https://img.shields.io/github/license/TickDB/tickdb-api-docs)
 [![Website](https://img.shields.io/badge/docs.tickdb.ai-online-blue)](https://docs.tickdb.ai)
 ![Docs](https://img.shields.io/badge/documentation-live-brightgreen)
 ![API](https://img.shields.io/badge/API-REST%20%26%20WebSocket-blue)
@@ -45,8 +44,15 @@ npm run dev
 
 ```
 ├── docs.json              # Mintlify 配置檔
-├── asyncapi.json          # WebSocket API 規範（AsyncAPI 3.0）
-├── openapi.yaml           # REST API 規範（OpenAPI 3.0）
+├── openapi.base.yaml      # REST 介面契約來源檔
+├── openapi.yaml           # 簡體中文 REST 規範（OpenAPI 3.0）
+├── openapi.zh-Hant.yaml   # 繁體中文 REST 規範
+├── openapi.en.yaml        # 英文 REST 規範
+├── asyncapi.base.json     # WebSocket 協定契約來源檔
+├── asyncapi.json          # 簡體中文 WebSocket 規範（AsyncAPI 3.0）
+├── asyncapi.zh-Hant.json  # 繁體中文 WebSocket 規範
+├── asyncapi.en.json       # 英文 WebSocket 規範
+├── scripts/               # 規範本地化與一致性檢查腳本
 ├── package.json           # Node.js 相依套件與腳本
 ├── logo.png               # TickDB 標誌
 ├── zh-Hant/               # 繁體中文文件
@@ -56,8 +62,8 @@ npm run dev
 │   ├── release-notes.md
 │   ├── data-specification.md
 │   ├── errors.md
-│   ├── rest/
-│   └── websocket/
+│   ├── rest/              # REST 介面頁面
+│   └── websocket/         # WebSocket 指南與頻道頁面
 ├── zh-Hans/               # 簡體中文文件
 └── en/                    # 英文文件
 ```
@@ -83,34 +89,24 @@ Mintlify 的主要配置檔，包含：
 - API 參考文件整合
 - WebSocket Playground 的 AsyncAPI 設定
 
-### asyncapi.json
+### OpenAPI 與 AsyncAPI
 
-WebSocket API 規範（AsyncAPI 3.0），用於定義：
+`openapi.base.yaml` 和 `asyncapi.base.json` 分別是 REST 與 WebSocket 的介面契約來源檔。三種語言的規範檔案由腳本產生；頁面透過對應語言的規範提供 Try It 或 WebSocket Playground。
 
-- WebSocket 連線端點
-- 頻道定義（如 ticker、depth、trades）
-- 訊息結構與範例
-- 身分驗證需求
+REST 文件包括通用行情、股票市場、全量行情、財務與基本面、財經日曆、市場資訊及 API Key 查詢。WebSocket 文件包括 `ticker`、`depth`、`trade`、`ping` 和 A 股、港股、美股全量行情訂閱。
 
-> **說明**：Mintlify 會依此檔案自動產生互動式 WebSocket Playground。
-
-### openapi.yaml
-
-REST API 規範（OpenAPI 3.0），用於定義：
-
-- 所有 REST 端點
-- 請求與回應結構
-- 身分驗證方式
-- Try-It 互動式範例
+`docs.json` 管理三語導覽；介面的說明、範例及支援市場以對應語言的頁面為準。
 
 ## 📚 文件特色
 
 - ✅ **多語言支援**：繁體中文、簡體中文、英文
 - ✅ **互動式 REST API**：支援 API Key 輸入的 Try-It 測試
 - ✅ **WebSocket Playground**：由 AsyncAPI 規範自動產生
-- ✅ **多市場範例**：外匯、貴金屬、指數、美股、港股、A 股、中國期貨、加密貨幣
-- ✅ **OpenAPI 整合**：自動產生 REST API 參考文件
-- ✅ **AsyncAPI 整合**：互動式 WebSocket 測試
+- ✅ **多市場範例**：外匯、貴金屬、指數、美股、港股、A 股、中國期貨、香港期貨、加密貨幣
+- ✅ **全量行情**：單次 REST 請求取得指定股票市場的行情快照；一次 WebSocket 訂閱持續接收該市場全部標的的即時更新
+- ✅ **更多數據**：公司資料、財務報表、估值、行業、分紅、股東持倉、財經日曆和市場資訊
+- ✅ **三語 API 規範**：REST Try It 與 WebSocket Playground 使用對應語言的規範檔案
+- ✅ **AI 接入**：首頁提供 Skill、MCP、CLI 與 `llms.txt` 的使用入口
 - ✅ **內建搜尋**：快速全文搜尋
 - ✅ **響應式設計**：適用桌機與行動裝置
 - ✅ **深色模式**：自動明暗主題切換
@@ -119,7 +115,7 @@ REST API 規範（OpenAPI 3.0），用於定義：
 
 ### 新增文件頁面
 
-1. 於對應語言目錄中新增 `.md` 檔案：
+1. 在三個語言目錄新增對應的 `.md` 或 `.mdx` 頁面：
    - 繁體中文：`zh-Hant/`
    - 简体中文：`zh-Hans/`
    - English：`en/`
@@ -141,15 +137,11 @@ REST API 規範（OpenAPI 3.0），用於定義：
 
 ### 更新 API 規範
 
-**REST APIs**：
-- 編輯 `openapi.yaml`
-- Mintlify 會自動更新 Try-It 介面
-- 部署完成後立即生效
+**REST API**：修改 `openapi.base.yaml` 的介面契約及三語頁面，再執行 `npm run openapi:localize` 和 `npm run check:openapi`。不要直接修改產生的三語規範檔案。
 
-**WebSocket APIs**：
-- 編輯 `asyncapi.json`
-- Mintlify 重新產生 WebSocket Playground
-- 互動式 UI 會自動更新
+**WebSocket API**：修改 `asyncapi.base.json` 的協定契約及三語頁面，再執行 `npm run asyncapi:localize` 和 `npm run check:asyncapi`。不要直接修改產生的三語規範檔案。
+
+提交前可執行 `npm run check` 檢查文件連結，並使用 `npx mintlify validate` 驗證建置。
 
 ## 📧 支援
 

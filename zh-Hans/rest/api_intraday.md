@@ -1,21 +1,34 @@
 ---
 title: 当日分时
 description: 获取股票当日的分时数据，包括每分钟的价格、成交量、成交额等信息。
-openapi: GET /v1/market/intraday
+openapi: "openapi.yaml GET /v1/market/intraday"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## 套餐权限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免费版 | ✅ |
+| 基础版 | ✅ |
+| 专业版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企业版 | ✅ |
 
 ## 注意事项
 - 数据为当日开盘至当前时间的分时数据
-- 非交易时段返回空数组
+- 非交易时段以实际可用数据为准，可能返回已有分时数据，也可能返回空数组。
 
 ## 支持的市场
 
-**美股**、**港股**、**A股**
-
-示例：
-- 美股：AAPL.US、TSLA.US、MSFT.US
-- 港股：700.HK、9988.HK、3690.HK
-- A股：000001.SH、000001.SZ
+| 市场 | 示例 |
+|---|---|
+| 美股 | AAPL.US, TSLA.US, MSFT.US |
+| 港股 | 700.HK, 9988.HK, 3690.HK |
+| A股 | 600519.SH, 000001.SZ |
 
 ## 请求参数
 
@@ -29,8 +42,9 @@ openapi: GET /v1/market/intraday
 | 字段名 | 描述 |
 |--------|------|
 | symbol | 交易产品 |
+| type | 产品类型，当前为 `stock` |
 | lines | 分时数据 |
-| └─ timestamp | 当前分钟的开始时间 |
+| └─ timestamp | 当前分钟的开始时间，Unix 时间戳，单位为毫秒 |
 | └─ price | 当前分钟的收盘价格 |
 | └─ volume | 成交量 |
 | └─ turnover | 成交额 |

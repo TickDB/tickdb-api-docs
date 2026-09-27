@@ -1,0 +1,142 @@
+---
+title: 逐筆成交（Trade）
+asyncapi: "/asyncapi.zh-Hant.json trade"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## 套餐權限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免費版 | ❌ |
+| 基礎版 | ✅ |
+| 專業版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企業版 | ✅ |
+
+## 支援市場
+
+支援市場：美股、港股、A股、中國期貨、香港期貨、加密貨幣
+
+## 訂閱
+
+```json
+{
+  "cmd": "subscribe",
+  "data": {
+    "channel": "trade",
+    "symbols": ["700.HK", "BTCUSDT"]
+  }
+}
+```
+
+> `type` 對本次訂閱中的全部代碼生效。混合訂閱不同產品類型時請省略 `type`；僅在代碼存在歧義時，按產品類型拆分訂閱並傳入對應值。
+
+## 取消訂閱
+
+```json
+{
+  "cmd": "unsubscribe",
+  "data": {
+    "channel": "trade",
+    "symbols": ["700.HK"]
+  }
+}
+```
+
+## 服務器響應
+
+港股、美股和加密貨幣使用成交數組結構：
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "700.HK",
+    "type": "stock",
+    "trades": [
+      {
+        "id": "20950",
+        "price": "553.000",
+        "quantity": "100",
+        "side": "buy",
+        "timestamp": 1773371154000
+      }
+    ]
+  }
+}
+```
+
+A股、中國期貨和香港期貨每條消息推送一筆成交，字段直接位於 `data`。A股示例：
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "600519.SH",
+    "type": "stock",
+    "price": "1252.48",
+    "quantity": "7",
+    "side": "sell",
+    "timestamp": 1789958062000
+  }
+}
+```
+
+香港期貨還會返回成交 ID：
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "id": "7687812613106827271",
+    "symbol": "HSI8888",
+    "type": "futures",
+    "price": "24907",
+    "quantity": "1",
+    "side": "buy",
+    "timestamp": 1789958359020
+  }
+}
+```
+
+中國期貨還可能返回持倉變化資訊：
+
+```json
+{
+  "cmd": "trade",
+  "data": {
+    "symbol": "BU2609",
+    "type": "futures",
+    "price": "4309",
+    "quantity": "1",
+    "side": "sell",
+    "timestamp": 1784012398000,
+    "open_interest_change": 0,
+    "position_effect": "short_transfer"
+  }
+}
+```
+
+### 字段說明
+
+| 字段 | 類型 | 描述 |
+|------|------|-------------|
+| data.symbol | string | 交易品種 |
+| data.type | string | 產品類型 |
+| data.trades | array | 成交記錄數組；港股、美股和加密貨幣返回 |
+| data.trades[].id | string | 成交 ID |
+| data.trades[].price | string | 成交價格 |
+| data.trades[].quantity | string | 成交數量 |
+| data.trades[].side | string | `buy`（買入）、`sell`（賣出）或 `neutral`（中性） |
+| data.trades[].timestamp | int | 成交時間戳（毫秒） |
+| data.id | string | 成交 ID；香港期貨返回 |
+| data.price | string | 單筆成交價格；A股、中國期貨和香港期貨返回 |
+| data.quantity | string | 單筆成交數量；A股、中國期貨和香港期貨返回 |
+| data.side | string | 單筆成交方向；A股、中國期貨和香港期貨返回 |
+| data.timestamp | int | 單筆成交時間戳（毫秒）；A股、中國期貨和香港期貨返回 |
+| data.open_interest_change | int \| null | 持倉變化；僅中國期貨在數據可用時返回 |
+| data.position_effect | string | 持倉影響；僅中國期貨在數據可用時返回：`long_open`（多開）、`short_open`（空開）、`both_open`（雙開）、`long_close`（多平）、`short_close`（空平）、`both_close`（雙平）、`long_transfer`（多換）、`short_transfer`（空換） |

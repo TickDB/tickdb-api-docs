@@ -1,0 +1,156 @@
+---
+title: A 股全量行情
+asyncapi: "/asyncapi.json ticker_cn_stock"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## 套餐权限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免费版 | ❌ |
+| 基础版 | ❌ |
+| 专业版 | ❌ |
+| A 股全量 | ✅ |
+| 港股全量 | ❌ |
+| 美股全量 | ❌ |
+| 企业版 | ✅ |
+
+
+订阅 CN_Stock 后，先分批接收市场行情快照，再持续接收有变化的行情。
+
+## 开启 WebSocket 压缩
+
+<Warning>全量行情订阅必须在 WebSocket 握手阶段成功协商 `permessage-deflate`。这与 REST 接口使用的 `gzip`、`br`、`zstd` 不同，不能通过 `Accept-Encoding` 或订阅消息开启。</Warning>
+
+- 客户端必须在建立连接时启用 `permessage-deflate`。
+- 压缩协商成功后，握手响应的 `Sec-WebSocket-Extensions` 中会包含 `permessage-deflate`。
+- 未成功协商压缩时，全量订阅会返回错误码 `2008`；需要开启压缩并重新建立连接。
+- 普通浏览器通常会自动协商 WebSocket 压缩；服务端程序应明确开启并检查协商结果。
+
+## 订阅消息
+
+`universes` 指定一个或多个全市场标识，`channels` 固定传入 `ticker`。
+
+```json
+{
+  "cmd": "subscribe",
+  "data": {
+    "universes": ["CN_Stock"],
+    "channels": ["ticker"]
+  }
+}
+```
+
+
+订阅成功后返回：
+
+```json
+{
+  "cmd": "subscribe",
+  "code": 0,
+  "message": "universe subscription successful",
+  "data": {
+    "universes": ["CN_Stock"],
+    "channels": ["ticker"]
+  }
+}
+```
+
+## JavaScript 示例
+
+以下 Node.js 示例使用 `ws`，并在连接时明确开启 `permessage-deflate`：
+
+```javascript
+const WebSocket = require("ws");
+
+const market = "CN_Stock";
+const ws = new WebSocket(
+  `wss://api.tickdb.ai/v1/realtime?api_key=${process.env.TICKDB_API_KEY}`,
+  { perMessageDeflate: true },
+);
+
+ws.on("upgrade", (response) => {
+  const extensions = response.headers["sec-websocket-extensions"] || "";
+  if (!extensions.includes("permessage-deflate")) {
+    ws.close();
+    throw new Error("未成功协商 permessage-deflate 压缩");
+  }
+});
+
+ws.on("open", () => {
+  ws.send(JSON.stringify({
+    cmd: "subscribe",
+    data: {
+      universes: [market],
+      channels: ["ticker"],
+    },
+  }));
+});
+
+ws.on("message", (raw) => {
+  const message = JSON.parse(raw.toString());
+
+  if (Array.isArray(message)) {
+    // 全量快照或增量更新，每个数组最多包含 500 条 ticker 消息
+    for (const item of message) {
+      console.log(item.data.symbol, item.data.last_price);
+    }
+    return;
+  }
+
+  // 连接响应、订阅结果、错误或 pong
+  console.log(message);
+});
+
+ws.on("error", console.error);
+```
+
+## 推送格式
+
+全量行情以 JSON 数组分批推送，每个数组最多包含 500 条 `ticker` 消息：
+
+```json
+[
+  {
+    "cmd": "ticker",
+    "data": {
+      "symbol": "600519.SH",
+      "name": "贵州茅台",
+      "type": "stock",
+      "last_price": "1300",
+      "timestamp": 1773292807000
+    }
+  }
+]
+```
+
+- 首次订阅会收到当前全量快照，快照可能分为多个数组依次发送。
+- 完成初始快照后，只推送发生变化的行情，仍使用相同的数组格式。
+- 行情字段与相应 REST 全量接口一致：[A 股全量行情](../rest/api_ticker_cn_stock)。
+- 同一连接订阅某个市场的全量行情后，该市场已有的单个股票订阅会被取消，避免重复推送。
+
+## 取消订阅
+
+```json
+{
+  "cmd": "unsubscribe",
+  "data": {
+    "universes": ["CN_Stock"],
+    "channels": ["ticker"]
+  }
+}
+```
+
+## 常见错误
+
+| 错误码 | 说明 |
+|---|---|
+| `2001` | `universes` 或 `channels` 参数格式错误。 |
+| `2002` | 全市场标识或频道不受支持。 |
+| `2008` | 连接未协商 `permessage-deflate`，需要开启压缩后重新连接。 |
+| `4005` | 当前 API Key 没有对应全量行情订阅权限。 |
+| `5003` | 对应市场的全量行情订阅暂不可用。 |

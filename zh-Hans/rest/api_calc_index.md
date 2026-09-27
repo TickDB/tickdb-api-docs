@@ -1,20 +1,33 @@
 ---
-title: 市场指标
-description: 获取股票的综合市场指标，包括行情统计、估值指标、资金流向以及衍生品相关指标。
-openapi: GET /v1/market/calc-index
+title: 综合指标
+description: 获取股票的价格涨跌、成交、资金流向及估值等综合指标。
+openapi: "openapi.yaml GET /v1/market/calc-index"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## 套餐权限
+
+| 套餐 | 可用 |
+|---|:---:|
+| 免费版 | ❌ |
+| 基础版 | ✅ |
+| 专业版 | ✅ |
+| 全量套餐（A 股、港股、美股） | ✅ |
+| 企业版 | ✅ |
 
 ## 注意事项
 - 指标数据基于实时行情和历史数据计算
 
 ## 支持的市场
 
-**美股**、**港股**、**A股**
-
-示例：
-- 美股：AAPL.US、TSLA.US、MSFT.US
-- 港股：700.HK、9988.HK、3690.HK
-- A股：000001.SH、000001.SZ
+| 市场 | 示例 |
+|---|---|
+| 美股 | AAPL.US, TSLA.US, MSFT.US |
+| 港股 | 700.HK, 9988.HK, 3690.HK |
+| A股 | 600519.SH, 000001.SZ |
 
 ## 请求参数
 

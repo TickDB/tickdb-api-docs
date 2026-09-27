@@ -1,8 +1,22 @@
 ---
 title: Capital Flow
 description: Retrieve capital flow data for stocks, including inflow and outflow of main funds, large orders, medium orders, and small orders.
-openapi: GET /v1/market/capital-flow
+openapi: "openapi.en.yaml GET /v1/market/capital-flow"
+contextual:
+  options:
+    - copy
+    - view
 ---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ❌ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
 
 ## Notes
 - Capital flow data is calculated based on volume and price changes
@@ -10,12 +24,11 @@ openapi: GET /v1/market/capital-flow
 
 ## Supported Markets
 
-**US Stocks**, **HK Stocks**, **A-Shares**
-
-Examples:
-- US Stocks: AAPL.US, TSLA.US, MSFT.US
-- HK Stocks: 700.HK, 9988.HK, 3690.HK
-- A-Shares: 000001.SH, 000001.SZ
+| Market | Examples |
+|---|---|
+| US Stocks | AAPL.US, TSLA.US, MSFT.US |
+| HK Stocks | 700.HK, 9988.HK, 3690.HK |
+| A-Shares | 600519.SH, 000001.SZ |
 
 ## Request Parameters
 
@@ -29,12 +42,12 @@ Examples:
 | Field Name | Description |
 |------------|-------------|
 | symbol | Trading Symbol |
-| timestamp | Data update timestamp |
+| timestamp | Data update time as a Unix timestamp in seconds |
 | intraday_flow | Capital flow data |
-| └─ timestamp | Minute start timestamp |
+| └─ timestamp | Minute start time as a Unix timestamp in seconds |
 | └─ inflow | Net inflow |
 | distribution | Capital distribution |
-| └─ timestamp | Data update timestamp |
+| └─ timestamp | Data update time as a Unix timestamp in seconds |
 | └─ capital_in | Inflow capital |
 | &nbsp;&nbsp;&nbsp;&nbsp;└─ large | Large orders |
 | &nbsp;&nbsp;&nbsp;&nbsp;└─ medium | Medium orders |

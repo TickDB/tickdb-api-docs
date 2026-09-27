@@ -1,26 +1,41 @@
 ---
 title: Stock Information
-description: Retrieve detailed information for stocks, including company name, industry classification, market capitalization, and other fundamental data.
-openapi: GET /v1/market/stock-info
+description: Retrieve stock names, exchanges, currencies, share capital, and per-share metrics.
+openapi: "openapi.en.yaml GET /v1/market/stock-info"
+contextual:
+  options:
+    - copy
+    - view
 ---
 
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ✅ |
+| Starter | ✅ |
+| Professional | ✅ |
+| Full-Market Plans (A-Shares, HK Stocks, US Stocks) | ✅ |
+| Enterprise | ✅ |
+
 ## Notes
-- Returned information may vary depending on data source
+
+- A single request can contain up to 500 stock symbols.
+- Returned fields vary by market and data availability. Conditional fields are omitted when no value is available.
 
 ## Supported Markets
 
-**US Stocks**, **HK Stocks**, **A-Shares**
-
-Examples:
-- US Stocks: AAPL.US, TSLA.US, MSFT.US
-- HK Stocks: 700.HK, 9988.HK, 3690.HK
-- A-Shares: 000001.SH, 000001.SZ
+| Market | Examples |
+|---|---|
+| US Stocks | AAPL.US, TSLA.US, MSFT.US |
+| HK Stocks | 700.HK, 9988.HK, 3690.HK |
+| A-Shares | 600519.SH, 000001.SZ, 300750.SZ |
 
 ## Request Parameters
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| symbols | Yes | Stock symbol codes, comma-separated, max 50 |
+| symbols | Yes | Stock symbol codes, comma-separated, maximum 500 |
 | type | No | Symbol type, optional. Not required when the symbol is unambiguous; if the API returns an `AMBIGUOUS_SYMBOL` error, pass the value as indicated. Values: `stock`, `indices`, `crypto`, `forex` |
 
 ## Response Fields
@@ -29,16 +44,17 @@ Examples:
 |-------|-------------|
 | symbol | Trading Symbol |
 | name_cn | Chinese simplified name |
-| name_en | English name |
-| name_hk | Chinese traditional name |
+| name_en | English name; returned for HK and US stocks |
+| name_hk | Traditional Chinese name; returned for HK and US stocks |
 | exchange | Exchange where the symbol is traded |
 | currency | Trading currency (CNY/USD/HKD) |
 | lot_size | Shares per lot |
-| total_shares | Total shares outstanding |
-| circulating_shares | Circulating shares |
-| hk_shares | HK shares (HK stocks only) |
-| eps | Earnings per share |
-| eps_ttm | Earnings per share (TTM) |
-| bps | Book value per share |
-| dividend_yield | Dividend yield (if calculated annually, annual calculation type provided) |
-| stock_derivatives | Options: 1 - Options, 2 - Warrants |
+| total_shares | Total shares outstanding; returned when available |
+| circulating_shares | Circulating shares; returned when available |
+| hk_shares | H-share capital; returned for HK stocks and A-share companies that also issue H shares |
+| eps | Earnings per share; returned when available |
+| eps_ttm | Earnings per share for the trailing twelve months; returned for HK and US stocks when available |
+| bps | Book value per share; returned when available |
+| dividend_yield | Dividend yield; returned for HK and US stocks when available |
+| stock_derivatives | Available derivative types; `1` means options and `2` means warrants. Returned for HK and US stocks when available |
+| board | A-share board or security classification code; returned for A-shares |

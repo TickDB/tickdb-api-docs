@@ -1,9 +1,9 @@
 {
   "asyncapi": "3.0.0",
   "info": {
-    "title": "TickDB WebSocket API",
-    "version": "1.0.2",
-    "description": "Unified real-time market data WebSocket API for Forex, indices, US stocks, HK stocks, A-shares, China futures, and Crypto.",
+    "title": "TickDB WebSocket 接口",
+    "version": "1.0.3",
+    "description": "统一实时行情 WebSocket 接口，支持外汇、指数、美股、港股、A 股、中国期货和加密货币。",
     "contact": {
       "email": "support@tickdb.ai"
     }
@@ -12,7 +12,7 @@
     "production": {
       "host": "api.tickdb.ai",
       "protocol": "wss",
-      "description": "Production WebSocket server",
+      "description": "生产环境 WebSocket 服务",
       "pathname": "/v1/realtime",
       "security": [
         {
@@ -28,16 +28,424 @@
         "name": "api_key",
         "in": "query"
       }
+    },
+    "messages": {
+      "errorResponse": {
+        "name": "ErrorResponse",
+        "title": "WebSocket 错误响应",
+        "summary": "WebSocket 连接建立后返回的订阅或命令错误。",
+        "contentType": "application/json",
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cmd": {
+              "type": "string",
+              "description": "触发错误的命令。"
+            },
+            "code": {
+              "description": "错误码；比较前应统一转为字符串。",
+              "oneOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "message": {
+              "type": "string",
+              "description": "错误说明。"
+            },
+            "data": {
+              "description": "可选的错误上下文。",
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                }
+              ]
+            }
+          },
+          "required": [
+            "cmd",
+            "code",
+            "message"
+          ]
+        }
+      }
     }
   },
   "channels": {
+    "ticker_cn_stock": {
+      "address": "/v1/realtime",
+      "description": "A 股全量行情订阅；建立 WebSocket 连接时须协商 permessage-deflate 压缩。",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "CN_StockFullMarketSubscriptionRequest",
+          "title": "订阅或取消订阅 A 股全量行情",
+          "summary": "订阅或取消订阅全部 A 股标的的行情更新；连接必须启用 permessage-deflate。",
+          "contentType": "application/json",
+          "examples": [
+            {
+              "name": "subscribe",
+              "payload": {
+                "cmd": "subscribe",
+                "data": {
+                  "universes": [
+                    "CN_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "unsubscribe",
+              "payload": {
+                "cmd": "unsubscribe",
+                "data": {
+                  "universes": [
+                    "CN_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            }
+          ],
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "default": "subscribe",
+                "description": "命令类型：订阅或取消订阅。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "universes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "CN_Stock"
+                      ]
+                    },
+                    "default": [
+                      "CN_Stock"
+                    ],
+                    "description": "要订阅或取消订阅的全市场标识。"
+                  },
+                  "channels": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "ticker"
+                      ]
+                    },
+                    "default": [
+                      "ticker"
+                    ],
+                    "description": "全量行情固定使用 ticker 频道。"
+                  }
+                },
+                "required": [
+                  "universes",
+                  "channels"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tickerBatch": {
+          "name": "CN_StockFullMarketTickerBatch",
+          "title": "A 股全量行情批次",
+          "summary": "初始快照和后续行情更新均以数组分批发送，每批最多 500 条消息。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/channels/ticker/messages/tickerData/payload"
+            }
+          }
+        }
+      }
+    },
+    "ticker_hk_stock": {
+      "address": "/v1/realtime",
+      "description": "港股全量行情订阅；建立 WebSocket 连接时须协商 permessage-deflate 压缩。",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "HK_StockFullMarketSubscriptionRequest",
+          "title": "订阅或取消订阅港股全量行情",
+          "summary": "订阅或取消订阅全部港股标的的行情更新；连接必须启用 permessage-deflate。",
+          "contentType": "application/json",
+          "examples": [
+            {
+              "name": "subscribe",
+              "payload": {
+                "cmd": "subscribe",
+                "data": {
+                  "universes": [
+                    "HK_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "unsubscribe",
+              "payload": {
+                "cmd": "unsubscribe",
+                "data": {
+                  "universes": [
+                    "HK_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            }
+          ],
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "default": "subscribe",
+                "description": "命令类型：订阅或取消订阅。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "universes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "HK_Stock"
+                      ]
+                    },
+                    "default": [
+                      "HK_Stock"
+                    ],
+                    "description": "要订阅或取消订阅的全市场标识。"
+                  },
+                  "channels": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "ticker"
+                      ]
+                    },
+                    "default": [
+                      "ticker"
+                    ],
+                    "description": "全量行情固定使用 ticker 频道。"
+                  }
+                },
+                "required": [
+                  "universes",
+                  "channels"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tickerBatch": {
+          "name": "HK_StockFullMarketTickerBatch",
+          "title": "港股全量行情批次",
+          "summary": "初始快照和后续行情更新均以数组分批发送，每批最多 500 条消息。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/channels/ticker/messages/tickerData/payload"
+            }
+          }
+        }
+      }
+    },
+    "ticker_us_stock": {
+      "address": "/v1/realtime",
+      "description": "美股全量行情订阅；建立 WebSocket 连接时须协商 permessage-deflate 压缩。",
+      "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
+        "subscribeRequest": {
+          "name": "US_StockFullMarketSubscriptionRequest",
+          "title": "订阅或取消订阅美股全量行情",
+          "summary": "订阅或取消订阅全部美股标的的行情更新；连接必须启用 permessage-deflate。",
+          "contentType": "application/json",
+          "examples": [
+            {
+              "name": "subscribe",
+              "payload": {
+                "cmd": "subscribe",
+                "data": {
+                  "universes": [
+                    "US_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "unsubscribe",
+              "payload": {
+                "cmd": "unsubscribe",
+                "data": {
+                  "universes": [
+                    "US_Stock"
+                  ],
+                  "channels": [
+                    "ticker"
+                  ]
+                }
+              }
+            }
+          ],
+          "payload": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "cmd": {
+                "type": "string",
+                "enum": [
+                  "subscribe",
+                  "unsubscribe"
+                ],
+                "default": "subscribe",
+                "description": "命令类型：订阅或取消订阅。"
+              },
+              "data": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "universes": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "US_Stock"
+                      ]
+                    },
+                    "default": [
+                      "US_Stock"
+                    ],
+                    "description": "要订阅或取消订阅的全市场标识。"
+                  },
+                  "channels": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "ticker"
+                      ]
+                    },
+                    "default": [
+                      "ticker"
+                    ],
+                    "description": "全量行情固定使用 ticker 频道。"
+                  }
+                },
+                "required": [
+                  "universes",
+                  "channels"
+                ]
+              }
+            },
+            "required": [
+              "cmd",
+              "data"
+            ]
+          }
+        },
+        "tickerBatch": {
+          "name": "US_StockFullMarketTickerBatch",
+          "title": "美股全量行情批次",
+          "summary": "初始快照和后续行情更新均以数组分批发送，每批最多 500 条消息。",
+          "contentType": "application/json",
+          "payload": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/channels/ticker/messages/tickerData/payload"
+            }
+          }
+        }
+      }
+    },
     "ticker": {
       "address": "/v1/realtime",
       "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
         "subscribeRequest": {
           "name": "TickerSubscriptionRequest",
-          "title": "Subscribe/Unsubscribe to Ticker",
-          "summary": "Subscribe or unsubscribe to real-time ticker updates for one or multiple symbols",
+          "title": "订阅或取消订阅实时行情",
+          "summary": "订阅或取消订阅一个或多个标的的实时行情。",
           "contentType": "application/json",
           "payload": {
             "type": "object",
@@ -49,7 +457,7 @@
                   "subscribe",
                   "unsubscribe"
                 ],
-                "description": "Command type (subscribe or unsubscribe)"
+                "description": "命令类型：订阅或取消订阅。"
               },
               "data": {
                 "type": "object",
@@ -63,7 +471,7 @@
                       "trade"
                     ],
                     "default": "ticker",
-                    "description": "Channel name"
+                    "description": "频道名称。"
                   },
                   "symbols": {
                     "type": "array",
@@ -78,7 +486,7 @@
                       "BTCUSDT",
                       "IC2606"
                     ],
-                    "description": "List of trading symbols to subscribe/unsubscribe"
+                    "description": "要订阅或取消订阅的交易代码列表。"
                   },
                   "type": {
                     "type": "string",
@@ -89,7 +497,7 @@
                       "forex",
                       "futures"
                     ],
-                    "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
+                    "description": "标的类型，可选；代码无歧义时可不传。若返回 AMBIGUOUS_SYMBOL 错误，请根据提示指定类型。"
                   }
                 },
                 "required": [
@@ -106,8 +514,8 @@
         },
         "tickerData": {
           "name": "TickerData",
-          "title": "Ticker Data",
-          "summary": "Real-time ticker data pushed from server",
+          "title": "实时行情数据",
+          "summary": "实时推送的行情数据。",
           "contentType": "application/json",
           "payload": {
             "type": "object",
@@ -116,7 +524,7 @@
               "cmd": {
                 "type": "string",
                 "const": "ticker",
-                "description": "Message type"
+                "description": "消息类型。"
               },
               "data": {
                 "type": "object",
@@ -125,22 +533,105 @@
                   "symbol": {
                     "type": "string",
                     "example": "AAPL.US",
-                    "description": "Trading symbol"
+                    "description": "交易代码。"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "产品名称；有数据时返回。"
                   },
                   "type": {
                     "type": "string",
-                    "enum": ["stock", "indices", "crypto", "forex", "futures"],
-                    "description": "Symbol type"
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex",
+                      "futures"
+                    ],
+                    "description": "标的类型。"
+                  },
+                  "category": {
+                    "type": "string",
+                    "description": "产品细分类别；有数据时返回。"
                   },
                   "last_price": {
                     "type": "string",
                     "example": "150.25",
-                    "description": "Latest trade price"
+                    "description": "最新价。"
+                  },
+                  "open": {
+                    "type": "string",
+                    "description": "开盘价；有数据时返回。"
+                  },
+                  "prev_close": {
+                    "type": "string",
+                    "description": "昨收价或参考价；有数据时返回。"
+                  },
+                  "bid_price": {
+                    "type": "string",
+                    "description": "最优买价；有数据时返回。"
+                  },
+                  "ask_price": {
+                    "type": "string",
+                    "description": "最优卖价；有数据时返回。"
+                  },
+                  "spread": {
+                    "type": "string",
+                    "description": "外汇或贵金属的买卖价差；有数据时返回。"
+                  },
+                  "volume_24h": {
+                    "type": "string",
+                    "description": "成交量；加密货币通常为滚动 24 小时，股票和期货通常为当日或当前交易时段。"
+                  },
+                  "quote_volume_24h": {
+                    "type": "string",
+                    "description": "与 volume_24h 相同统计窗口内的成交额；有数据时返回。"
+                  },
+                  "high_24h": {
+                    "type": "string",
+                    "description": "与 volume_24h 相同统计窗口内的最高价。"
+                  },
+                  "low_24h": {
+                    "type": "string",
+                    "description": "与 volume_24h 相同统计窗口内的最低价。"
+                  },
+                  "price_change_24h": {
+                    "type": "string",
+                    "description": "相同统计窗口内的价格变化；有数据时返回。"
+                  },
+                  "price_change_percent_24h": {
+                    "type": "string",
+                    "description": "价格变化百分比；有数据时返回。"
+                  },
+                  "trade_session": {
+                    "type": "string",
+                    "enum": [
+                      "pre_market",
+                      "post_market",
+                      "overnight"
+                    ],
+                    "description": "美股扩展交易时段；适用时返回。"
+                  },
+                  "quote_volume": {
+                    "type": "string",
+                    "description": "当前扩展交易时段的成交额；有数据时返回。"
+                  },
+                  "pre_market_quote": {
+                    "type": "object",
+                    "description": "盘前行情；有数据时返回。"
+                  },
+                  "post_market_quote": {
+                    "type": "object",
+                    "description": "盘后行情；有数据时返回。"
+                  },
+                  "overnight_quote": {
+                    "type": "object",
+                    "description": "夜盘行情；有数据时返回。"
                   },
                   "timestamp": {
                     "type": "integer",
                     "example": 1703123456789,
-                    "description": "Unix timestamp in milliseconds"
+                    "description": "Unix 时间戳，单位为毫秒。"
                   }
                 },
                 "required": [
@@ -161,10 +652,13 @@
     "depth": {
       "address": "/v1/realtime",
       "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
         "subscribeRequest": {
           "name": "DepthSubscriptionRequest",
-          "title": "Subscribe/Unsubscribe to Order Book Depth",
-          "summary": "Subscribe or unsubscribe to real-time order book depth updates",
+          "title": "订阅或取消订阅盘口深度",
+          "summary": "订阅或取消订阅实时盘口深度。",
           "contentType": "application/json",
           "payload": {
             "type": "object",
@@ -176,7 +670,7 @@
                   "subscribe",
                   "unsubscribe"
                 ],
-                "description": "Command type (subscribe or unsubscribe)"
+                "description": "命令类型：订阅或取消订阅。"
               },
               "data": {
                 "type": "object",
@@ -190,7 +684,7 @@
                       "trade"
                     ],
                     "default": "depth",
-                    "description": "Channel name"
+                    "description": "频道名称。"
                   },
                   "symbols": {
                     "type": "array",
@@ -205,7 +699,7 @@
                       "BTCUSDT",
                       "IC2606"
                     ],
-                    "description": "List of trading symbols to subscribe/unsubscribe"
+                    "description": "要订阅或取消订阅的交易代码列表。"
                   },
                   "type": {
                     "type": "string",
@@ -216,7 +710,7 @@
                       "forex",
                       "futures"
                     ],
-                    "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
+                    "description": "标的类型，可选；代码无歧义时可不传。若返回 AMBIGUOUS_SYMBOL 错误，请根据提示指定类型。"
                   }
                 },
                 "required": [
@@ -233,8 +727,8 @@
         },
         "depthData": {
           "name": "DepthData",
-          "title": "Order Book Depth Data",
-          "summary": "Real-time order book depth data pushed from server",
+          "title": "盘口深度数据",
+          "summary": "实时推送的盘口深度数据。",
           "contentType": "application/json",
           "payload": {
             "type": "object",
@@ -243,7 +737,7 @@
               "cmd": {
                 "type": "string",
                 "const": "depth",
-                "description": "Message type"
+                "description": "消息类型。"
               },
               "data": {
                 "type": "object",
@@ -252,12 +746,18 @@
                   "symbol": {
                     "type": "string",
                     "example": "BTCUSDT",
-                    "description": "Trading symbol"
+                    "description": "交易代码。"
                   },
                   "type": {
                     "type": "string",
-                    "enum": ["stock", "indices", "crypto", "forex", "futures"],
-                    "description": "Symbol type"
+                    "enum": [
+                      "stock",
+                      "indices",
+                      "crypto",
+                      "forex",
+                      "futures"
+                    ],
+                    "description": "标的类型。"
                   },
                   "bids": {
                     "type": "array",
@@ -279,7 +779,7 @@
                         "0.250"
                       ]
                     ],
-                    "description": "Bid orders [price, quantity]"
+                    "description": "买盘档位，每项为 [价格, 数量]。"
                   },
                   "asks": {
                     "type": "array",
@@ -301,12 +801,12 @@
                         "0.320"
                       ]
                     ],
-                    "description": "Ask orders [price, quantity]"
+                    "description": "卖盘档位，每项为 [价格, 数量]。"
                   },
                   "timestamp": {
                     "type": "integer",
                     "example": 1703123456789,
-                    "description": "Unix timestamp in milliseconds"
+                    "description": "Unix 时间戳，单位为毫秒。"
                   }
                 },
                 "required": [
@@ -328,10 +828,13 @@
     "trade": {
       "address": "/v1/realtime",
       "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
         "subscribeRequest": {
           "name": "TradeSubscriptionRequest",
-          "title": "Subscribe/Unsubscribe to Recent Trades",
-          "summary": "Subscribe or unsubscribe to real-time trade execution updates",
+          "title": "订阅或取消订阅逐笔成交",
+          "summary": "订阅或取消订阅实时成交记录。",
           "contentType": "application/json",
           "payload": {
             "type": "object",
@@ -343,7 +846,7 @@
                   "subscribe",
                   "unsubscribe"
                 ],
-                "description": "Command type (subscribe or unsubscribe)"
+                "description": "命令类型：订阅或取消订阅。"
               },
               "data": {
                 "type": "object",
@@ -357,7 +860,7 @@
                       "trade"
                     ],
                     "default": "trade",
-                    "description": "Channel name"
+                    "description": "频道名称。"
                   },
                   "symbols": {
                     "type": "array",
@@ -372,7 +875,7 @@
                       "BTCUSDT",
                       "IC2606"
                     ],
-                    "description": "List of trading symbols to subscribe/unsubscribe"
+                    "description": "要订阅或取消订阅的交易代码列表。"
                   },
                   "type": {
                     "type": "string",
@@ -383,7 +886,7 @@
                       "forex",
                       "futures"
                     ],
-                    "description": "Symbol type, optional. Not required when the symbol is unambiguous; if the server returns an AMBIGUOUS_SYMBOL error, pass the value as indicated"
+                    "description": "标的类型，可选；代码无歧义时可不传。若返回 AMBIGUOUS_SYMBOL 错误，请根据提示指定类型。"
                   }
                 },
                 "required": [
@@ -400,8 +903,8 @@
         },
         "tradeData": {
           "name": "TradeData",
-          "title": "Trade Execution Data",
-          "summary": "Real-time trade execution data pushed from server",
+          "title": "逐笔成交数据",
+          "summary": "实时推送的成交记录数据。",
           "contentType": "application/json",
           "payload": {
             "type": "object",
@@ -410,63 +913,153 @@
               "cmd": {
                 "type": "string",
                 "const": "trade",
-                "description": "Message type"
+                "description": "消息类型。"
               },
               "data": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "symbol": {
-                    "type": "string",
-                    "example": "AAPL.US",
-                    "description": "Trading symbol"
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "symbol": {
+                        "type": "string",
+                        "example": "700.HK",
+                        "description": "交易代码。"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "stock",
+                          "crypto"
+                        ],
+                        "description": "标的类型。"
+                      },
+                      "trades": {
+                        "type": "array",
+                        "description": "港股、美股和加密货币的成交记录。",
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "description": "成交 ID。"
+                            },
+                            "price": {
+                              "type": "string",
+                              "description": "成交价格。"
+                            },
+                            "quantity": {
+                              "type": "string",
+                              "description": "成交数量。"
+                            },
+                            "side": {
+                              "type": "string",
+                              "enum": [
+                                "buy",
+                                "sell",
+                                "neutral"
+                              ],
+                              "description": "成交方向。"
+                            },
+                            "timestamp": {
+                              "type": "integer",
+                              "description": "Unix 时间戳，单位为毫秒。"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "price",
+                            "quantity",
+                            "side",
+                            "timestamp"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "symbol",
+                      "type",
+                      "trades"
+                    ]
                   },
-                  "type": {
-                    "type": "string",
-                    "enum": ["stock", "indices", "crypto", "forex", "futures"],
-                    "description": "Symbol type"
-                  },
-                  "price": {
-                    "type": "string",
-                    "example": "150.25",
-                    "description": "Trade execution price"
-                  },
-                  "quantity": {
-                    "type": "string",
-                    "example": "100",
-                    "description": "Trade quantity"
-                  },
-                  "side": {
-                    "type": "string",
-                    "enum": [
-                      "buy",
-                      "sell",
-                      "neutral"
-                    ],
-                    "example": "buy",
-                    "description": "Trade side"
-                  },
-                  "timestamp": {
-                    "type": "integer",
-                    "example": 1703123456789,
-                    "description": "Unix timestamp in milliseconds"
-                  },
-                  "open_interest_change": {
-                    "type": ["integer", "null"],
-                    "description": "Change in open interest caused by this trade; futures only"
-                  },
-                  "position_effect": {
-                    "type": "string",
-                    "enum": ["long_open", "short_open", "both_open", "long_close", "short_close", "both_close", "long_transfer", "short_transfer"],
-                    "description": "Effect of the futures trade on positions; futures only"
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "成交 ID；香港期货返回。"
+                      },
+                      "symbol": {
+                        "type": "string",
+                        "example": "600519.SH",
+                        "description": "交易代码。"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "stock",
+                          "futures"
+                        ],
+                        "description": "标的类型。"
+                      },
+                      "price": {
+                        "type": "string",
+                        "example": "1252.48",
+                        "description": "成交价格。"
+                      },
+                      "quantity": {
+                        "type": "string",
+                        "example": "7",
+                        "description": "成交数量。"
+                      },
+                      "side": {
+                        "type": "string",
+                        "enum": [
+                          "buy",
+                          "sell",
+                          "neutral"
+                        ],
+                        "example": "sell",
+                        "description": "成交方向。"
+                      },
+                      "timestamp": {
+                        "type": "integer",
+                        "example": 1789958062000,
+                        "description": "Unix 时间戳，单位为毫秒。"
+                      },
+                      "open_interest_change": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "description": "持仓量变化；中国期货有数据时返回。"
+                      },
+                      "position_effect": {
+                        "type": "string",
+                        "enum": [
+                          "long_open",
+                          "short_open",
+                          "both_open",
+                          "long_close",
+                          "short_close",
+                          "both_close",
+                          "long_transfer",
+                          "short_transfer"
+                        ],
+                        "description": "开平仓类型；中国期货有数据时返回。"
+                      }
+                    },
+                    "required": [
+                      "symbol",
+                      "type",
+                      "price",
+                      "quantity",
+                      "side",
+                      "timestamp"
+                    ]
                   }
-                },
-                "required": [
-                  "symbol",
-                  "price",
-                  "quantity",
-                  "side",
-                  "timestamp"
                 ]
               }
             },
@@ -481,10 +1074,13 @@
     "ping": {
       "address": "/v1/realtime",
       "messages": {
+        "errorResponse": {
+          "$ref": "#/components/messages/errorResponse"
+        },
         "pingRequest": {
           "name": "PingRequest",
-          "title": "Ping Request",
-          "summary": "Send ping to check connection",
+          "title": "Ping 请求",
+          "summary": "发送 ping 检查连接状态。",
           "contentType": "application/json",
           "payload": {
             "type": "object",
@@ -494,7 +1090,7 @@
                 "type": "string",
                 "const": "ping",
                 "default": "ping",
-                "description": "Ping command (fixed value)"
+                "description": "Ping 命令，固定值。"
               }
             },
             "required": [
@@ -511,8 +1107,8 @@
         },
         "pongResponse": {
           "name": "PongResponse",
-          "title": "Pong Response",
-          "summary": "Server response to ping",
+          "title": "Pong 响应",
+          "summary": "服务端对 ping 的响应。",
           "contentType": "application/json",
           "payload": {
             "type": "object",
@@ -521,17 +1117,17 @@
               "cmd": {
                 "type": "string",
                 "const": "pong",
-                "description": "Pong response"
+                "description": "Pong 响应。"
               },
               "code": {
                 "type": "integer",
                 "example": 0,
-                "description": "Response code"
+                "description": "响应码。"
               },
               "message": {
                 "type": "string",
                 "example": "pong",
-                "description": "Response message"
+                "description": "响应消息。"
               },
               "data": {
                 "type": "object",
@@ -540,7 +1136,7 @@
                   "timestamp": {
                     "type": "integer",
                     "example": 1768976158541,
-                    "description": "Server timestamp in milliseconds"
+                    "description": "服务端时间戳，单位为毫秒。"
                   }
                 },
                 "required": [
@@ -560,6 +1156,81 @@
     }
   },
   "operations": {
+    "sendTickerCnStockSubscription": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker_cn_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_cn_stock/messages/subscribeRequest"
+        }
+      ]
+    },
+    "receiveTickerCnStockBatch": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker_cn_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_cn_stock/messages/tickerBatch"
+        },
+        {
+          "$ref": "#/channels/ticker_cn_stock/messages/errorResponse"
+        }
+      ]
+    },
+    "sendTickerHkStockSubscription": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker_hk_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_hk_stock/messages/subscribeRequest"
+        }
+      ]
+    },
+    "receiveTickerHkStockBatch": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker_hk_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_hk_stock/messages/tickerBatch"
+        },
+        {
+          "$ref": "#/channels/ticker_hk_stock/messages/errorResponse"
+        }
+      ]
+    },
+    "sendTickerUsStockSubscription": {
+      "action": "receive",
+      "channel": {
+        "$ref": "#/channels/ticker_us_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_us_stock/messages/subscribeRequest"
+        }
+      ]
+    },
+    "receiveTickerUsStockBatch": {
+      "action": "send",
+      "channel": {
+        "$ref": "#/channels/ticker_us_stock"
+      },
+      "messages": [
+        {
+          "$ref": "#/channels/ticker_us_stock/messages/tickerBatch"
+        },
+        {
+          "$ref": "#/channels/ticker_us_stock/messages/errorResponse"
+        }
+      ]
+    },
     "subscribeToTicker": {
       "action": "send",
       "channel": {

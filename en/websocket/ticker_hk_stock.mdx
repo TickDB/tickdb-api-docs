@@ -1,0 +1,156 @@
+---
+title: Hong Kong Full-Market Ticker
+asyncapi: "/asyncapi.en.json ticker_hk_stock"
+contextual:
+  options:
+    - copy
+    - view
+---
+
+## Plan Access
+
+| Plan | Available |
+|---|:---:|
+| Free | ❌ |
+| Starter | ❌ |
+| Professional | ❌ |
+| All A-Shares | ❌ |
+| All HK-Shares | ✅ |
+| All US-Shares | ❌ |
+| Enterprise | ✅ |
+
+
+A subscription to HK_Stock first sends a batched market snapshot, then continuously pushes changed tickers.
+
+## Enable WebSocket Compression
+
+<Warning>A full-market subscription must successfully negotiate `permessage-deflate` during the WebSocket handshake. This is different from the `gzip`, `br`, and `zstd` compression used by REST endpoints and cannot be enabled through `Accept-Encoding` or a subscription message.</Warning>
+
+- The client must enable `permessage-deflate` when establishing the connection.
+- After successful negotiation, the handshake response includes `permessage-deflate` in `Sec-WebSocket-Extensions`.
+- If compression is not negotiated, a full-market subscription returns error code `2008`. Enable compression and reconnect.
+- Browsers normally negotiate WebSocket compression automatically. Server-side clients should explicitly enable it and verify the negotiated extension.
+
+## Subscription Message
+
+Use `universes` to specify one or more market universes. `channels` must contain `ticker`.
+
+```json
+{
+  "cmd": "subscribe",
+  "data": {
+    "universes": ["HK_Stock"],
+    "channels": ["ticker"]
+  }
+}
+```
+
+
+Successful subscription response:
+
+```json
+{
+  "cmd": "subscribe",
+  "code": 0,
+  "message": "universe subscription successful",
+  "data": {
+    "universes": ["HK_Stock"],
+    "channels": ["ticker"]
+  }
+}
+```
+
+## JavaScript Example
+
+The following Node.js example uses `ws` and explicitly enables `permessage-deflate` when connecting:
+
+```javascript
+const WebSocket = require("ws");
+
+const market = "HK_Stock";
+const ws = new WebSocket(
+  `wss://api.tickdb.ai/v1/realtime?api_key=${process.env.TICKDB_API_KEY}`,
+  { perMessageDeflate: true },
+);
+
+ws.on("upgrade", (response) => {
+  const extensions = response.headers["sec-websocket-extensions"] || "";
+  if (!extensions.includes("permessage-deflate")) {
+    ws.close();
+    throw new Error("permessage-deflate was not negotiated");
+  }
+});
+
+ws.on("open", () => {
+  ws.send(JSON.stringify({
+    cmd: "subscribe",
+    data: {
+      universes: [market],
+      channels: ["ticker"],
+    },
+  }));
+});
+
+ws.on("message", (raw) => {
+  const message = JSON.parse(raw.toString());
+
+  if (Array.isArray(message)) {
+    // Full snapshot or incremental update; each array contains at most 500 ticker messages
+    for (const item of message) {
+      console.log(item.data.symbol, item.data.last_price);
+    }
+    return;
+  }
+
+  // Connection response, subscription result, error, or pong
+  console.log(message);
+});
+
+ws.on("error", console.error);
+```
+
+## Push Format
+
+Full-market data is pushed in JSON arrays of at most 500 `ticker` messages:
+
+```json
+[
+  {
+    "cmd": "ticker",
+    "data": {
+      "symbol": "700",
+      "name": "Tencent Holdings",
+      "type": "stock",
+      "last_price": "543",
+      "timestamp": 1773292807000
+    }
+  }
+]
+```
+
+- The first subscription delivers the current full snapshot, which may be split across multiple arrays.
+- After the initial snapshot, only changed tickers are pushed, using the same array format.
+- Quote fields follow the corresponding REST endpoint: [HK-stock full-market quotes](../rest/api_ticker_hk_stock).
+- After a full-market subscription is activated for a market, existing per-symbol stock subscriptions for that market are canceled on the same connection to avoid duplicate messages.
+
+## Unsubscribe
+
+```json
+{
+  "cmd": "unsubscribe",
+  "data": {
+    "universes": ["HK_Stock"],
+    "channels": ["ticker"]
+  }
+}
+```
+
+## Common Errors
+
+| Code | Description |
+|---|---|
+| `2001` | Invalid `universes` or `channels` format. |
+| `2002` | Unsupported universe or channel. |
+| `2008` | The connection did not negotiate `permessage-deflate`; enable compression and reconnect. |
+| `4005` | The current API key does not have permission for the requested full-market subscription. |
+| `5003` | The requested full-market subscription is temporarily unavailable. |

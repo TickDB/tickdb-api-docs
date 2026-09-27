@@ -1,341 +1,202 @@
 ---
 title: Error Codes
-description: Error code meanings and handling recommendations.
+description: Error codes returned by the API and recommended handling.
 ---
 
-This document explains API error codes and provides handling recommendations.
+## Error Response Contract
 
----
-
-## Response Format
+- A successful response uses the numeric `code` value `0`
+- An error response may return `code` as an integer or a string; normalize it with `String(code)` before comparison
+- Do not branch on the `message` text. It explains the error and may vary by context
+- The HTTP status describes the request-level outcome, while `code` identifies the specific business reason; clients should check both
 
 ### HTTP API
 
-```json
-{
-  "code": 0,
-  "message": "success",
-  "data": { ... }
-}
-```
-
-### WebSocket
+HTTP error responses contain at least `code` and `message`. Some endpoints also return `error` or `data`:
 
 ```json
 {
-  "cmd": "subscribe",
-  "code": 0,
-  "message": "success",
-  "data": { ... }
+  "code": "2001",
+  "message": "symbol parameter is required",
+  "error": "2001"
 }
 ```
 
----
+Financial and fundamental endpoints generally use this structure:
 
-## Error Code Quick Reference
+```json
+{
+  "code": 40001,
+  "message": "granularity must be daily or monthly",
+  "data": null
+}
+```
 
-| Code | Meaning | Recommendation |
-|------|---------|----------------|
-| 0 | Success | - |
-| 1001 | Invalid or expired API Key | Check API Key |
-| 1002 | API Key not provided | Add `X-API-Key` header |
-| 1003 | IP not in whitelist | Contact admin to add IP |
-| 1004 | Insufficient permissions | Upgrade plan or contact admin |
-| 2001 | Invalid parameters | Check request parameters |
-| 2002 | Symbol not found | Use `/v1/symbols/available` to query |
-| 2003 | Invalid time range | Check start_time/end_time parameters |
-| 2004 | Request limit exceeded | Reduce limit parameter |
-| 3001 | Rate limit exceeded | Reduce request frequency, check Retry-After |
-| 3002 | Quota exhausted | Wait for reset or upgrade plan |
-| 3003 | Connection limit exceeded | Close excess connections |
-| 3004 | Subscription limit exceeded | Unsubscribe some channels |
-| 4001 | Unknown command | Check WebSocket cmd field |
-| 4002 | Invalid message format | Check JSON format |
-| 4003 | Depth subscription unavailable | Use HTTP API for depth data |
-| 4004 | Trade subscription unavailable | Use HTTP API for trade data |
-| 5000 | Internal server error | Retry later, contact support if persists |
-| 5001 | Data source unavailable | Retry later |
-| 5002 | Service temporarily unavailable | Retry later |
+### WebSocket Connection Failures
 
----
+Authentication errors that occur before the WebSocket upgrade completes are regular HTTP error responses. The connection has not been established, so no WebSocket message is delivered.
 
-## Detailed Descriptions
+| HTTP Status | `code` | Meaning | Recommended Action |
+| ---: | --- | --- | --- |
+| 401 | `UNAUTHORIZED` | API Key is missing | Pass `api_key` in the connection URL |
+| 401 | `INVALID_TOKEN` | API Key is invalid or no longer valid | Check or regenerate the API Key |
+| 403 | `PERMISSION_DENIED` | The API Key cannot establish this connection | Check plan permissions or contact support |
+
+### Errors After WebSocket Connection
+
+Subscription or message errors after the connection is established are delivered as WebSocket messages. `cmd` identifies the command that caused the error:
+
+```json
+{
+  "cmd": "error",
+  "code": 2001,
+  "message": "Invalid message format",
+  "data": null
+}
+```
+
+## Error Code Reference
 
 ### Authentication Errors (1xxx)
 
-#### 1001 - Invalid or Expired API Key
-
-```json
-{
-  "code": 1001,
-  "message": "Invalid or expired token"
-}
-```
-
-**Causes**:
-- Incorrect API Key
-- API Key disabled
-- API Key expired
-
-**Solution**: Verify API Key or contact admin to confirm status.
-
-#### 1002 - API Key Not Provided
-
-```json
-{
-  "code": 1002,
-  "message": "Token is required"
-}
-```
-
-**Solution**: Add `X-API-Key: your_api_key` to HTTP headers, or add `?api_key=your_api_key` to WebSocket URL.
-
-#### 1003 - IP Not in Whitelist
-
-```json
-{
-  "code": 1003,
-  "message": "IP address not in whitelist"
-}
-```
-
-**Cause**: Enterprise plan has IP whitelist enabled.
-
-**Solution**: Contact admin to add your IP to whitelist.
-
-#### 1004 - Insufficient Permissions
-
-```json
-{
-  "code": 1004,
-  "message": "Permission denied"
-}
-```
-
-**Cause**: Current plan doesn't support this feature.
-
-**Solution**: Upgrade plan or contact admin.
-
----
+| Code | HTTP / Context | Meaning | Recommended Action |
+| ---: | --- | --- | --- |
+| `1001` | 401 | Invalid API Key | Check the API Key |
+| `1002` | 401 | API Key is missing | Add `X-API-Key` to the request headers |
+| `1004` | 403 | Insufficient permissions | Check the current plan permissions |
+| `1005` | 401 | API Key has expired | Renew or upgrade the plan, then retry |
 
 ### Parameter Errors (2xxx)
 
-#### 2001 - Invalid Parameters
+| Code | HTTP / Context | Meaning | Recommended Action |
+| ---: | --- | --- | --- |
+| `2001` | 400 / WS message | Invalid request parameters | Use `message` to check missing fields, formats, or parameter combinations |
+| `2002` | 404 / WS message | Symbol does not exist or is unsupported | Query `/v1/symbols/available` for supported symbols |
+| `2003` | 400 / WS message | Invalid time range; in some WebSocket subscriptions it also indicates an ambiguous symbol | Correct the time range, or use `message` and `data` to provide `type` |
+| `2004` | 400 | Request count exceeds an endpoint limit | Reduce the request size according to that endpoint's documentation |
+| `2005` | 400 | Symbol format is unsupported | Use a public symbol format from the data specification |
+| `2006` | 400 / WS message | Symbol suffix conflicts with the requested `type` | Correct the symbol or `type` so they agree |
+| `2008` | 406 | Full-market request did not enable compression | Enable HTTP response compression as documented by the endpoint |
 
-```json
-{
-  "code": 2001,
-  "message": "Invalid parameter: symbol is required"
-}
-```
+An ambiguous symbol in an HTTP request returns the string `AMBIGUOUS_SYMBOL`. An ambiguous symbol in a WebSocket subscription currently returns the numeric code `2003`. In both cases, use `available_types` in the response to provide `type`.
 
-**Solution**: Check if request parameters are complete and correctly formatted.
+### Access and Quota Errors (3xxx)
 
-#### 2002 - Symbol Not Found
+| Code | HTTP / Context | Meaning | Recommended Action |
+| ---: | --- | --- | --- |
+| `3001` | 429 | Rate limit exceeded | Wait for the `Retry-After` duration before retrying |
+| `3002` | 403 | Quota exhausted | Wait for quota reset or upgrade the plan |
+| `3003` | 429 | WebSocket connection limit exceeded | Close unused connections |
+| `3004` | 403 / WS message | Subscription limit exceeded | Unsubscribe or reduce the number of symbols |
+| `3005` | 429 | Too many requests for the same symbol in a short period | Wait briefly and avoid concentrated duplicate requests |
+| `3006` | 403 | Product is unavailable on the current plan | Use another product or change the plan |
+| `3007` | 403 | K-line history range exceeds the current plan limit | Shorten the range or change the plan |
+| `3008` | 403 | K-line time-range queries are unavailable on the current plan | Use a supported query mode or change the plan |
+| `3009` | 403 | The API Key cannot access this endpoint | Check API Key permissions or change the plan |
+| `3010` | 403 | The API Key cannot access fundamental data for this market | Use another market or change the plan |
+| `3011` | 403 | Fundamental history depth exceeds the limit | Shorten the history range or change the plan |
+| `3012` | 403 | Fundamental batch size exceeds the limit | Reduce the number of symbols in one request |
 
-```json
-{
-  "code": 2002,
-  "message": "Symbol not found"
-}
-```
+### WebSocket Channel Permission Errors (4xxx)
 
-**Solution**: Call `GET /v1/symbols/available` to get available symbols.
+The current public WebSocket connection uses the following 4xxx error:
 
-#### 2003 - Invalid Time Range
+| Code | Meaning | Recommended Action |
+| ---: | --- | --- |
+| `4005` | The API Key cannot subscribe to this channel | Check WebSocket channel permissions |
 
-```json
-{
-  "code": 2003,
-  "message": "Invalid time range"
-}
-```
-
-**Causes**:
-- start_time greater than end_time
-- Invalid time format
-- Time range exceeds limit
-
-**Solution**: Use Unix millisecond timestamps, ensure start_time < end_time.
-
-#### 2004 - Request Limit Exceeded
-
-```json
-{
-  "code": 2004,
-  "message": "Request limit exceeded"
-}
-```
-
-**Solution**: Reduce `limit` parameter value (typically max 1000).
-
----
-
-### Rate Limiting Errors (3xxx)
-
-#### 3001 - Rate Limit Exceeded
-
-```json
-{
-  "code": 3001,
-  "message": "Rate limit exceeded"
-}
-```
-
-HTTP response includes `Retry-After` header indicating wait time in seconds.
-
-**Solutions**:
-- Reduce request frequency
-- Use WebSocket subscriptions instead of polling
-- Upgrade plan for higher quota
-
-#### 3002 - Quota Exhausted
-
-```json
-{
-  "code": 3002,
-  "message": "Quota exhausted"
-}
-```
-
-**Solution**: Wait for quota reset (typically monthly) or upgrade plan.
-
-#### 3003 - Connection Limit Exceeded
-
-```json
-{
-  "code": 3003,
-  "message": "Connection limit exceeded"
-}
-```
-
-**Solutions**:
-- Call `GET /v1/connections` to view current connections
-- Call `DELETE /v1/connections/:id` to close excess connections
-
-#### 3004 - Subscription Limit Exceeded
-
-```json
-{
-  "code": 3004,
-  "message": "Subscription limit exceeded"
-}
-```
-
-**Solution**: Unsubscribe from some channels before subscribing to new ones.
-
----
-
-### WebSocket Errors (4xxx)
-
-#### 4001 - Unknown Command
-
-```json
-{
-  "cmd": "unknown",
-  "code": 4001,
-  "message": "Unknown command"
-}
-```
-
-**Solution**: Check `cmd` field. Supported commands: `subscribe`, `unsubscribe`, `ping`.
-
-#### 4002 - Invalid Message Format
-
-```json
-{
-  "cmd": "subscribe",
-  "code": 4002,
-  "message": "Invalid message format"
-}
-```
-
-**Solution**: Ensure valid JSON with required fields.
-
-#### 4003 / 4004 - Subscription Temporarily Unavailable
-
-```json
-{
-  "cmd": "subscribe",
-  "code": 4003,
-  "message": "Depth subscriptions temporarily unavailable",
-  "data": {
-    "channel": "depth",
-    "suggestion": "Use HTTP API /v1/market/depth for current depth data"
-  }
-}
-```
-
-**Solution**: Use HTTP API to fetch data.
-
----
+Invalid JSON and unknown commands currently return `cmd="error"` with `code=2001`. Codes `4001–4004` are not part of the current public response contract, so clients should not depend on them.
 
 ### Service Errors (5xxx)
 
-#### 5000 - Internal Server Error
+| Code | HTTP / Context | Meaning | Recommended Action |
+| ---: | --- | --- | --- |
+| `5000` | 500 | Internal server error | Retry later; contact support if it persists |
+| `5001` | 503 | Market data temporarily unavailable | Retry later |
+| `5002` | 503 | Service temporarily unavailable | Retry later |
+| `5003` | 503 | No data service is currently available for this request | Retry later or change the symbol or query |
+| `5004` | 503 / WS message | Real-time market data temporarily unavailable | Retry only the symbols marked as retryable after a short delay |
+| `5005` | 503 | Adjustment factors temporarily unavailable | Retry later or request unadjusted K-lines |
+| `5006` | 422 | Base data required to generate adjusted K-lines is unavailable for this interval | Use another interval or request unadjusted K-lines |
+
+The `data` object in a WebSocket subscription response with `5004` may include these fields:
 
 ```json
 {
-  "code": 5000,
-  "message": "Internal server error"
+  "channel": "ticker",
+  "symbols": ["700.HK"],
+  "failed_symbols": ["AAPL.US", "BTCUSDT"],
+  "retryable_symbols": ["AAPL.US"],
+  "retryable": true
 }
 ```
 
-**Solution**: Retry later. Contact support if issue persists.
+- `symbols`: symbols already subscribed successfully; do not subscribe to them again
+- `failed_symbols`: all symbols that were not subscribed in this request
+- `retryable_symbols`: the subset that can be retried later
+- `retryable`: whether at least one symbol can be retried
 
-#### 5001 - Data Source Unavailable
+## String Error Codes
 
-```json
-{
-  "code": 5001,
-  "message": "Data source unavailable"
-}
-```
+| `code` | Context | Recommended Action |
+| --- | --- | --- |
+| `"2001"`, `"2002"`, `"5000"`, and similar | Some HTTP endpoints serialize numeric error codes as strings | Normalize with `String(code)` and handle them like the corresponding numeric code |
+| `AMBIGUOUS_SYMBOL` | An HTTP symbol matches multiple product types | Pass `type` using `data.available_types` |
+| `UNAUTHORIZED` | API Key is missing before WebSocket connection | Pass `api_key` in the connection URL |
+| `INVALID_TOKEN` | API Key is invalid or no longer valid before WebSocket connection | Check or regenerate the API Key |
+| `PERMISSION_DENIED` | Insufficient permission before WebSocket connection | Check plan and connection permissions |
 
-**Solution**: Retry later, typically recovers automatically.
+## Financial and Fundamental API Errors
 
-#### 5002 - Service Temporarily Unavailable
+The following five-digit codes apply to standard financial and fundamental endpoints. Stock news endpoints may use a different error mapping; use the `code` and `message` returned by those endpoints.
 
-```json
-{
-  "code": 5002,
-  "message": "Service temporarily unavailable"
-}
-```
-
-**Solution**: Service may be under maintenance, retry later.
-
----
+| Code | HTTP | Meaning | Recommended Action |
+| ---: | ---: | --- | --- |
+| `40001` | 400 | Invalid request parameters | Use `message` to check parameter formats and combinations |
+| `40101` | 401 | Authentication failed | Check the API Key |
+| `40404` | 404 | Requested resource not found | Check the symbol, object ID, or query |
+| `40405` | 404 | No business data is available for the query | Change the symbol, date range, or query |
+| `50001` | 500 | Internal endpoint error | Retry later; contact support if it persists |
 
 ## Error Handling Examples
 
 ### JavaScript
 
 ```javascript
+const BASE_URL = 'https://api.tickdb.ai';
+const API_KEY = 'YOUR_API_KEY';
+
 async function fetchTicker(symbol) {
-  const response = await fetch(`/v1/market/ticker/${symbol}`, {
+  const url = new URL('/v1/market/ticker', BASE_URL);
+  url.searchParams.set('symbols', symbol);
+
+  const response = await fetch(url, {
     headers: { 'X-API-Key': API_KEY }
   });
-  
-  const data = await response.json();
-  
-  if (data.code !== 0) {
-    switch (data.code) {
-      case 1001:
-      case 1002:
-        throw new Error('Authentication failed, check API Key');
-      case 2002:
-        throw new Error(`Symbol ${symbol} not found`);
-      case 3001:
-        const retryAfter = response.headers.get('Retry-After') || 60;
-        console.log(`Rate limited, retry after ${retryAfter} seconds`);
-        break;
-      default:
-        throw new Error(data.message);
-    }
+
+  let body;
+  try {
+    body = await response.json();
+  } catch {
+    throw new Error(`HTTP ${response.status}: response is not JSON`);
   }
-  
-  return data.data;
+
+  if (!response.ok || String(body.code) !== '0') {
+    const code = String(body.code ?? 'UNKNOWN');
+    const retryAfter = response.headers.get('Retry-After');
+    const message = code === '3001' && retryAfter
+      ? `Rate limit exceeded; retry after ${retryAfter} seconds`
+      : body.message || `HTTP ${response.status}`;
+
+    const error = new Error(message);
+    error.status = response.status;
+    error.code = code;
+    error.retryAfter = retryAfter;
+    error.details = body;
+    throw error;
+  }
+
+  return body.data;
 }
 ```
 
@@ -344,28 +205,29 @@ async function fetchTicker(symbol) {
 ```python
 import requests
 
+BASE_URL = 'https://api.tickdb.ai'
+
 def fetch_ticker(symbol, api_key):
     response = requests.get(
-        f'/v1/market/ticker/{symbol}',
-        headers={'X-API-Key': api_key}
+        f'{BASE_URL}/v1/market/ticker',
+        params={'symbols': symbol},
+        headers={'X-API-Key': api_key},
+        timeout=10,
     )
-    
-    data = response.json()
-    
-    if data['code'] != 0:
-        if data['code'] in [1001, 1002]:
-            raise Exception('Authentication failed, check API Key')
-        elif data['code'] == 2002:
-            raise Exception(f'Symbol {symbol} not found')
-        elif data['code'] == 3001:
-            retry_after = response.headers.get('Retry-After', 60)
-            print(f'Rate limited, retry after {retry_after} seconds')
+
+    try:
+        body = response.json()
+    except requests.exceptions.JSONDecodeError as exc:
+        raise RuntimeError(f'HTTP {response.status_code}: response is not JSON') from exc
+
+    code = str(body.get('code', 'UNKNOWN'))
+    if not response.ok or code != '0':
+        retry_after = response.headers.get('Retry-After')
+        if code == '3001' and retry_after:
+            message = f'Rate limit exceeded; retry after {retry_after} seconds'
         else:
-            raise Exception(data['message'])
-    
-    return data['data']
+            message = body.get('message') or f'HTTP {response.status_code}'
+        raise RuntimeError(f'[{code}] {message}')
+
+    return body['data']
 ```
-
----
-
-*For questions, please contact technical support.*
